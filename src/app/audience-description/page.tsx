@@ -6,23 +6,20 @@ import {
   RightImageSection,
   MainContent,
   PageHeader,
-  ClaimSection,
+  AudienceDescriptionSection,
   Step,
-  MobileSidebarToggle
+  MobileMenuToggle
 } from '@/components';
+import { images } from "../../assets/index";
 import { useRouter } from "next/navigation";
-import {images} from "../assets/index"
 
-const Home = () => {
+const AudienceDescriptionPage = () => {
   const router = useRouter();
-  const [name, setName] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleVerify = (inputName: string) => {
-    console.log('Verifying name:', inputName);
-    if(inputName !== ""){
-      router.push("/email-verification");
-    }
+  const handleSubmit = (description: string) => {
+    console.log('Audience description submitted:', description);
+    router.push("/success-metrics")
   };
 
   const toggleMobileMenu = () => {
@@ -30,10 +27,10 @@ const Home = () => {
   };
 
   const steps: Step[] = [
-    { id: 1, title: 'Claim Your Signature', status: 'current' },
-    { id: 2, title: 'Verification', status: 'pending' },
-    { id: 3, title: 'Your Information', status: 'pending' },
-    { id: 4, title: 'Your Audience', status: 'pending' },
+    { id: 1, title: 'Claim Your Signature', status: 'completed' },
+    { id: 2, title: 'Verification', status: 'completed' },
+    { id: 3, title: 'Your Information', status: 'completed' },
+    { id: 4, title: 'Your Audience', status: 'current' },
     { id: 5, title: 'Your Success Metrics', status: 'pending' },
     { id: 6, title: 'Your Links', status: 'pending' },
     { id: 7, title: 'Sign', status: 'pending' },
@@ -42,17 +39,18 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col xl:flex-row relative">
-      {/* Mobile Sidebar Toggle - Only show when sidebar is closed */}
-      {!isMobileMenuOpen && (
-        <MobileSidebarToggle onToggle={toggleMobileMenu} />
-      )}
+      {/* Mobile Menu Toggle */}
+      <MobileMenuToggle onToggle={toggleMobileMenu} />
 
-      {/* Section 1: Left Sidebar - Hidden on mobile/tablet, shown on desktop */}
+      {/* Section 1: Left Sidebar - Hidden on mobile, shown on desktop */}
       <div className="hidden xl:block xl:w-[364px] xl:flex-shrink-0">
-        <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage}/>
+        <Sidebar 
+          steps={steps} 
+          imageUrl={images.verifyPageLefBgImage}
+        />
       </div>
 
-      {/* Mobile/Tablet Sidebar - Overlay */}
+      {/* Mobile Sidebar - Overlay */}
       <Sidebar 
         steps={steps} 
         imageUrl={images.verifyPageLefBgImage}
@@ -71,23 +69,20 @@ const Home = () => {
               highlightWord="MARK"
             />
 
-            {/* Claim Section */}
-            <ClaimSection
-              title="CLAIM YOUR SIGNATURE"
-              placeholder="Enter your name..."
-              value={name}
-              onChange={setName}
-              onVerify={handleVerify}
-              buttonText="VERIFY"
+            {/* Audience Description Section */}
+            <AudienceDescriptionSection
+              onSubmit={handleSubmit}
             />
           </div>
         </div>
       </MainContent>
 
-      {/* Section 3: Right Image Section - Hidden on mobile/tablet, shown on desktop */}
-      <RightImageSection imageUrl={images.verifyFirstPageRightBgImage} />
+      {/* Section 3: Right Image Section - Hidden on mobile, shown on desktop */}
+      <RightImageSection 
+        imageUrl={images.comboInfoAudSideBarImage}
+      />
     </div>
   );
 };
 
-export default Home;
+export default AudienceDescriptionPage;

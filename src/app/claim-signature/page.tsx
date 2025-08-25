@@ -11,9 +11,9 @@ import {
   MobileSidebarToggle
 } from '@/components';
 import { useRouter } from "next/navigation";
-import {images} from "../assets/index"
+import {images} from "../../assets/index"
 
-const Home = () => {
+const FirstScreen = () => {
   const router = useRouter();
   const [name, setName] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -90,4 +90,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default FirstScreen;

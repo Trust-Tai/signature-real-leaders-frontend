@@ -1,15 +1,46 @@
 @import "tailwindcss";
 
+/* Font Face Declarations */
+@font-face {
+  font-family: 'Abolition Test';
+  src: url('/fonts/AbolitionTest-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --custom-red: #CF3232;
+  --custom-red-border: #CF323240;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-custom-red: var(--custom-red);
+  --color-custom-red-border: var(--custom-red-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-abolition: "Abolition Test", sans-serif;
+  --font-outfit: "Outfit", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +54,156 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom font classes */
+.font-abolition {
+  font-family: "Abolition Test", sans-serif;
+}
+
+.font-outfit {
+  font-family: "Outfit", sans-serif;
+}
+
+/* Custom typography for "MAKE YOUR MARK" header */
+.header-title {
+  font-family: "Abolition Test", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(48px, 8vw, 112px);
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+}
+
+/* Custom typography for "with RealLeaders signature" subtitle */
+.subtitleheader- {
+  font-family: "Outfit", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(16px, 3vw, 25px);
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+/* Custom typography for section titles */
+.section-title {
+  font-family: "Abolition Test", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  color:#333333;
+}
+
+/* Custom typography for input text */
+.input-text {
+  font-family: 'Outfit';
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(16px, 3vw, 24px);
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+/* Custom button for all buttons (Send Verification, Verify & Continue, Next) */
+.custom-btn {
+  width: clamp(180px, 40vw, 220px);
+  height: clamp(50px, 8vw, 70px);
+  border-radius: 5px;
+  opacity: 1;
+  font-family: "Abolition Test", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(16px, 3vw, 24px);
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  background-color: #CF3232;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-btn:hover {
+  background-color: #CF3232;
+  opacity: 0.9;
+}
+
+.custom-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Custom color classes */
+.text-custom-red {
+  color: #CF3232;
+}
+
+.bg-custom-red {
+  background-color: #CF3232;
+}
+
+.border-custom-red {
+  border-color: #CF3232;
+}
+
+.border-custom-red-border {
+  border-color: #CF323240;
+}
+
+.ring-custom-red {
+  --tw-ring-color: #CF3232;
+}
+
+.hover\:bg-custom-red:hover {
+  background-color: #CF3232;
+}
+
+.hover\:text-custom-red:hover {
+  color: #CF3232;
+}
+
+.focus\:border-custom-red:focus {
+  border-color: #CF3232;
+}
+
+.focus\:ring-custom-red:focus {
+  --tw-ring-color: #CF3232;
+}
+
+.realLeadersLogo{
+  height: clamp(20px, 4vw, 31px);
+  width: clamp(120px, 25vw, 200px);
+}
+
+.firstVerifyScreen{
+    height: clamp(60px, 12vw, 90px);
+    border-radius: 10px;
+    border-color: #CF323240;
+    display: flex;
+    align-items: center;
+    border: clamp(6px, 1.5vw, 10px) solid rgba(207, 50, 50, 0.25);
+}
+
+.firstVerifyScreenInput{
+  font-family: 'Outfit';
+  font-weight: 400;
+  font-size: clamp(14px, 3vw, 24px);
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #949494;
+  font-style: normal;
+}
+
+.firstVerifyScreenButton{
+    width: clamp(120px, 25vw, 160px);
+    height: clamp(45px, 8vw, 60px);
+    border-radius: 5px;
+    border-color: #CF3232;
+    margin-right: 5px;
+    background-color: #CF3232;
 }
