@@ -42,7 +42,7 @@ const SuccessMetricsPage = () => {
       <MobileMenuToggle onToggle={toggleMobileMenu} />
 
       {/* Section 1: Left Sidebar - Hidden on mobile, shown on desktop */}
-      <div className="hidden xl:block xl:w-[364px] xl:flex-shrink-0">
+      <div className="hidden xl:block xl:w-[320px] xl:flex-shrink-0">
         <Sidebar 
           steps={steps} 
           imageUrl={images.verifyPageLefBgImage}
@@ -60,12 +60,13 @@ const SuccessMetricsPage = () => {
       {/* Section 2: Middle Content - Takes remaining width */}
       <MainContent>
         <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
-          <div className="max-w-2xl w-full mt-16 sm:mt-20 lg:mt-[110px]">
+          <div className="max-w-[870px] w-full mt-16 sm:mt-20 lg:mt-[110px]">
             {/* Header */}
             <PageHeader
               title="MAKE YOUR MARK"
               subtitle="with RealLeaders signature"
               highlightWord="MARK"
+              className='lg:mb-[130px]'
             />
 
             {/* Success Metrics Section */}
@@ -79,6 +80,7 @@ const SuccessMetricsPage = () => {
       {/* Section 3: Right Image Section - Hidden on mobile, shown on desktop */}
       <RightImageSection 
         imageUrl={images.successMetrixRightSideImage}
+        className='h-full'
       />
     </div>
   );

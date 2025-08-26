@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       case "current":
         return (
           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center mr-3 sm:mr-4">
-            <span className="text-white font-semibold text-xs sm:text-sm">{step.id}</span>
+            <CheckIcon size={16} color="white" className="sm:w-5 sm:h-5" />
           </div>
         );
       case "pending":
@@ -56,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const sidebarContent = (
     <div
       className={cn(
-        "relative h-full w-full xl:w-[364px] xl:flex-shrink-0 text-white p-4 sm:p-6 lg:p-8 flex flex-col overflow-hidden",
+        "relative h-full w-full xl:w-[320px] xl:flex-shrink-0 text-white p-4 sm:p-6 lg:p-8 flex flex-col overflow-hidden",
         className
       )}
     >
@@ -71,8 +71,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/93" />
+      {/* Background overlay */}
+      <div className="absolute inset-0" style={{
+        background: '#0F1222F2',
+        backgroundBlendMode: 'multiply'
+      }} />
 
       <div className="relative z-10">
         {/* Mobile close button */}
@@ -88,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Header */}
-        <div className="flex items-center mb-8 sm:mb-10 lg:mb-12">
+        <div className="flex items-center mb-8 sm:mb-10 lg:mb-12 mt-[30]">
           <div className="text-lg sm:text-xl lg:text-2xl font-bold font-abolition flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
             {/* Desktop: Show sideToolBar image */}
             <div className="hidden xl:block">
@@ -107,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Steps */}
-        <div className="space-y-4 sm:space-y-6 relative">
+        <div className="space-y-4 sm:space-y-6 relative mt-[60]">
           {/* Gray line */}
           <div className="absolute left-3 sm:left-4 top-3 sm:top-4 bottom-0 w-0.5 bg-gray-600"></div>
 
@@ -132,9 +135,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           })()}
 
           {steps.map((step) => (
-            <div key={step.id} className="flex items-center relative z-20">
+            <div key={step.id} className="flex items-center relative z-20 mb-[50]">
               {getStepIcon(step)}
-              <span className={cn("font-medium text-sm sm:text-base", getStepTextColor(step))}>
+              <span className={cn("font-outfit font-medium text-sm sm:text-base", getStepTextColor(step))}>
                 {step.title}
               </span>
             </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { ChevronDown } from 'lucide-react';
 
 interface SuccessMetricsSectionProps {
   onSubmit: (data: SuccessMetricsData) => void;
@@ -49,89 +50,81 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
       {/* Form Fields */}
       <div className="space-y-6">
         {/* Row 1: Number of Bookings & Email List Size */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <select
-            value={formData.numberOfBookings}
-            onChange={(e) => handleInputChange('numberOfBookings', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none bg-no-repeat bg-right pr-10 firstVerifyScreenInput"
-            style={{
-              border: '10px solid #CF323240',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
-          >
-            <option value="">Number of Bookings</option>
-            <option value="0-10">0-10</option>
-            <option value="11-50">11-50</option>
-            <option value="51-100">51-100</option>
-            <option value="101-500">101-500</option>
-            <option value="501-1000">501-1000</option>
-            <option value="1000+">1000+</option>
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[10px] gap-y-[16px]">
+          <div className="relative firstVerifyScreen" >
+            <select
+              value={formData.numberOfBookings}
+              onChange={(e) => handleInputChange('numberOfBookings', e.target.value)}
+              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10"
+             
+            >
+              <option value="">Number of Bookings</option>
+              <option value="0-10">0-10</option>
+              <option value="11-50">11-50</option>
+              <option value="51-100">51-100</option>
+              <option value="101-500">101-500</option>
+              <option value="501-1000">501-1000</option>
+              <option value="1000+">1000+</option>
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+          </div>
           
-          <select
-            value={formData.emailListSize}
-            onChange={(e) => handleInputChange('emailListSize', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none bg-no-repeat bg-right pr-10 firstVerifyScreenInput"
-            style={{
-              border: '10px solid #CF323240',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
-          >
-            <option value="">Email List Size</option>
-            <option value="0-100">0-100</option>
-            <option value="101-500">101-500</option>
-            <option value="501-1000">501-1000</option>
-            <option value="1001-5000">1001-5000</option>
-            <option value="5001-10000">5001-10000</option>
-            <option value="10000+">10000+</option>
-          </select>
+          <div className="relative firstVerifyScreen" >
+            <select
+              value={formData.emailListSize}
+              onChange={(e) => handleInputChange('emailListSize', e.target.value)}
+              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10"
+             
+            >
+              <option value="">Email List Size</option>
+              <option value="0-100">0-100</option>
+              <option value="101-500">101-500</option>
+              <option value="501-1000">501-1000</option>
+              <option value="1001-5000">1001-5000</option>
+              <option value="5001-10000">5001-10000</option>
+              <option value="10000+">10000+</option>
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+          </div>
         </div>
 
         {/* Row 2: Amount in Sales & Amount in Donations */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <select
-            value={formData.amountInSales}
-            onChange={(e) => handleInputChange('amountInSales', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none bg-no-repeat bg-right pr-10 firstVerifyScreenInput"
-            style={{
-              border: '10px solid #CF323240',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
-          >
-            <option value="">Amount in Sales</option>
-            <option value="0-10k">$0 - $10K</option>
-            <option value="10k-50k">$10K - $50K</option>
-            <option value="50k-100k">$50K - $100K</option>
-            <option value="100k-500k">$100K - $500K</option>
-            <option value="500k-1m">$500K - $1M</option>
-            <option value="1m+">$1M+</option>
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[10px] gap-y-[16px]">
+          <div className="relative firstVerifyScreen" >
+            <select
+              value={formData.amountInSales}
+              onChange={(e) => handleInputChange('amountInSales', e.target.value)}
+              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10"
+            
+            >
+              <option value="">Amount in Sales</option>
+              <option value="0-10k">$0 - $10K</option>
+              <option value="10k-50k">$10K - $50K</option>
+              <option value="50k-100k">$50K - $100K</option>
+              <option value="100k-500k">$100K - $500K</option>
+              <option value="500k-1m">$500K - $1M</option>
+              <option value="1m+">$1M+</option>
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+          </div>
           
-          <select
-            value={formData.amountInDonations}
-            onChange={(e) => handleInputChange('amountInDonations', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none bg-no-repeat bg-right pr-10 firstVerifyScreenInput"
-            style={{
-              border: '10px solid #CF323240',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
-          >
-            <option value="">Amount in Donations</option>
-            <option value="0-1k">$0 - $1K</option>
-            <option value="1k-5k">$1K - $5K</option>
-            <option value="5k-10k">$5K - $10K</option>
-            <option value="10k-50k">$10K - $50K</option>
-            <option value="50k-100k">$50K - $100K</option>
-            <option value="100k+">$100K+</option>
-          </select>
+          <div className="relative firstVerifyScreen" >
+            <select
+              value={formData.amountInDonations}
+              onChange={(e) => handleInputChange('amountInDonations', e.target.value)}
+              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10"
+            
+            >
+              <option value="">Amount in Donations</option>
+              <option value="0-1k">$0 - $1K</option>
+              <option value="1k-5k">$1K - $5K</option>
+              <option value="5k-10k">$5K - $10K</option>
+              <option value="10k-50k">$10K - $50K</option>
+              <option value="50k-100k">$50K - $100K</option>
+              <option value="100k+">$100K+</option>
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+          </div>
         </div>
 
         {/* Submit Button */}

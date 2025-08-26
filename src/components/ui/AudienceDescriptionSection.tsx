@@ -28,23 +28,29 @@ const AudienceDescriptionSection: React.FC<AudienceDescriptionSectionProps> = ({
       </h2>
 
      
-      <p className="text-gray-600 text-lg font-outfit mx-auto leading-relaxed text-center max-w-2xl px-4">
+      <p className="font-outfit mx-auto leading-relaxed text-center px-4" style={{ color: '#333333B2', fontSize: 18, fontWeight: 400, width: 485 }}>
        Describe Your Target Audience(s) who you want to reach such as industry, job title, age, location, and pain points.
       </p>
 
       {/* Form Fields */}
       <div className="space-y-6">
-        <div>
+        <div className='h-[270] rounded-[10px]' style={{
+          borderColor: '#efc0c0',
+          border: 'clamp(6px, 1.5vw, 10px) solid rgba(207, 50, 50, 0.25)'
+        }}>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className={cn(
-              "w-full px-6 py-4  text-gray-700 placeholder-gray-400 bg-white rounded-2xl",
+              "w-full text-gray-700 placeholder-gray-400 bg-white",
               "focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200",
-              "resize-none min-h-[120px] firstVerifyScreenInput",
+              "resize-none min-h-[250px] firstVerifyScreenInput",
               error && "border-custom-red focus:border-custom-red"
             )}
-            style={{ border: '10px solid #CF323240' }}
+            style={{
+              padding: '16px 16px'
+            }}
+            
             placeholder="Write a short description here......"
             rows={5}
           />

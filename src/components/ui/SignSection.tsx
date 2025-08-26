@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { Upload } from 'lucide-react';
 
 interface SignSectionProps {
   onSubmit: (data: SignFormData) => void;
@@ -30,6 +31,9 @@ const SignSection: React.FC<SignSectionProps> = ({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDrawingRef = useRef<boolean>(false);
+  const [hasDrawn, setHasDrawn] = useState(false);
 
   const handleInputChange = (field: string, value: string | boolean | string | null) => {
     setFormData(prev => ({
@@ -64,6 +68,93 @@ const SignSection: React.FC<SignSectionProps> = ({
 
   const isFormValid = formData.confirmInfo && formData.giveConsent && formData.agreeTerms;
 
+  const setupCanvasForDpr = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+    const needResize = canvas.width !== Math.max(1, Math.floor(rect.width * dpr)) || canvas.height !== Math.max(1, Math.floor(rect.height * dpr));
+    if (needResize) {
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    }
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#000000';
+    }
+  };
+
+  useEffect(() => {
+    setupCanvasForDpr();
+    const onResize = () => setupCanvasForDpr();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', onResize);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', onResize);
+      }
+    };
+  }, []);
+
+  const getCanvasPos = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  };
+
+  const startDrawing = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const { x, y } = getCanvasPos(clientX, clientY);
+    isDrawingRef.current = true;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setHasDrawn(true);
+  };
+
+  const draw = (clientX: number, clientY: number) => {
+    if (!isDrawingRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const { x, y } = getCanvasPos(clientX, clientY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const endDrawing = () => {
+    if (!isDrawingRef.current) return;
+    isDrawingRef.current = false;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    // Save drawn signature as data URL
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      handleInputChange('signature', dataUrl);
+    } catch {
+      console.warn('Unable to export signature image');
+    }
+  };
+
+  const clearSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    handleInputChange('signature', '');
+    setHasDrawn(false);
+  };
+
   return (
     <div className={cn("text-center space-y-8 px-4", className)}>
       {/* Section Heading */}
@@ -75,7 +166,7 @@ const SignSection: React.FC<SignSectionProps> = ({
       <div className="space-y-6">
         {/* Signature Input Container */}
         <div className="relative mx-auto w-full max-w-2xl" style={{ height: '186px' }}>
-          {/* Conditional Rendering: Text Input or Image Display */}
+          {/* Conditional Rendering: Draw box (canvas) or Image Display */}
           {formData.uploadedImage ? (
             /* Show uploaded image */
             <div 
@@ -93,7 +184,6 @@ const SignSection: React.FC<SignSectionProps> = ({
                 width={400}
                 height={186}
               />
-              
               {/* Clear/Remove image button */}
               <button
                 onClick={() => handleInputChange('uploadedImage', null)}
@@ -103,22 +193,39 @@ const SignSection: React.FC<SignSectionProps> = ({
               </button>
             </div>
           ) : (
-            /* Show text input */
-            <input
-              type="text"
-              value={formData.signature}
-              onChange={(e) => handleInputChange('signature', e.target.value)}
-              placeholder="Write your signature here..."
-              className="w-full h-full px-4 py-4 text-xl sm:text-2xl font-bold text-gray-800 bg-white outline-none"
-              style={{ 
-                fontFamily: 'cursive', 
-                fontStyle: 'italic',
-                border: '10px solid #CF323240',
-                borderRadius: '6px'
-              }}
-            />
+            /* Draw on box */
+            <div className='firstVerifyScreen' style={{height:185, position: 'relative'}}>
+              <canvas
+                ref={canvasRef}
+                className="w-full h-full bg-white rounded-[6px]"
+                onMouseDown={(e) => startDrawing(e.clientX, e.clientY)}
+                onMouseMove={(e) => draw(e.clientX, e.clientY)}
+                onMouseUp={endDrawing}
+                onMouseLeave={endDrawing}
+                onTouchStart={(e) => {
+                  const t = e.touches[0];
+                  startDrawing(t.clientX, t.clientY);
+                }}
+                onTouchMove={(e) => {
+                  const t = e.touches[0];
+                  draw(t.clientX, t.clientY);
+                }}
+                onTouchEnd={endDrawing}
+              />
+              {/* Clear canvas button */}
+              {hasDrawn && (
+                <button
+                  type="button"
+                  onClick={clearSignature}
+                  className="absolute top-2 right-2 rounded px-2 py-1 text-xs transition-colors"
+                  style={{ backgroundColor: '#CF3232', color: '#FFFFFF' }}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           )}
-          
+
           {/* Hidden File Input */}
           <input
             ref={fileInputRef}
@@ -127,16 +234,13 @@ const SignSection: React.FC<SignSectionProps> = ({
             onChange={handleFileUpload}
             className="hidden"
           />
-          
+
           {/* Upload Button - Bottom Right */}
           <button 
             onClick={handleUploadClick}
             className="absolute bottom-5 right-5 flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
+            <Upload size={16} color="#8B8B8B" />
             <span className="text-sm text-gray-600 font-outfit">Upload</span>
           </button>
         </div>
@@ -148,13 +252,14 @@ const SignSection: React.FC<SignSectionProps> = ({
         </p>
 
         {/* Options */}
-        <div className="space-y-4 max-w-2xl mx-auto text-left px-4">
+        <div className="space-y-4 max-w-2xl mx-auto text-left px-4 mb-[45]">
           <label className="flex items-start space-x-3 cursor-pointer">
             <input
               type="checkbox"
               checked={formData.confirmInfo}
               onChange={(e) => handleInputChange('confirmInfo', e.target.checked)}
               className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2"
+              style={{ accentColor: '#CF3232' }}
             />
             <span className="font-outfit font-medium text-sm sm:text-base" style={{color:"#00000099"}}>
               I confirm all information provided is accurate.
@@ -167,6 +272,7 @@ const SignSection: React.FC<SignSectionProps> = ({
               checked={formData.giveConsent}
               onChange={(e) => handleInputChange('giveConsent', e.target.checked)}
               className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2"
+              style={{ accentColor: '#CF3232' }}
             />
             <span className="font-outfit font-medium text-sm sm:text-base" style={{color:"#00000099"}}>
               I give consent to feature my name and contributions.
@@ -179,6 +285,7 @@ const SignSection: React.FC<SignSectionProps> = ({
               checked={formData.agreeTerms}
               onChange={(e) => handleInputChange('agreeTerms', e.target.checked)}
               className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2"
+              style={{ accentColor: '#CF3232' }}
             />
             <span className="font-outfit font-medium text-sm sm:text-base" style={{color:"#00000099"}}>
               I agree to the Terms of Use and Privacy Policy.
@@ -190,9 +297,10 @@ const SignSection: React.FC<SignSectionProps> = ({
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
-          className="custom-btn my-3 w-full max-w-md"
+          className="custom-btn my-3 w-full"
+          style={{width:"100%"}}
         >
-          CONTINUE
+          Confirm & Submit Signature
         </button>
 
         {/* Error Message */}

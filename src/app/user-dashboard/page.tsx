@@ -251,21 +251,14 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, User, Calendar, Mail, Eye, MousePointer, BarChart3, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { Search, Bell, User, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import Image from 'next/image';
 import { images } from '@/assets';
+import { UserProfileSidebar, StatsCards } from '@/components';
 
 const Dashboard = () => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
-  const sidebarItems = [
-    { icon: Calendar, label: 'Bookings This Month', active: true },
-    { icon: Mail, label: 'Email Subscribers' },
-    { icon: Eye, label: 'Page Views' },
-    { icon: MousePointer, label: 'Total Link Clicks' },
-    { icon: BarChart3, label: 'Audience Demographics' }
-  ];
 
   const statsCards = [
     { number: '50', label: 'BOOKINGS', description: 'New Meetings, Consultations, Or Events Scheduled', color: '#CF3232' },
@@ -285,58 +278,13 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex bg-[#FFF9F9]" style={{ fontFamily: 'Outfit, sans-serif' }}>
       
-      {/* Mobile Sidebar Overlay - Only show when sidebar is open and on mobile */}
-      {sidebarOpen && (
-        <div 
-          className="fixed top-0 left-64 right-0 bottom-0  z-30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    
+      <UserProfileSidebar 
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        currentPage="user-dashboard"
+      />
 
-      {/* Sidebar */}
-      <aside className={`
-        bg-[#101117] w-64 flex flex-col fixed lg:static min-h-screen z-40 transition-transform duration-300 ease-in-out lg:transform-none
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
-        {/* Mobile Close Button */}
-        <div className="lg:hidden flex justify-end p-4">
-          <button 
-            onClick={() => setSidebarOpen(false)}
-            className="text-white hover:text-gray-300"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Sidebar Header Logo */}
-        <div className="p-6">
-          <div className="flex items-center space-x-2">
-            <Image src={images.realLeaders} alt='' />
-          </div>
-        </div>
-
-        {/* Sidebar Nav */}
-        <div className="p-6 flex-1">
-          <nav className="space-y-2">
-            {sidebarItems.map((item, index) => (
-              <div 
-                key={index}
-                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                  item.active ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm">{item.label}</span>
-              </div>
-            ))}
-          </nav>
-        </div>
-        
-        <div className="p-6 hidden lg:block">
-           <Image src={images.realLeaders} alt='' className='w-32 h-8 mb-[30] ml-[80]'/>
-        </div>
-      </aside>
 
       {/* Right Side (Header + Main Content) */}
       <div className="flex-1 flex flex-col w-full lg:w-auto">
@@ -353,7 +301,7 @@ const Dashboard = () => {
                 <Menu className="w-6 h-6 text-gray-600" />
               </button>
               
-              <h1 className="text-[#101117] text-lg sm:text-xl font-semibold">
+              <h1 className="text-[#101117] text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
                 Signature Dashboard
               </h1>
             </div>
@@ -404,30 +352,8 @@ const Dashboard = () => {
             {/* Left Content */}
             <div className="flex-1 flex flex-col gap-6 lg:gap-8">
               
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                {statsCards.map((card, index) => (
-                  <div key={index} className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-2xl sm:text-3xl font-bold text-[#101117] mb-1">
-                          {card.number}
-                        </h3>
-                        <p className="text-[#CF3232] font-semibold text-xs sm:text-sm tracking-wide">
-                          {card.label}
-                        </p>
-                      </div>
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-50 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
-                        <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-[#CF3232]" />
-                      </div>
-                    </div>
-                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                      {card.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
+                            {/* Stats Cards */}
+              <StatsCards stats={statsCards} columns={4} />
               {/* Audience Demographics */}
               <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
                 <h2 className="text-lg sm:text-xl font-semibold text-[#101117] mb-4 sm:mb-6">
@@ -479,10 +405,10 @@ const Dashboard = () => {
                     <tbody>
                       {demographicsData.map((row, index) => (
                         <tr key={index} className="border-b border-gray-50 hover:bg-gray-50">
-                          <td className="py-4 px-2 text-sm text-gray-700">{row.country}</td>
-                          <td className="py-4 px-2 text-sm text-gray-700">{row.device}</td>
-                          <td className="py-4 px-2 text-sm text-gray-700">{row.age}</td>
-                          <td className="py-4 px-2 text-sm text-gray-700">{row.role}</td>
+                          <td className="py-4 px-2 text-sm sm:text-base font-outfit font-regular text-[#414141]">{row.country}</td>
+                          <td className="py-4 px-2 text-sm sm:text-base font-outfit font-regular text-[#414141]">{row.device}</td>
+                          <td className="py-4 px-2 text-sm sm:text-base font-outfit font-regular text-[#414141]">{row.age}</td>
+                          <td className="py-4 px-2 text-sm sm:text-base font-outfit font-regular text-[#414141]">{row.role}</td>
                           <td className="py-4 px-2 text-sm font-semibold text-[#101117]">{row.percentage}</td>
                         </tr>
                       ))}

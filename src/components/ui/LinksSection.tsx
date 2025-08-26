@@ -54,7 +54,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({
       <div className="space-y-6">
         {/* First two inputs - always visible */}
         {links.slice(0, 2).map((link, index) => (
-          <div key={index}>
+          <div key={index} className='firstVerifyScreen'>
             <input
               type="text"
               value={link}
@@ -62,7 +62,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({
               className={cn(
                 "w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
               )}
-              style={{ border: '10px solid #CF323240' }}
+              
               placeholder={getPlaceholder(index)}
             />
           </div>
@@ -70,7 +70,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({
 
         {/* Third input - YouTube Channel - only show after clicking Add Link */}
         {showThirdInput && links.length > 2 && (
-          <div>
+          <div className='firstVerifyScreen'>
             <input
               type="text"
               value={links[2]}
@@ -78,7 +78,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({
               className={cn(
                 "w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
               )}
-              style={{ border: '10px solid #CF323240' }}
+              
               placeholder="YouTube Channel"
             />
           </div>

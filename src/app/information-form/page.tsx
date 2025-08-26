@@ -42,7 +42,7 @@ const InformationFormPage = () => {
       <MobileMenuToggle onToggle={toggleMobileMenu} />
 
       {/* Section 1: Left Sidebar - Hidden on mobile/tablet, shown on desktop */}
-      <div className="hidden xl:block xl:w-[364px] xl:flex-shrink-0">
+      <div className="hidden xl:block xl:w-[320px] xl:flex-shrink-0">
         <Sidebar 
           steps={steps} 
           imageUrl={images.verifyPageLefBgImage}
@@ -60,12 +60,13 @@ const InformationFormPage = () => {
       {/* Section 2: Middle Content - Takes remaining width */}
       <MainContent>
         <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
-          <div className="max-w-2xl w-full mt-16 sm:mt-20 lg:mt-[110px]">
+          <div className="max-w-[870px] w-full mt-16 sm:mt-20 lg:mt-[110px]">
             {/* Header */}
             <PageHeader
               title="MAKE YOUR MARK"
               subtitle="with RealLeaders signature"
               highlightWord="MARK"
+              className='lg:mb-[80px]'
             />
 
             {/* Information Form Section */}
@@ -79,6 +80,10 @@ const InformationFormPage = () => {
       {/* Section 3: Right Image Section - Hidden on mobile/tablet, shown on desktop */}
       <RightImageSection 
         imageUrl={images.comboInfoAudSideBarImage}
+        className='h-full'
+         style={{
+    background: 'linear-gradient(180deg, #4AC29A 0%, #BDFFF3 100%)'
+  }}
       />
     </div>
   );

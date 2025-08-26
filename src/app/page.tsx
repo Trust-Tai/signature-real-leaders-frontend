@@ -48,7 +48,7 @@ const Home = () => {
       )}
 
       {/* Section 1: Left Sidebar - Hidden on mobile/tablet, shown on desktop */}
-      <div className="hidden xl:block xl:w-[364px] xl:flex-shrink-0">
+      <div className="hidden xl:block xl:w-[320px] xl:flex-shrink-0">
         <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage}/>
       </div>
 
@@ -69,6 +69,7 @@ const Home = () => {
               title="MAKE YOUR MARK"
               subtitle="with RealLeaders signature"
               highlightWord="MARK"
+               className='lg:mb-[150px]'
             />
 
             {/* Claim Section */}
@@ -85,7 +86,13 @@ const Home = () => {
       </MainContent>
 
       {/* Section 3: Right Image Section - Hidden on mobile/tablet, shown on desktop */}
-      <RightImageSection imageUrl={images.verifyFirstPageRightBgImage} />
+      <RightImageSection
+       imageUrl={images.verifyFirstPageRightBgImage}
+        className='h-full'
+        style={{
+    background: 'linear-gradient(180deg, #1C92D2 0%, #F2FCFE 100%)'
+  }}
+       />
     </div>
   );
 };

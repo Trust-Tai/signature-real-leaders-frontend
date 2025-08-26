@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { ChevronDown } from 'lucide-react';
 
 interface InformationFormSectionProps {
   onSubmit: (data: FormData) => void;
@@ -55,104 +56,98 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
       {/* Form Fields */}
       <div className="space-y-6">
         {/* Row 1: First Name & Last Name */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+          <div className='firstVerifyScreen'>
           <input
             type="text"
             value={formData.firstName}
             onChange={(e) => handleInputChange('firstName', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
-            style={{ border: '10px solid #CF323240' }}
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
+            style={{ color: '#949494' }}
             placeholder="First Name"
           />
-          
+          </div>
+          <div className='firstVerifyScreen'>
           <input
             type="text"
             value={formData.lastName}
             onChange={(e) => handleInputChange('lastName', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
-            style={{ border: '10px solid #CF323240' }}
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
+            style={{ color: '#949494' }}
             placeholder="Last Name"
           />
+          </div>
         </div>
 
         {/* Row 2: Company Name & Company Website */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+           <div className='firstVerifyScreen'>
           <input
             type="text"
             value={formData.companyName}
             onChange={(e) => handleInputChange('companyName', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
-            style={{ border: '10px solid #CF323240' }}
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
+            style={{ color: '#949494' }}
             placeholder="Company Name"
           />
-          
+          </div>
+           <div className='firstVerifyScreen'>
           <input
             type="url"
             value={formData.companyWebsite}
             onChange={(e) => handleInputChange('companyWebsite', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
-            style={{ border: '10px solid #CF323240' }}
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
+            style={{ color: '#949494' }}
             placeholder="Company Website"
           />
+          </div>
         </div>
 
         {/* Row 3: Industry & Number of Employees */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <select
-            value={formData.industry}
-            onChange={(e) => handleInputChange('industry', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none bg-no-repeat bg-right pr-10 firstVerifyScreenInput"
-            style={{
-              border: '10px solid #CF323240',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
-          >
-            <option value="">Industry</option>
-            <option value="Technology">Technology</option>
-            <option value="Healthcare">Healthcare</option>
-            <option value="Finance">Finance</option>
-            <option value="Education">Education</option>
-            <option value="Retail">Retail</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Consulting">Consulting</option>
-            <option value="Other">Other</option>
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+          <div className="relative firstVerifyScreen">
+            <select
+              value={formData.industry}
+              onChange={(e) => handleInputChange('industry', e.target.value)}
+              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10 select-custom-color"
+            >
+              <option value="">Industry</option>
+              <option value="Technology">Technology</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Finance">Finance</option>
+              <option value="Education">Education</option>
+              <option value="Retail">Retail</option>
+              <option value="Manufacturing">Manufacturing</option>
+              <option value="Consulting">Consulting</option>
+              <option value="Other">Other</option>
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+          </div>
           
-          <select
-            value={formData.numberOfEmployees}
-            onChange={(e) => handleInputChange('numberOfEmployees', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none bg-no-repeat bg-right pr-10 firstVerifyScreenInput"
-            style={{
-              border: '10px solid #CF323240',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
-          >
-            <option value="">Number of Employees</option>
-            <option value="1-10">1-10</option>
-            <option value="11-50">11-50</option>
-            <option value="51-200">51-200</option>
-            <option value="201-500">201-500</option>
-            <option value="501-1000">501-1000</option>
-            <option value="1000+">1000+</option>
-          </select>
+          <div className="relative firstVerifyScreen">
+            <select
+              value={formData.numberOfEmployees}
+              onChange={(e) => handleInputChange('numberOfEmployees', e.target.value)}
+              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10 select-custom-color"
+            >
+              <option value="">Number of Employees</option>
+              <option value="1-10">1-10</option>
+              <option value="11-50">11-50</option>
+              <option value="51-200">51-200</option>
+              <option value="201-500">201-500</option>
+              <option value="501-1000">501-1000</option>
+              <option value="1000+">1000+</option>
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+          </div>
         </div>
 
         {/* Row 4: Contact Email List Size */}
-        <div>
+        <div className="relative firstVerifyScreen">
           <select
             value={formData.contactEmailListSize}
             onChange={(e) => handleInputChange('contactEmailListSize', e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none bg-no-repeat bg-right pr-10 firstVerifyScreenInput"
-            style={{
-              border: '10px solid #CF323240',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10 select-custom-color"
           >
             <option value="">Contact email list size</option>
             <option value="0-100">0-100</option>
@@ -162,6 +157,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
             <option value="5001-10000">5001-10000</option>
             <option value="10000+">10000+</option>
           </select>
+          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
         </div>
 
         {/* Submit Button */}
@@ -181,10 +177,18 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
 
       {/* Custom CSS for dropdown content styling */}
       <style jsx>{`
+        /* Force select color with multiple selectors */
+        select,
+        select.select-custom-color,
+        select.firstVerifyScreenInput {
+          color: #949494 !important;
+          -webkit-text-fill-color: #949494 !important;
+        }
+        
         /* Style the dropdown list content (options) */
         select option {
           background-color: #fef2f2 !important;
-          color: #374151 !important;
+          color: #949494 !important;
           font-family: 'Outfit', sans-serif !important;
           padding: 12px 16px !important;
           border: 2px solid #CF323240 !important;

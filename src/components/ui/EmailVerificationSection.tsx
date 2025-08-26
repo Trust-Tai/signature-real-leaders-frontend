@@ -34,18 +34,17 @@ const EmailVerificationSection: React.FC<EmailVerificationSectionProps> = ({
     <div className={cn("text-center space-y-8", className)}>
       {/* Section Heading */}
       <h2 className="section-title">
-        VERIFY YOUR EMAIL
+        VERIFY YOUR EMAIL ADDRESS
       </h2>
 
       {/* Email Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
+        <div className='firstVerifyScreen w-[609px] mx-auto'>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 text-gray-700 rounded-lg focus:outline-none transition-all duration-200 firstVerifyScreenInput"
-            style={{ border: '10px solid #CF323240' }}
+            className=" px-4 py-3 w-full text-gray-700 rounded-lg focus:outline-none transition-all duration-200 firstVerifyScreenInput"
             placeholder="Enter your email..."
             required
           />

@@ -5,23 +5,28 @@ import Image, { StaticImageData } from "next/image";
 interface RightImageSectionProps {
   className?: string;
   imageUrl?:string | StaticImageData
+  style?: React.CSSProperties;
 }
 
 const RightImageSection: React.FC<RightImageSectionProps> = ({ 
   className,
-
-  imageUrl=""
+  imageUrl="",
+  style
 }) => {
   
   return (
     <div className={cn(
-      "hidden xl:block xl:w-[364px] flex-shrink-0 bg-gradient-to-l from-blue-400 to-blue-300 relative overflow-hidden min-h-screen",
-      className
-    )}>
+      "hidden xl:block xl:w-[320px] flex-shrink-0 bg-gradient-to-l from-blue-400 to-blue-300 relative overflow-hidden min-h-screen",
+      
+    )} style={style}>
        <Image
           src={imageUrl}
           alt="Right Section"
-          className="object-cover w-full h-screen"
+          
+          className={cn(
+      "object-cover w-full h-screen",
+      className
+    )}
         />
     </div>
   );

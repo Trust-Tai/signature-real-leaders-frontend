@@ -54,7 +54,7 @@ const EmailVerificationPage = () => {
       <MobileMenuToggle onToggle={toggleMobileMenu} />
 
       {/* Section 1: Left Sidebar - Hidden on mobile/tablet, shown on desktop */}
-      <div className="hidden xl:block xl:w-[364px] xl:flex-shrink-0">
+      <div className="hidden xl:block xl:w-[320px] xl:flex-shrink-0">
         <Sidebar 
           steps={steps} 
           imageUrl={images.verifyPageLefBgImage}
@@ -78,6 +78,7 @@ const EmailVerificationPage = () => {
               title="MAKE YOUR MARK"
               subtitle="with RealLeaders signature"
               highlightWord="MARK"
+              className='lg:mb-[150px]'
             />
 
             {/* Email Verification Section */}
@@ -99,6 +100,10 @@ const EmailVerificationPage = () => {
       {/* Section 3: Right Image Section - Hidden on mobile/tablet, shown on desktop */}
       <RightImageSection 
         imageUrl={images.verifyFirstPageRightBgImage}
+        className='h-full'
+         style={{
+    background: 'linear-gradient(180deg, #1C92D2 0%, #F2FCFE 100%)'
+  }}
       />
     </div>
   );

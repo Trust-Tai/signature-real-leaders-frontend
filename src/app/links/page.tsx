@@ -43,7 +43,7 @@ const LinksPage = () => {
       <MobileMenuToggle onToggle={toggleMobileMenu} />
 
       {/* Section 1: Left Sidebar - Hidden on mobile, shown on desktop */}
-      <div className="hidden xl:block xl:w-[364px] xl:flex-shrink-0">
+      <div className="hidden xl:block xl:w-[320px] xl:flex-shrink-0">
         <Sidebar 
           steps={steps} 
           imageUrl={images.verifyPageLefBgImage}
@@ -67,6 +67,7 @@ const LinksPage = () => {
               title="MAKE YOUR MARK"
               subtitle="with RealLeaders signature"
               highlightWord="MARK"
+              className='lg:mb-[90px]'
             />
 
             {/* Links Section */}
@@ -80,6 +81,7 @@ const LinksPage = () => {
       {/* Section 3: Right Image Section - Hidden on mobile, shown on desktop */}
       <RightImageSection 
         imageUrl={images.linkRightSideImge}
+        className='h-full'
       />
     </div>
   );

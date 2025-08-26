@@ -33,7 +33,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   };
 
   return (
-    <div className={cn("text-center mb-8 sm:mb-12 lg:mb-16 px-4", className)}>
+    <div className={cn("text-center mb-8 sm:mb-20  px-4", className)}>
       <h1 className="header-title mb-3 sm:mb-4">
         {renderTitle()}
       </h1>

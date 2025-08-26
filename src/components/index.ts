@@ -17,11 +17,13 @@ export { default as SuccessMetricsSection } from './ui/SuccessMetricsSection';
 export { default as LinksSection } from './ui/LinksSection';
 export { default as SignSection } from './ui/SignSection';
 export { default as VerificationReviewSection } from './ui/VerificationReviewSection';
-export { default as MobileMenuToggle } from './ui/MobileMenuToggle';
+export { default as MobileMenuToggle } from './ui/MobileSidebarToggle';
 export { default as MobileSidebarToggle } from './ui/MobileSidebarToggle';
+export { default as StatsCards } from './ui/StatsCards';
 
 // Layout Components
 export { default as Sidebar } from './ui/Sidebar';
+export { default as UserProfileSidebar } from './ui/UserProfileSidebar';
 
 // Types
 export type { Step } from './types';

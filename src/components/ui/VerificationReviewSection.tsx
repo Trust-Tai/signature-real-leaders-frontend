@@ -27,7 +27,10 @@ const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
           <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold leading-tight" 
               style={{ 
                 color: '#CF3232',
-                fontFamily: "Abolition Test"
+                fontFamily: "Abolition Test",
+                fontStyle: 'normal',
+                fontSize: '72px',
+                fontWeight:400
               }}>
             YOUR SIGNATURE LINK IS<br />
             UNDER REVIEW

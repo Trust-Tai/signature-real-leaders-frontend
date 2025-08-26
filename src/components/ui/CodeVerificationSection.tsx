@@ -73,6 +73,7 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
       <div className="space-y-6">
         <div className="flex justify-center space-x-3 sm:space-x-4" style={{marginBottom:10}}>
           {code.map((digit, index) => (
+            <div key={index} className='firstVerifyScreen'>
             <input
               key={index}
               ref={(el) => {
@@ -87,7 +88,7 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
               className={cn(
-                "text-center font-bold font-mono rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-custom-red/20",
+                "text-center font-bold font-mono  transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-custom-red/20",
                 // Mobile sizes
                 "w-12 h-12 sm:w-14 sm:h-14 text-xl sm:text-2xl",
                 // Desktop sizes (xl and above)
@@ -95,7 +96,7 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
                 // Mobile border
                 "border-2 border-custom-red-border",
                 // Desktop border
-                "xl:border-[10px] xl:border-custom-red-border",
+                "firstVerifyScreenInput",
                 digit
                   ? "text-custom-red bg-white"
                   : "text-gray-400 bg-white",
@@ -103,9 +104,10 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
               )}
               disabled={isLoading}
             />
+            </div>
           ))}
         </div>
-<p className="text-gray-600 l mx-auto leading-relaxed" style={{fontSize:15}}>
+<p className="font-outfit mx-auto leading-relaxed" style={{fontSize:15, color: '#656060'}}>
        check your email for your Real Leaders access code
       </p>
         
@@ -114,7 +116,7 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
           // disabled={!isValidEmail}
           className="custom-btn mt-4 mb-0"
         >
-          SEND VERIFICATION CODE
+          VERIFY AND CONTINUE
         </button>
 
         {error && (
@@ -130,9 +132,9 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
     disabled={isLoading}
     className=""
   >
-    <span className="text-gray-600 font-outfit font-normal transition-colors duration-200">
+    <span className="font-outfit font-normal transition-colors duration-200" style={{fontSize:15, color: '#656060'}}>
       Didn&apos;t receive the code?{' '}
-      <span className="text-black font-outfit font-medium hover:text-custom-red transition-colors duration-200">
+      <span className="font-outfit font-medium hover:text-custom-red transition-colors duration-200" style={{fontSize:15, color: '#000000'}}>
         [Resend]
       </span>
     </span>

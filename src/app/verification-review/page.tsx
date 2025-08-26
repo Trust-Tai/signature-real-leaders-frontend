@@ -34,7 +34,7 @@ const VerificationReviewPage = () => {
       <MobileMenuToggle onToggle={toggleMobileMenu} />
 
       {/* Section 1: Left Sidebar - Hidden on mobile, shown on desktop */}
-      <div className="hidden xl:block xl:w-[364px] xl:flex-shrink-0">
+      <div className="hidden xl:block xl:w-[320px] xl:flex-shrink-0">
         <Sidebar 
           steps={steps} 
           imageUrl={images.verifyPageLefBgImage}
