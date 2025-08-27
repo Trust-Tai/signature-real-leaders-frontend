@@ -453,15 +453,15 @@ const Dashboard = () => {
                       height={256}
                     />
                   </div>
-                  <h3 className="font-bold text-[#101117] mb-2 leading-tight" style={{ fontFamily: 'Abolition Test', fontSize: '54px' }}>
+                  <h3 className="text-[#101117] mb-2 leading-tight" style={{ fontFamily: 'Abolition Test', fontSize: '54px' }}>
                     RICHARD BRANSON
                   </h3>
-                  <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-600 mb-4">
+                  <p className="font-outfit font-medium mb-4 text-[#111111]" style={{fontSize:14}}>
                     Founder of the Virgin Group
                   </p>
                 </div>
 
-                <div className="text-sm sm:text-base text-gray-600 leading-relaxed mb-6">
+                <div className="font-outfit font-regular mb-6 text-[#000000CC]" style={{fontSize:15}}>
                   <p>
                     Founder Of The Virgin Group, Which Has Gone On To Grow Successful Businesses In Sectors Including Mobile Telephony, Travel And Transportation, Financial And Entertainment And Health And Wellness. Virgin Is A Leading International Investment Group And One Of The World&apos;s Most Recognised And Respected Brands. Since Starting Youth Culture... 
                     <span className="text-[#CF3232] cursor-pointer font-medium">Read More</span>

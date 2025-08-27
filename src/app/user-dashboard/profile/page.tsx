@@ -135,7 +135,7 @@ const ProfilePage = () => {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
             <h2 className="font-semibold font-outift text-[#333333]  mb-4">Bio</h2>
             <div className="space-y-4">
-              <div className='firstVerifyScreen h-[250]'>
+              <div className='firstVerifyScreen' style={{height:250}}>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
@@ -169,9 +169,9 @@ const ProfilePage = () => {
                     type={showCurrentPassword ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full p-3 pr-10 font-outift font-regular border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-[#efc0c0]"
+                    className="w-full p-3 pr-10 font-outift font-regular border border-[#cf323240]  focus:outline-none focus:ring-0 focus:border-[#efc0c0]"
                     placeholder="Enter current password"
-                    style={{ color: '#949494', height: '70px' }}
+                    style={{ color: '#949494', height: '70px', fontSize:18 }}
                   />
                   <button
                     type="button"
@@ -192,9 +192,9 @@ const ProfilePage = () => {
                     type={showNewPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full p-3 pr-10 font-outift font-regular border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-[#efc0c0]"
+                    className="w-full p-3 pr-10 font-outift font-regular border border-[#cf323240] focus:outline-none focus:ring-0 focus:border-[#efc0c0]"
                     placeholder="Enter new password"
-                    style={{ color: '#949494', height: '70px' }}
+                    style={{ color: '#949494', height: '70px', fontSize:18}}
                   />
                   <button
                     type="button"
@@ -215,9 +215,9 @@ const ProfilePage = () => {
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full p-3 font-outift font-regular border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-[#efc0c0]" 
+                    className="w-full p-3 font-outift font-regular border border-[#cf323240]  focus:outline-none focus:ring-0 focus:border-[#efc0c0]" 
                     placeholder="Confirm new password"
-                    style={{ color: '#949494', height: '70px' }}
+                    style={{ color: '#949494', height: '70px',fontSize:18 }}
                   />
                   <button
                     type="button"
