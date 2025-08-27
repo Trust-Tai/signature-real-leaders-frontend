@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Download, Filter } from 'lucide-react';
+import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import { StatsCards } from '@/components';
 
@@ -11,30 +11,34 @@ interface Subscriber {
   name: string;
   status: string;
   date: string;
-  source: string;
 }
 
 const EmailSubscribers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [addSubscriberModalOpen, setAddSubscriberModalOpen] = useState(false);
   const [editSubscriberModalOpen, setEditSubscriberModalOpen] = useState(false);
   const [editingSubscriber, setEditingSubscriber] = useState<Subscriber | null>(null);
   const [filters, setFilters] = useState({
     status: 'all',
-    source: 'all',
     dateRange: 'all',
     searchTerm: ''
   });
+  const [newSubscriber, setNewSubscriber] = useState({
+    name: '',
+    email: '',
+    status: 'Active'
+  });
 
   const subscribersData = [
-    { id: 1, email: 'john.doe@example.com', name: 'John Doe', status: 'Active', date: '2025-01-15', source: 'Website Signup' },
-    { id: 2, email: 'jane.smith@example.com', name: 'Jane Smith', status: 'Active', date: '2025-01-14', source: 'LinkedIn' },
-    { id: 3, email: 'mike.johnson@example.com', name: 'Mike Johnson', status: 'Unsubscribed', date: '2025-01-13', source: 'Email Campaign' },
-    { id: 4, email: 'sarah.wilson@example.com', name: 'Sarah Wilson', status: 'Active', date: '2025-01-12', source: 'Website Signup' },
-    { id: 5, email: 'david.brown@example.com', name: 'David Brown', status: 'Active', date: '2025-01-11', source: 'Referral' },
-    { id: 6, email: 'emma.davis@example.com', name: 'Emma Davis', status: 'Active', date: '2025-01-10', source: 'Social Media' },
-    { id: 7, email: 'alex.taylor@example.com', name: 'Alex Taylor', status: 'Unsubscribed', date: '2025-01-09', source: 'Website Signup' },
-    { id: 8, email: 'lisa.anderson@example.com', name: 'Lisa Anderson', status: 'Active', date: '2025-01-08', source: 'Email Campaign' }
+    { id: 1, email: 'john.doe@example.com', name: 'John Doe', status: 'Active', date: '2025-01-15' },
+    { id: 2, email: 'jane.smith@example.com', name: 'Jane Smith', status: 'Active', date: '2025-01-14' },
+    { id: 3, email: 'mike.johnson@example.com', name: 'Mike Johnson', status: 'Unsubscribed', date: '2025-01-13' },
+    { id: 4, email: 'sarah.wilson@example.com', name: 'Sarah Wilson', status: 'Active', date: '2025-01-12' },
+    { id: 5, email: 'david.brown@example.com', name: 'David Brown', status: 'Active', date: '2025-01-11' },
+    { id: 6, email: 'emma.davis@example.com', name: 'Emma Davis', status: 'Active', date: '2025-01-10' },
+    { id: 7, email: 'alex.taylor@example.com', name: 'Alex Taylor', status: 'Unsubscribed', date: '2025-01-09' },
+    { id: 8, email: 'lisa.anderson@example.com', name: 'Lisa Anderson', status: 'Active', date: '2025-01-08' }
   ];
 
   const statsCards = [
@@ -44,6 +48,20 @@ const EmailSubscribers = () => {
     { number: '12.5%', label: 'GROWTH RATE', description: 'Monthly subscriber increase', color: '#CF3232' }
   ];
 
+  const handleAddSubscriber = () => {
+    if (newSubscriber.name && newSubscriber.email) {
+      const newSubscriberItem = {
+        id: subscribersData.length + 1,
+        email: newSubscriber.email,
+        name: newSubscriber.name,
+        status: newSubscriber.status,
+        date: new Date().toISOString().split('T')[0]
+      };
+      subscribersData.push(newSubscriberItem);
+      setNewSubscriber({ name: '', email: '', status: 'Active' });
+      setAddSubscriberModalOpen(false);
+    }
+  };
 
   const handleEditSubscriber = (subscriber: Subscriber) => {
     setEditingSubscriber(subscriber);
@@ -54,7 +72,14 @@ const EmailSubscribers = () => {
     if (editingSubscriber) {
       const index = subscribersData.findIndex(s => s.id === editingSubscriber.id);
       if (index !== -1) {
-        subscribersData[index] = { ...editingSubscriber };
+        const updated: Subscriber = {
+          id: editingSubscriber.id,
+          email: editingSubscriber.email,
+          name: editingSubscriber.name,
+          status: editingSubscriber.status,
+          date: editingSubscriber.date,
+        };
+        subscribersData[index] = updated;
         setEditSubscriberModalOpen(false);
         setEditingSubscriber(null);
       }
@@ -66,8 +91,7 @@ const EmailSubscribers = () => {
       Name: sub.name,
       Email: sub.email,
       Status: sub.status,
-      'Date Joined': sub.date,
-      Source: sub.source
+      'Date Joined': sub.date
     }));
     
     const csvContent = [
@@ -163,6 +187,13 @@ const EmailSubscribers = () => {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button 
+                onClick={() => setAddSubscriberModalOpen(true)}
+                className="bg-[#CF3232] text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add New Subscriber</span>
+              </button>
+              <button 
                 onClick={handleExportSubscribers}
                 className="bg-white text-[#CF3232] border border-[#CF3232] px-4 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center space-x-2"
               >
@@ -179,7 +210,7 @@ const EmailSubscribers = () => {
             </div>
 
             {/* Active Filters Display */}
-            {(filters.status !== 'all' || filters.source !== 'all' || filters.dateRange !== 'all' || filters.searchTerm) && (
+            {(filters.status !== 'all' || filters.dateRange !== 'all' || filters.searchTerm) && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium text-blue-800">Active Filters:</h3>
@@ -187,7 +218,6 @@ const EmailSubscribers = () => {
                     onClick={() => {
                       setFilters({
                         status: 'all',
-                        source: 'all',
                         dateRange: 'all',
                         searchTerm: ''
                       });
@@ -209,17 +239,7 @@ const EmailSubscribers = () => {
                       </button>
                     </span>
                   )}
-                  {filters.source !== 'all' && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      Source: {filters.source}
-                      <button
-                        onClick={() => setFilters({...filters, source: 'all'})}
-                        className="ml-1 text-blue-600 hover:text-blue-800"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  )}
+                  
                   {filters.dateRange !== 'all' && (
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       Date: {filters.dateRange}
@@ -379,24 +399,7 @@ const EmailSubscribers = () => {
                     </select>
                   </div>
 
-                  {/* Source Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#101117] mb-3">
-                      Source
-                    </label>
-                    <select
-                      value={filters.source}
-                      onChange={(e) => setFilters({...filters, source: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
-                    >
-                      <option value="all" className="text-[#101117]">All Sources</option>
-                      <option value="website" className="text-[#101117]">Website Signup</option>
-                      <option value="linkedin" className="text-[#101117]">LinkedIn</option>
-                      <option value="email" className="text-[#101117]">Email Campaign</option>
-                      <option value="referral" className="text-[#101117]">Referral</option>
-                      <option value="social" className="text-[#101117]">Social Media</option>
-                    </select>
-                  </div>
+                  
 
                   {/* Date Range Filter */}
                   <div>
@@ -439,7 +442,6 @@ const EmailSubscribers = () => {
                     onClick={() => {
                       setFilters({
                         status: 'all',
-                        source: 'all',
                         dateRange: 'all',
                         searchTerm: ''
                       });
@@ -459,7 +461,98 @@ const EmailSubscribers = () => {
             </div>
           )}
 
-          {/* Add New Subscriber Modal - Removed */}
+          {/* Add New Subscriber Modal */}
+          {addSubscriberModalOpen && (
+            <div 
+              className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+              onClick={() => setAddSubscriberModalOpen(false)}
+            >
+              <div 
+                className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
+                      Add New Subscriber
+                    </h2>
+                    <button
+                      onClick={() => setAddSubscriberModalOpen(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 space-y-6">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#101117] mb-3">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter full name..."
+                      value={newSubscriber.name}
+                      onChange={(e) => setNewSubscriber({...newSubscriber, name: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#101117] mb-3">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="Enter email address..."
+                      value={newSubscriber.email}
+                      onChange={(e) => setNewSubscriber({...newSubscriber, email: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                    />
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#101117] mb-3">
+                      Status
+                    </label>
+                    <select
+                      value={newSubscriber.status}
+                      onChange={(e) => setNewSubscriber({...newSubscriber, status: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Unsubscribed">Unsubscribed</option>
+                      <option value="Pending">Pending</option>
+                    </select>
+                  </div>
+
+                  
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-gray-200 flex gap-3">
+                  <button
+                    onClick={() => setAddSubscriberModalOpen(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddSubscriber}
+                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    Add Subscriber
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Edit Subscriber Modal */}
           {editSubscriberModalOpen && editingSubscriber && (
@@ -532,7 +625,7 @@ const EmailSubscribers = () => {
                     </select>
                   </div>
 
-                  {/* Source removed from Edit Subscriber */}
+                  
                 </div>
 
                 {/* Modal Footer */}
