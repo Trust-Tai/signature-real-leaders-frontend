@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter } from 'lucide-react';
+import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Download, Filter } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import { StatsCards } from '@/components';
 
@@ -17,7 +17,6 @@ interface Subscriber {
 const EmailSubscribers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [addSubscriberModalOpen, setAddSubscriberModalOpen] = useState(false);
   const [editSubscriberModalOpen, setEditSubscriberModalOpen] = useState(false);
   const [editingSubscriber, setEditingSubscriber] = useState<Subscriber | null>(null);
   const [filters, setFilters] = useState({
@@ -25,12 +24,6 @@ const EmailSubscribers = () => {
     source: 'all',
     dateRange: 'all',
     searchTerm: ''
-  });
-  const [newSubscriber, setNewSubscriber] = useState({
-    name: '',
-    email: '',
-    status: 'Active',
-    source: 'Website Signup'
   });
 
   const subscribersData = [
@@ -51,21 +44,6 @@ const EmailSubscribers = () => {
     { number: '12.5%', label: 'GROWTH RATE', description: 'Monthly subscriber increase', color: '#CF3232' }
   ];
 
-  const handleAddSubscriber = () => {
-    if (newSubscriber.name && newSubscriber.email) {
-      const newSubscriberItem = {
-        id: subscribersData.length + 1,
-        email: newSubscriber.email,
-        name: newSubscriber.name,
-        status: newSubscriber.status,
-        date: new Date().toISOString().split('T')[0],
-        source: newSubscriber.source
-      };
-      subscribersData.push(newSubscriberItem);
-      setNewSubscriber({ name: '', email: '', status: 'Active', source: 'Website Signup' });
-      setAddSubscriberModalOpen(false);
-    }
-  };
 
   const handleEditSubscriber = (subscriber: Subscriber) => {
     setEditingSubscriber(subscriber);
@@ -185,13 +163,6 @@ const EmailSubscribers = () => {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button 
-                onClick={() => setAddSubscriberModalOpen(true)}
-                className="bg-[#CF3232] text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center space-x-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add New Subscriber</span>
-              </button>
-              <button 
                 onClick={handleExportSubscribers}
                 className="bg-white text-[#CF3232] border border-[#CF3232] px-4 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center space-x-2"
               >
@@ -298,7 +269,6 @@ const EmailSubscribers = () => {
                     <p className="text-gray-600 text-sm mb-2">{subscriber.email}</p>
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>Joined: {subscriber.date}</span>
-                      <span>Source: {subscriber.source}</span>
                     </div>
                   </div>
                 ))}
@@ -313,7 +283,6 @@ const EmailSubscribers = () => {
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Email</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Status</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Date Joined</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Source</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Actions</th>
                     </tr>
                   </thead>
@@ -330,7 +299,6 @@ const EmailSubscribers = () => {
                           </span>
                         </td>
                         <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.date}</td>
-                        <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.source}</td>
                         <td className="py-4 px-4">
                           <button 
                             onClick={() => handleEditSubscriber(subscriber)}
@@ -491,114 +459,7 @@ const EmailSubscribers = () => {
             </div>
           )}
 
-          {/* Add New Subscriber Modal */}
-          {addSubscriberModalOpen && (
-            <div 
-              className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
-              onClick={() => setAddSubscriberModalOpen(false)}
-            >
-              <div 
-                className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Modal Header */}
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                      Add New Subscriber
-                    </h2>
-                    <button
-                      onClick={() => setAddSubscriberModalOpen(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <X className="w-6 h-6" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Modal Body */}
-                <div className="p-6 space-y-6">
-                  {/* Name */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#101117] mb-3">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter full name..."
-                      value={newSubscriber.name}
-                      onChange={(e) => setNewSubscriber({...newSubscriber, name: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#101117] mb-3">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="Enter email address..."
-                      value={newSubscriber.email}
-                      onChange={(e) => setNewSubscriber({...newSubscriber, email: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#101117] mb-3">
-                      Status
-                    </label>
-                    <select
-                      value={newSubscriber.status}
-                      onChange={(e) => setNewSubscriber({...newSubscriber, status: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Unsubscribed">Unsubscribed</option>
-                      <option value="Pending">Pending</option>
-                    </select>
-                  </div>
-
-                  {/* Source */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#101117] mb-3">
-                      Source
-                    </label>
-                    <select
-                      value={newSubscriber.source}
-                      onChange={(e) => setNewSubscriber({...newSubscriber, source: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
-                    >
-                      <option value="Website Signup">Website Signup</option>
-                      <option value="LinkedIn">LinkedIn</option>
-                      <option value="Email Campaign">Email Campaign</option>
-                      <option value="Referral">Referral</option>
-                      <option value="Social Media">Social Media</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Modal Footer */}
-                <div className="p-6 border-t border-gray-200 flex gap-3">
-                  <button
-                    onClick={() => setAddSubscriberModalOpen(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleAddSubscriber}
-                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
-                  >
-                    Add Subscriber
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Add New Subscriber Modal - Removed */}
 
           {/* Edit Subscriber Modal */}
           {editSubscriberModalOpen && editingSubscriber && (
@@ -671,23 +532,7 @@ const EmailSubscribers = () => {
                     </select>
                   </div>
 
-                  {/* Source */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#101117] mb-3">
-                      Source
-                    </label>
-                    <select
-                      value={editingSubscriber.source}
-                      onChange={(e) => setEditingSubscriber({...editingSubscriber, source: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
-                    >
-                      <option value="Website Signup">Website Signup</option>
-                      <option value="LinkedIn">LinkedIn</option>
-                      <option value="Email Campaign">Email Campaign</option>
-                      <option value="Referral">Referral</option>
-                      <option value="Social Media">Social Media</option>
-                    </select>
-                  </div>
+                  {/* Source removed from Edit Subscriber */}
                 </div>
 
                 {/* Modal Footer */}
