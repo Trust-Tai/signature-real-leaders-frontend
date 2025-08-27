@@ -60,7 +60,7 @@ const SuccessMetricsPage = () => {
       {/* Section 2: Middle Content - Takes remaining width */}
       <MainContent>
         <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
-          <div className="max-w-[870px] w-full mt-16 sm:mt-20 lg:mt-[110px]">
+          <div className="max-w-[870px] w-full mt-16 sm:mt-20 lg:mt-[40px]">
             {/* Header */}
             <PageHeader
               title="MAKE YOUR MARK"

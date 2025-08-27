@@ -251,10 +251,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, User, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { Search, Bell, ChevronLeft, ChevronRight, Menu, Users } from 'lucide-react';
 import Image from 'next/image';
 import { images } from '@/assets';
 import { UserProfileSidebar, StatsCards } from '@/components';
+import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 
 const Dashboard = () => {
 
@@ -306,18 +307,20 @@ const Dashboard = () => {
               </h1>
             </div>
             
-            <div className="flex items-center space-x-4">
-              {/* Search - Hidden on very small screens */}
+            <div className="flex items-center space-x-6">
+              {/* Search Bar */}
               <div className="relative hidden sm:block">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input 
                   type="text" 
                   placeholder="Search here..." 
-                  className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-48 md:w-64"
+                  className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-48 md:w-64 font-outfit"
+                  style={{ color: '#949494' }}
                 />
               </div>
               
-              <div className="flex items-center space-x-3">
+              {/* Notifications and Profile Icons */}
+              <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
                   <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
@@ -325,11 +328,12 @@ const Dashboard = () => {
                   </span>
                 </div>
                 <div className="relative">
-                  <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
                   <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                     16
                   </span>
                 </div>
+                <UserProfileDropdown userName="Richard Branson" />
               </div>
             </div>
           </div>
@@ -340,7 +344,8 @@ const Dashboard = () => {
             <input 
               type="text" 
               placeholder="Search here..." 
-              className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full"
+              className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
+              style={{ color: '#949494' }}
             />
           </div>
         </header>

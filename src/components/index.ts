@@ -24,6 +24,8 @@ export { default as StatsCards } from './ui/StatsCards';
 // Layout Components
 export { default as Sidebar } from './ui/Sidebar';
 export { default as UserProfileSidebar } from './ui/UserProfileSidebar';
+export { default as UserProfileDropdown } from './ui/UserProfileDropdown';
+export { default as LogoutConfirmationPopup } from './ui/LogoutConfirmationPopup';
 
 // Types
 export type { Step } from './types';

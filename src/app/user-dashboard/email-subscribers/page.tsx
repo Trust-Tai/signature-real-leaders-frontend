@@ -141,7 +141,8 @@ const EmailSubscribers = () => {
                 <input 
                   type="text" 
                   placeholder="Search subscribers..." 
-                  className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-48 md:w-64"
+                  className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-48 md:w-64 font-outfit"
+                  style={{ color: '#949494' }}
                 />
               </div>
               
@@ -168,7 +169,8 @@ const EmailSubscribers = () => {
             <input 
               type="text" 
               placeholder="Search subscribers..." 
-              className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full"
+              className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
+              style={{ color: '#949494' }}
             />
           </div>
         </header>
@@ -457,7 +459,8 @@ const EmailSubscribers = () => {
                       placeholder="Search by name or email..."
                       value={filters.searchTerm}
                       onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent font-outfit"
+                      style={{ color: '#949494' }}
                     />
                   </div>
                 </div>
