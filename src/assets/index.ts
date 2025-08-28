@@ -36,8 +36,10 @@ import h1Fourth from "./images/h1img3.png"
 import h1Fifth from "./images/h1img2.png"
 import h1Sixth from "./images/h1img1.png"
 import realLeadersWhite from "./images/realLeadersWhite.png"
+import heroLine from "./images/lineHero.png"
 export const images ={
 verifyPageLefBgImage: verifyPageLefBgImage,
+heroLine:heroLine,
 h1Third:h1Third,
 h1Fourth:h1Fourth,
 h1Fifth:h1Fifth,

@@ -1,8 +1,10 @@
 import { images } from '@/assets';
 import Image from 'next/image';
 import React from 'react';
+import { useRouter } from "next/navigation";
 
 const FooterBanner = () => {
+    const router = useRouter();
   return (
     <footer className="w-full bg-[#f9efef]">
       {/* Main Banner - Red Box */}
@@ -29,6 +31,7 @@ const FooterBanner = () => {
           
           {/* Button */}
           <button 
+          onClick={()=>router.push("/name-verification")}
             className="text-white  mb-4 hover:bg-gray-800 transition-colors inline-flex items-center justify-center"
             style={{
               backgroundColor: '#1A1B20',

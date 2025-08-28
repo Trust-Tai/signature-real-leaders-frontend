@@ -81,7 +81,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#fff9f9', fontFamily: 'Outfit, sans-serif' }}>
+    <div className="min-h-screen relative overflow-hidden " style={{ backgroundColor: '#fff9f9', fontFamily: 'Outfit, sans-serif' }}>
       <div className="absolute inset-0 opacity-30">
         <Image 
           src={images.heroPageGif}
@@ -101,7 +101,7 @@ const HeroSection = () => {
         }}
       ></div>
       
-      <div className="relative z-10 h-screen flex flex-col items-end">
+      <div className="relative z-10 h-screen flex flex-col items-start" style={{height:"100%"}}>
         <div className="absolute top-6 left-6 z-50">
           <button 
             // onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -137,7 +137,7 @@ const HeroSection = () => {
           </div>
         )}
 
-        <div className="flex-1 flex items-center justify-start items-start  relative px-6 w-[1538] h-[436] mt-[200] mr-[50] ml-[332]">
+        <div className="flex-1 flex items-center justify-start items-start  relative px-6 w-[1538] h-[436] mt-[200] mr-[50] ml-[250]" style={{width:"-webkit-fill-available"}}>
           <div className="text-center text-white space-y-8 ">
             <div className="space-y-6">
               <div className="h-8 flex items-center justify-start">
@@ -170,6 +170,7 @@ const HeroSection = () => {
               <button 
                 className="px-8 py-4 heroPageButton "
                 style={{fontSize:30,color:"#CF3232"}}
+                onClick={()=>router.push("/name-verification")}
               >
                <p className='heroSubtilepage' style={{fontSize:30}}> {contentSlides[currentSlide].buttonText}</p>
               <Image src={images.heroPageBtnRightToggle} alt='' className='h-[30] w-[30] mt-[9]'/>
@@ -199,7 +200,7 @@ const HeroSection = () => {
         </div>
 
      
-        <div className="text-start text-white pb-8 px-6 w-full">
+        <div className="text-white pb-8 w-[1330] mt-[190] ml-[50]" style={{whiteSpace:"nowrap"}}>
           <div className="flex flex-col lg:flex-row items-center justify-start gap-8 ml-[200]">
             <h3 
 
@@ -213,8 +214,7 @@ const HeroSection = () => {
   {[
     { value: timeRemaining.days, label: "DAYS" },
     { value: timeRemaining.hours, label: "HRS" },
-    { value: timeRemaining.minutes, label: "MIN" },
-    { value: timeRemaining.seconds, label: "SEC" },
+    { value: timeRemaining.minutes, label: "MIN" }
   ].map((item, index) => (
     <div key={index} className="flex gap-[20] items-center">
       <div className="flex gap-2 justify-center">
@@ -254,7 +254,7 @@ const HeroSection = () => {
             <button 
               className="px-8 py-4 heroPageButton"
                style={{fontSize:30,color:"#CF3232"}}
-               onClick={()=>router.push("/name-verification")}
+               
             >
               <p className='heroSubtilepage' style={{fontSize:30}}>REGISTER NOW</p>
             <Image src={images.heroPageBtnRightToggle} alt='' className='h-[30] w-[30] mt-[9]'/>
