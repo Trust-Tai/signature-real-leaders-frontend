@@ -28,7 +28,7 @@ import thirdIcon from "./icons/thirdIcon.png"
 import heroPageGif from "./images/heropage.gif"
 import heroPageLine from "./images/heropageline.png"
 import heroPageBtnRightToggle from "./images/heroButtonRightToggle.png"
-import eventPageGif from './images/EventPage.gif'
+import eventPageGif from './images/EventPage.png'
 import h1First from "./images/h1img6.png"
 import h1Second from "./images/h1img5.png"
 import h1Third from "./images/h1img4.png"
