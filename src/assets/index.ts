@@ -25,8 +25,23 @@ import goArrowIcon from "./icons/Arrow.png"
 import emailIcon from "./icons/emailIcon.png"
 import linkedinIcon from "./icons/linkedinIcon.png"
 import thirdIcon from "./icons/thirdIcon.png"
+import heroPageGif from "./images/heropage.gif"
+import heroPageLine from "./images/heropageline.png"
+import heroPageBtnRightToggle from "./images/heroButtonRightToggle.png"
+import eventPageGif from './images/EventPage.gif'
+import h1First from "./images/h1img6.png"
+import h1Second from "./images/h1img5.png"
+import h1Third from "./images/h1img4.png"
+import h1Fourth from "./images/h1img3.png"
+import h1Fifth from "./images/h1img2.png"
+import h1Sixth from "./images/h1img1.png"
+import realLeadersWhite from "./images/realLeadersWhite.png"
 export const images ={
 verifyPageLefBgImage: verifyPageLefBgImage,
+h1Third:h1Third,
+h1Fourth:h1Fourth,
+h1Fifth:h1Fifth,
+h1Sixth:h1Sixth,
 verifyFirstPageRightBgImage : verifyFirstPageRightBgImage,
 realLeaders:realLeaders,
 sideToolBar:sideToolBar,
@@ -39,7 +54,15 @@ realLeadersTitle:realLeadersTitle,
 goArrowIcon:goArrowIcon,
 emailIcon:emailIcon,
 linkedinIcon:linkedinIcon,
-thirdIcon:thirdIcon
+thirdIcon:thirdIcon,
+heroPageGif:heroPageGif,
+heroPageLine:heroPageLine,
+heroPageBtnRightToggle:heroPageBtnRightToggle,
+eventPageGif:eventPageGif,
+h1First:h1First,
+h1Second:h1Second,
+realLeadersWhite:realLeadersWhite
+
 }
 // Fonts (if needed)
 export const FONTS = {

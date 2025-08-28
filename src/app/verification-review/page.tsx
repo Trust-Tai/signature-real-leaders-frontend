@@ -55,9 +55,11 @@ const VerificationReviewPage = () => {
           <div className="max-w-3xl w-full">
             {/* Verification Review Section */}
             <VerificationReviewSection />
+             
           </div>
         </div>
       </MainContent>
+     
     </div>
   );
 };

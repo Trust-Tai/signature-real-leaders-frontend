@@ -209,3 +209,39 @@ body {
    background: #CF3232;
 }
 
+.heroTitlePage{
+font-family: Abolition Test;
+font-weight: 400;
+font-style: Regular;
+font-size: 140px;
+line-height: 100%;
+letter-spacing: 0%;
+}
+.heroSubtilepage{
+  font-family: Abolition Test;
+font-weight: 400;
+font-style: Regular;
+font-size: 40px;
+line-height: 100%;
+letter-spacing: 7%;
+
+}
+.heroPageDescription{
+  font-family: Outfit;
+font-weight: 400;
+font-style: Regular;
+font-size: 26px;
+line-height: 100%;
+letter-spacing: 0%;
+
+}
+.heroPageButton{
+height: 74;
+border-radius: 10px;
+gap: 10px;
+background: #FFFFFF;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+

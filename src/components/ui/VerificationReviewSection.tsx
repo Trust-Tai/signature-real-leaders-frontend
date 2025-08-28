@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from "next/image";
 import {images} from '../../assets/index'
+import { useRouter } from "next/navigation";
 interface VerificationReviewSectionProps {
   className?: string;
 }
@@ -8,6 +9,7 @@ interface VerificationReviewSectionProps {
 const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
   className
 }) => {
+   const router = useRouter();
   return (
     <div className={`min-h-screen flex items-start justify-center p-4 sm:p-8 ${className || ''}`} 
         style={{marginTop:150}} >
@@ -50,7 +52,16 @@ const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
             </p>
           </div>
         </div>
+
+         <button
+          type="submit"
+          onClick={()=>router.push("/user-dashboard")}
+          className="custom-btn"
+        >
+           ACCESS DASHBOARD FOR KEVIN
+        </button>
       </div>
+     
     </div>
   );
 };
