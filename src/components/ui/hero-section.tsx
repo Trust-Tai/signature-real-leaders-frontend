@@ -201,7 +201,7 @@ const HeroSection = () => {
 
      
         <div className="text-white pb-8 w-[1330] mt-[190] ml-[50]" style={{whiteSpace:"nowrap"}}>
-          <div className="flex flex-col lg:flex-row items-center justify-start gap-8 ml-[200]">
+          <div className="flex flex-col lg:flex-row items-center justify-start gap-8 ml-[220]">
             <h3 
 
               className="heroSubtilepage"
