@@ -272,6 +272,8 @@
 
 // export default HeroSection;
 
+
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -284,12 +286,7 @@ const HeroSection = () => {
     const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState({
-    days: 0,
-    hours: 9,
-    minutes: 34,
-    seconds: 0
-  });
+ 
 
   const contentSlides = [
     {
@@ -303,7 +300,7 @@ const HeroSection = () => {
       subtitle: "BECOME THE AUTHORITY",
       title: "IN YOUR INDUSTRY",
       description: "Real Leaders core platform grants you access to the real leaders community and the digital tools to grow your impact.",
-      buttonText: "GET STARTED"
+      buttonText: "GET VERIFIED"
     },
     {
      
@@ -317,7 +314,7 @@ const HeroSection = () => {
       subtitle: "MAKE YOUR MARK",
       title: "SHARE YOUR SIGNATURE STORY",
       description: "Get help with publishing your signature story that made you start your business and inspire leaders around the world.",
-      buttonText: "GET STARTED"
+      buttonText: "GET VERIFIED"
     },
     {
      
@@ -336,23 +333,7 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, [contentSlides.length]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        } else if (prev.days > 0) {
-          return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
-        }
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#fff9f9', fontFamily: 'Outfit, sans-serif' }}>
@@ -491,69 +472,17 @@ const HeroSection = () => {
                 ))}
               </div>
             </div>
+
+            
+
           </div>
         </div>
 
-        {/* Early Registration Section */}
-        <div className="text-white pb-8 px-6 mt-8 lg:mt-[140px]">
-          <div className="flex flex-col items-center lg:items-start lg:flex-row lg:justify-start gap-6 lg:gap-8 lg:ml-[270px]">
-            <h3 
-              className="heroSubtilepage"
-              style={{ fontSize:50 }}
-            >
-              EARLY REGISTRATION
-            </h3>
-            
-            {/* Timer */}
-            <div className="flex gap-4 lg:gap-6">
-              {[
-                { value: timeRemaining.days, label: "DAYS" },
-                { value: timeRemaining.hours, label: "HRS" },
-                { value: timeRemaining.minutes, label: "MIN" }
-              ].map((item, index) => (
-                <div key={index} className="flex flex-col lg:flex-row gap-2 lg:gap-5 items-center">
-                  <div className="flex gap-1 lg:gap-2 justify-center">
-                    {item.value.toString().padStart(2, "0").split("").map((digit, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 lg:w-[76px] lg:h-[76px] rounded-lg border-2 border-[#efc0c0] backdrop-blur-[15px]"
-                        style={{
-                          backgroundColor: "rgba(255, 249, 249, 0.2)",
-                        }}
-                      >
-                        <span
-                          className="font-medium"
-                          style={{
-                            fontFamily: "Outfit, sans-serif",
-                            fontSize: "50px",
-                            lineHeight: "100%",
-                          }}
-                        >
-                          {digit}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="heroSubtilepage" style={{fontSize:30}}>
-                    {item.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Register Button */}
-            <button 
-              className="px-4 py-2 lg:px-8 lg:py-4 heroPageButton flex items-center gap-2 lg:gap-3"
-              style={{fontSize:30, color:"#CF3232"}}
-            >
-              <p className='heroSubtilepage text-sm lg:text-3xl' style={{fontSize:30}}>REGISTER NOW</p>
-              <Image src={images.heroPageBtnRightToggle} alt='' className='h-5 w-5 lg:h-[30px] lg:w-[30px] mt-1 lg:mt-[9px]'/>
-            </button>
-          </div>
-        </div>
+       
+       
+</div>
       </div>
-    </div>
+    
   );
 };
 
