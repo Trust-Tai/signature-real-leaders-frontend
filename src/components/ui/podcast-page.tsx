@@ -3,7 +3,8 @@
 // import { images } from "@/assets";
 // import Image from "next/image";
 
-// const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
+// const cn = (...classes: Array<string | number | false | null | undefined>) =>
+//   classes.filter((c): c is string | number => Boolean(c)).join(' ');
 
 // interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 //   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
@@ -94,16 +95,7 @@
 //     },
 //   ];
 
-//   const getCategoryColor = (category: string) => {
-//     const colors = {
-//       "PERSONAL FINANCE": "text-gray-600",
-//       "GROWTH": "text-gray-600", 
-//       "WORK/LIFE": "text-gray-600",
-//       "READY, SET, GOAL": "text-gray-600",
-//       "DAILY WELLNESS": "text-gray-600",
-//     };
-//     return colors[category as keyof typeof colors] || "text-gray-600";
-//   };
+  
 
 //   return (
 //     <div className="min-h-screen py-20" style={{backgroundColor: '#f9efef'}}>
@@ -116,13 +108,13 @@
 //             </h2>
 //             <p className="font-outift font-medium text-[#333333B2] mb-[45]" style={{ fontSize: '18px', lineHeight: '26px'}}>
 //               The Real Leaders Podcast provides real, fresh, and inspiring experiences 
-//               from the world's most forward-thinking impact business CEOs, leadership 
+//               from the world&apos;s most forward-thinking impact business CEOs, leadership 
 //               authors, and thought leaders. Each episode will leave you with a page-full 
 //               of notes on how to lead the future of work.
 //             </p>
 //             <Button 
 //               size="lg"
-//               className="bg-red-500 hover:bg-red-600 text-white font-bold text-sm tracking-wider uppercase"
+//               className="bg-[#CF3232] firstVerifyScreenButton text-white text-sm tracking-wider uppercase"
 //               style={{
 //                 width: '233px',
 //                 height: '64px',
@@ -130,7 +122,9 @@
 //                 paddingTop: '22px',
 //                 paddingRight: '80px',
 //                 paddingBottom: '22px',
-//                 paddingLeft: '80px'
+//                 paddingLeft: '80px',
+//                  fontFamily: "Abolition Test",
+//                  fontSize:26
 //               }}
 //             >
 //               SUBSCRIBE
@@ -139,13 +133,14 @@
 
 //           {/* Right Podcast Grid */}
 //           <div className="lg:col-span-8 ml-[121]">
-//             <div className="grid grid-cols-3 gap-[50] ">
+//             <div className="grid grid-cols-3 gap-[50]">
 //               {podcasts.map((podcast) => (
 //                 <div
 //                   key={podcast.id}
-//                   className="group   overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
-//                   style={{width: '220px', height: '354px',background:"#f9efef"}}
+//                   className="group flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+//                   style={{width: '220px', height: '354px', background:"#f9efef"}}
 //                 >
+//                   {/* Image Section */}
 //                   <div className="relative overflow-hidden" style={{width: '220px', height: '220px'}}>
 //                     <Image
 //                       src={podcast.thumbnail}
@@ -154,26 +149,30 @@
 //                     />
 //                     <div className="absolute inset-0 bg-black/20"></div>
 //                   </div>
-//                   <div>
-//                    <span className='text-[#333333] font-outift ml-[5]'  style={{fontSize:11}}>
+                  
+//                   {/* Content Section - Flexible height */}
+//                   <div className="flex flex-col flex-1 justify-between mt-[15]">
+//                     {/* Top Content */}
+//                     <div>
+//                       <span className='text-[#333333] font-outift block mb-[6]' style={{fontSize:11}}>
 //                         {podcast.category}
 //                       </span>
-//  </div>
-//                   <div className=" space-y-2" style={{height: '115px'}}>
-//                     <h3 className="font-outift text-[#333333] ml-[5]" style={{fontSize:16}}>
-//                       {podcast.title}
-//                     </h3>
+//                       <h3 className="font-outift text-[#333333]" style={{fontSize:16}}>
+//                         {podcast.title}
+//                       </h3>
+//                     </div>
                     
-                     
-                   
-//                     <Button 
-//                       size="sm"
-//                       className="font-outift text-[#333333] rounded-lg  mt-2 ml-[5]"
-//                       style={{height: '32px', fontSize: '10px', background:"#f9efef",color:"black",border: "1px solid #828282"}}
-//                     >
-//                       <Play className="h-3 w-3 mr-1 " />
-//                       WATCH &nbsp; {podcast.duration}
-//                     </Button>
+//                     {/* Button at Bottom */}
+//                     <div className="mt-auto pt-2">
+//                       <Button 
+//                         size="sm"
+//                         className="font-outift text-[#333333] rounded-lg"
+//                         style={{height: '32px', fontSize: '10px', background:"#f9efef", color:"black", border: "1px solid #828282"}}
+//                       >
+//                         <Play className="h-3 w-3 mr-1" />
+//                         WATCH  {podcast.duration}
+//                       </Button>
+//                     </div>
 //                   </div>
 //                 </div>
 //               ))}
@@ -181,11 +180,12 @@
 //           </div>
 //         </div>
 //       </div>
-//     </div>
-//   );
-// };
+//       </div>
+//     );
+//   };
 
 // export default PodcastSection;
+
 
 import * as React from "react"
 import { Play } from 'lucide-react';
@@ -284,82 +284,115 @@ const PodcastSection = () => {
     },
   ];
 
-  
-
   return (
-    <div className="min-h-screen py-20" style={{backgroundColor: '#f9efef'}}>
-      <div className="container mx-auto px-6">
-        <div className="grid lg:grid-cols-12 gap-16 items-start">
+    <div className="min-h-screen py-8 sm:py-12 md:py-16 lg:py-20" style={{backgroundColor: '#f9efef'}}>
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-start">
           {/* Left Content */}
-          <div className="lg:col-span-4 space-y-6">
-            <h2 className="heroSubtilepage mb-[35]" style={{fontSize:80,color:"#333333"}}>
+          <div className="lg:col-span-4 space-y-4 sm:space-y-6 text-center lg:text-left">
+            <h2 
+              className="heroSubtilepage font-bold leading-none"
+              style={{
+                fontSize: 'clamp(40px, 8vw, 80px)',
+                color: "#333333"
+              }}
+            >
               PODCASTS
             </h2>
-            <p className="font-outift font-medium text-[#333333B2] mb-[45]" style={{ fontSize: '18px', lineHeight: '26px'}}>
+            <p 
+              className="font-outfit font-medium text-[#333333B2] max-w-md mx-auto lg:mx-0"
+              style={{ 
+                fontSize: 'clamp(16px, 2vw, 18px)', 
+                lineHeight: '1.5'
+              }}
+            >
               The Real Leaders Podcast provides real, fresh, and inspiring experiences 
               from the world&apos;s most forward-thinking impact business CEOs, leadership 
               authors, and thought leaders. Each episode will leave you with a page-full 
               of notes on how to lead the future of work.
             </p>
-            <Button 
-              size="lg"
-              className="bg-[#CF3232] firstVerifyScreenButton text-white text-sm tracking-wider uppercase"
-              style={{
-                width: '233px',
-                height: '64px',
-                borderRadius: '5px',
-                paddingTop: '22px',
-                paddingRight: '80px',
-                paddingBottom: '22px',
-                paddingLeft: '80px',
-                 fontFamily: "Abolition Test",
-                 fontSize:26
-              }}
-            >
-              SUBSCRIBE
-            </Button>
+            <div className="flex justify-center lg:justify-start">
+              <Button 
+                size="lg"
+                className="bg-[#CF3232] firstVerifyScreenButton text-white tracking-wider uppercase font-bold"
+                style={{
+                  width: 'clamp(180px, 40vw, 233px)',
+                  height: 'clamp(48px, 8vw, 64px)',
+                  borderRadius: '5px',
+                  fontFamily: "Abolition Test",
+                  fontSize: 'clamp(16px, 3vw, 26px)'
+                }}
+              >
+                SUBSCRIBE
+              </Button>
+            </div>
           </div>
 
           {/* Right Podcast Grid */}
-          <div className="lg:col-span-8 ml-[121]">
-            <div className="grid grid-cols-3 gap-[50]">
+          <div className="lg:col-span-8 lg:ml-8 xl:ml-16 2xl:ml-[121px]">
+            {/* Mobile: Single column, Tablet: 2 columns, Desktop: 3 columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-[50px] place-items-center">
               {podcasts.map((podcast) => (
                 <div
                   key={podcast.id}
-                  className="group flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
-                  style={{width: '220px', height: '354px', background:"#f9efef"}}
+                  className="group flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 w-full max-w-[280px] sm:max-w-none"
+                  style={{
+                    width: 'clamp(250px, 100%, 220px)', 
+                    height: 'auto',
+                    minHeight: 'clamp(320px, 60vw, 354px)',
+                    background: "#f9efef"
+                  }}
                 >
                   {/* Image Section */}
-                  <div className="relative overflow-hidden" style={{width: '220px', height: '220px'}}>
+                  <div 
+                    className="relative overflow-hidden w-full aspect-square"
+                    style={{
+                      maxHeight: 'clamp(250px, 40vw, 220px)'
+                    }}
+                  >
                     <Image
                       src={podcast.thumbnail}
                       alt={podcast.title}
                       className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-black/20"></div>
                   </div>
                   
-                  {/* Content Section - Flexible height */}
-                  <div className="flex flex-col flex-1 justify-between mt-[15]">
+                  {/* Content Section */}
+                  <div className="flex flex-col flex-1 justify-between p-3 sm:p-4 lg:p-0 lg:mt-[15px]">
                     {/* Top Content */}
-                    <div>
-                      <span className='text-[#333333] font-outift block mb-[6]' style={{fontSize:11}}>
+                    <div className="mb-3 sm:mb-4">
+                      <span 
+                        className='text-[#333333] font-outfit block mb-2'
+                        style={{fontSize: 'clamp(10px, 2vw, 11px)'}}
+                      >
                         {podcast.category}
                       </span>
-                      <h3 className="font-outift text-[#333333]" style={{fontSize:16}}>
+                      <h3 
+                        className="font-outfit text-[#333333] leading-tight"
+                        style={{fontSize: 'clamp(14px, 3vw, 16px)'}}
+                      >
                         {podcast.title}
                       </h3>
                     </div>
                     
                     {/* Button at Bottom */}
-                    <div className="mt-auto pt-2">
+                    <div className="mt-auto">
                       <Button 
                         size="sm"
-                        className="font-outift text-[#333333] rounded-lg"
-                        style={{height: '32px', fontSize: '10px', background:"#f9efef", color:"black", border: "1px solid #828282"}}
+                        className="font-outfit text-[#333333] rounded-lg w-full sm:w-auto"
+                        style={{
+                          height: 'clamp(28px, 6vw, 32px)', 
+                          fontSize: 'clamp(9px, 2vw, 10px)', 
+                          background: "#f9efef", 
+                          color: "black", 
+                          border: "1px solid #828282"
+                        }}
                       >
                         <Play className="h-3 w-3 mr-1" />
-                        WATCH  {podcast.duration}
+                        WATCH {podcast.duration}
                       </Button>
                     </div>
                   </div>
@@ -369,8 +402,8 @@ const PodcastSection = () => {
           </div>
         </div>
       </div>
-      </div>
-    );
-  };
+    </div>
+  );
+};
 
 export default PodcastSection;
