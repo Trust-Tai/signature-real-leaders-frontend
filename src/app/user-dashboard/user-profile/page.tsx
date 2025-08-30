@@ -51,7 +51,7 @@ export default function UserProfile() {
           className="w-full h-full bg-cover bg-center bg-no-repeat ">
         <Image src={images.profileBgImage} alt='' className='w-full'style={{opacity:'0.08',height:"1250px"}}/>
         </div>
-        <div className="absolute inset-0  opacity-60"></div>
+        <div className="absolute inset-0  bg-black/20"></div>
       </div>
 
       {/* Header */}
