@@ -37,7 +37,15 @@ import h1Fifth from "./images/h1img2.png"
 import h1Sixth from "./images/h1img1.png"
 import realLeadersWhite from "./images/realLeadersWhite.png"
 import heroLine from "./images/lineHero.png"
+import profileBgImage from "./images/profileBgImage.jpg"
+import userProfileImage from "./images/user-prfoile-image.png"
+import userProileReel from "./images/user-profile-reel.png"
+import profileSinature from "./images/profile-signature.png"
 export const images ={
+  profileSinature:profileSinature,
+  userProileReel:userProileReel,
+  userProfileImage:userProfileImage,
+  profileBgImage:profileBgImage,
 verifyPageLefBgImage: verifyPageLefBgImage,
 heroLine:heroLine,
 h1Third:h1Third,

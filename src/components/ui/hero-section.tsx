@@ -293,7 +293,7 @@ const HeroSection = () => {
       subtitle: "THE WORLD'S LEADERS",
       title: "ONE PLATFORM",
       description: "It's hard to find business leaders who believe they can solve the world's challenges.",
-      buttonText: "GET ACCESS"
+      buttonText: "GET VERIFIED"
     },
     {
      
@@ -321,7 +321,7 @@ const HeroSection = () => {
       subtitle: "EMPOWER YOUR PEOPLE",
       title: "TO BUILD THE BRAND",
       description: "Turn Every Team Member Into a Trusted Voice",
-      buttonText: "GET ACCESS"
+      buttonText: "GET VERIFIED"
     }
   ];
 
@@ -395,7 +395,7 @@ const HeroSection = () => {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-start px-6 lg:ml-[250px] lg:mt-[200px] mt-24">
+        <div className="flex-1 flex items-center justify-start px-6 lg:ml-[250px] lg:mt-[100px]">
           <div className="text-white w-full lg:w-auto">
             {/* Content Stack for Mobile/Tablet, Side by Side for Desktop */}
             <div className="lg:flex lg:items-center lg:justify-between lg:w-full">

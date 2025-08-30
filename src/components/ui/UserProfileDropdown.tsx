@@ -68,9 +68,9 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50]">
             <Link
-              href="/user-dashboard/profile"
+              href="/user-dashboard/user-profile"
               className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
