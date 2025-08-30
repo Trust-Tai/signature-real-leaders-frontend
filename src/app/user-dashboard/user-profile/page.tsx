@@ -49,9 +49,9 @@ export default function UserProfile() {
       <div className="absolute inset-0">
         <div 
           className="w-full h-full bg-cover bg-center bg-no-repeat ">
-        <Image src={images.profileBgImage} alt='' className='w-full'style={{opacity:'0.08',height:"1250px"}}/>
+        <Image src={images.profileBgImage} alt='' className='w-full'style={{height:"1440px"}}/>
         </div>
-        <div className="absolute inset-0  bg-black/20"></div>
+        <div className="absolute inset-0  bg-black/92 h-[1440px]"></div>
       </div>
 
       {/* Header */}
