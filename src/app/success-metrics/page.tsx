@@ -29,11 +29,13 @@ const SuccessMetricsPage = () => {
     { id: 1, title: 'Claim Your Signature', status: 'completed' },
     { id: 2, title: 'Verification', status: 'completed' },
     { id: 3, title: 'Your Information', status: 'completed' },
-    { id: 4, title: 'Your Audience', status: 'completed' },
-    { id: 5, title: 'Your Success Metrics', status: 'current' },
-    { id: 6, title: 'Your Links', status: 'pending' },
-    { id: 7, title: 'Sign', status: 'pending' },
-    { id: 8, title: 'Review in Progress', status: 'pending' }
+    { id: 4, title: 'Newsletter Setup', status: 'completed' },
+    { id: 5, title: 'Profile Template', status: 'completed' },
+    { id: 6, title: 'Your Audience', status: 'completed' },
+    { id: 7, title: 'Your Success Metrics', status: 'current' },
+    { id: 8, title: 'Your Links', status: 'pending' },
+    { id: 9, title: 'Sign', status: 'pending' },
+    { id: 10, title: 'Review in Progress', status: 'pending' }
   ];
 
   return (

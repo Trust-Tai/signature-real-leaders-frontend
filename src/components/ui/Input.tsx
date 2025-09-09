@@ -7,6 +7,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   label?: string;
   error?: string;
   className?: string;
+  labelClassName?: string;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -15,6 +16,7 @@ const Input: React.FC<InputProps> = ({
   label,
   error,
   className,
+  labelClassName,
   ...props
 }) => {
   const baseClasses = 'w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed input-text';
@@ -34,7 +36,7 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-white mb-2">
+        <label className={cn("block text-sm font-medium mb-2", labelClassName ?? 'text-white')}>
           {label}
         </label>
       )}
