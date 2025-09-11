@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Bell, User, TrendingUp, TrendingDown, Calendar, Menu } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
+import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
 
 const BookingThisMonth = () => {
@@ -85,6 +86,7 @@ const BookingThisMonth = () => {
                     16
                   </span>
                 </div>
+                <UserProfileDropdown userName="Richard Branson" />
               </div>
             </div>
           </div>

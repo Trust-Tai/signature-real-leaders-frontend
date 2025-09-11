@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import {  Bell, User, Menu,  Calendar, Users, Globe, Monitor, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { UserProfileSidebar, StatsCards } from '@/components';
+import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 
 const AudienceDemographics = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -104,6 +105,7 @@ const AudienceDemographics = () => {
                     16
                   </span>
                 </div>
+                <UserProfileDropdown userName="Richard Branson" />
               </div>
             </div>
           </div>

@@ -3,8 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X, Calendar, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon } from 'lucide-react';
+import { X, Calendar, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon, Users } from 'lucide-react';
 import { images } from '@/assets';
+import UserProfileDropdown from './UserProfileDropdown';
 
 interface UserProfileSidebarProps {
   sidebarOpen: boolean;
@@ -21,7 +22,8 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   const sidebarItems = [
     { icon: LayoutDashboardIcon, label: 'Dashboard', path: '/user-dashboard', page: 'user-dashboard' },
     { icon: Calendar, label: 'Bookings This Month', path: '/user-dashboard/booking-this-month', page: 'booking-this-month' },
-    { icon: Mail, label: 'Email Subscribers', path: '/user-dashboard/email-subscribers', page: 'email-subscribers' },
+    { icon: Mail, label: 'Newsletter Subscribers', path: '/user-dashboard/email-subscribers', page: 'email-subscribers' },
+    { icon: Users, label: 'Followers', path: '/user-dashboard/followers', page: 'followers' },
     { icon: Eye, label: 'Page Views', path: '/user-dashboard/page-views', page: 'page-views' },
     { icon: Send, label: 'Total Link Clicks', path: '/user-dashboard/total-link-clicks', page: 'total-link-clicks' },
     { icon: SquarePlus, label: 'Audience Demographics', path: '/user-dashboard/audience-demographics', page: 'audience-demographics' }
@@ -56,8 +58,13 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
         {/* Sidebar Header Logo */}
         <div className="p-6">
-          <div className="flex items-center space-x-2">
-            <Image src={images.realLeaders} alt='' />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Image src={images.realLeaders} alt='' />
+            </div>
+            <div className="lg:hidden">
+              <UserProfileDropdown userName="Richard Branson" />
+            </div>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight, X } from 'lucide-react';
 import Image from 'next/image';
 import { images } from '@/assets';
 import FooterBanner from '@/components/ui/home-page-footer';
@@ -9,6 +9,53 @@ import { useRouter } from "next/navigation";
 export default function UserProfile() {
     const router = useRouter()
   const [emailSubscribed, setEmailSubscribed] = useState(false);
+  const [newsletterModalOpen, setNewsletterModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    surname: '',
+    age: '',
+    occupation: '',
+    email: ''
+  });
+ 
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return formData.name.trim() !== '' && 
+           formData.surname.trim() !== '' && 
+           formData.age.trim() !== '' && 
+           formData.occupation.trim() !== '' && 
+           formData.email.trim() !== '';
+  };
+
+  // Handle checkbox click
+  const handleNewsletterClick = () => {
+    setNewsletterModalOpen(true);
+  };
+
+  // Handle form input changes
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle form submission
+  const handleFormSubmit = () => {
+    if (isFormValid()) {
+      setEmailSubscribed(true);
+      
+      setNewsletterModalOpen(false);
+      // Here you would typically send the data to your backend
+      console.log('Newsletter signup data:', formData);
+    }
+  };
+
+  // Handle follow button click
+  const handleFollow = () => {
+   
+  };
 
   const profileButtons = [
     { 
@@ -171,7 +218,7 @@ export default function UserProfile() {
                 type="checkbox"
                 id="newsletter"
                 checked={emailSubscribed}
-                onChange={(e) => setEmailSubscribed(e.target.checked)}
+                onChange={handleNewsletterClick}
                 className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded mt-[5] focus:ring-red-500 flex-shrink-0"
               />
               <label 
@@ -191,14 +238,16 @@ export default function UserProfile() {
             </div>
 
  <button 
-              className="w-full bg-[#CF3232]  transition-colors duration-200 text-white rounded-lg mb-4"
+              onClick={handleFollow}
+             
+              className={`w-full transition-colors duration-200 text-white rounded-lg mb-4 bg-[#CF3232] hover:bg-red-600 cursor-pointer `}
               style={{
                 height: '60px',
                 fontSize:"25px",
                 fontFamily:"Abolition Test"
               }}
             >
-              FOLLOW
+              FOLLOW 
             </button>
             {/* 
            
@@ -221,6 +270,133 @@ export default function UserProfile() {
           </div>
         </div>
       </div>
+
+      {/* Newsletter Signup Modal */}
+      {newsletterModalOpen && (
+        <div 
+          className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+          onClick={() => setNewsletterModalOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
+                  Join Our Newsletter
+                </h2>
+                <button
+                  onClick={() => setNewsletterModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4">
+              <p className="text-gray-600 text-sm mb-4">
+                Please fill in your details to join our newsletter and follow Richard Branson.
+              </p>
+              
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-[#101117] mb-2">
+                  First Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter your first name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                />
+              </div>
+
+              {/* Surname */}
+              <div>
+                <label className="block text-sm font-medium text-[#101117] mb-2">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter your last name"
+                  value={formData.surname}
+                  onChange={(e) => handleInputChange('surname', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                />
+              </div>
+
+              {/* Age */}
+              <div>
+                <label className="block text-sm font-medium text-[#101117] mb-2">
+                  Age *
+                </label>
+                <input
+                  type="number"
+                  placeholder="Enter your age"
+                  value={formData.age}
+                  onChange={(e) => handleInputChange('age', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                />
+              </div>
+
+              {/* Occupation */}
+              <div>
+                <label className="block text-sm font-medium text-[#101117] mb-2">
+                  Occupation *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter your occupation"
+                  value={formData.occupation}
+                  onChange={(e) => handleInputChange('occupation', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-[#101117] mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-gray-200 flex gap-3">
+              <button
+                onClick={() => setNewsletterModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFormSubmit}
+                disabled={!isFormValid()}
+                className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                  isFormValid()
+                    ? 'bg-[#CF3232] text-white hover:bg-red-600'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Join Newsletter
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <FooterBanner />
     </div>
   );

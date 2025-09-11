@@ -7,6 +7,7 @@ interface StatsCard {
   description: string;
   color?: string;
   icon?: React.ReactNode;
+  smallText?: boolean; // For smaller text on location cards
 }
 
 interface StatsCardsProps {
@@ -44,7 +45,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({
           {/* Number and label on left side */}
           <div className="mb-4">
             <h3 
-              className="text-3xl sm:text-5xl font-bold text-[#101117] mb-1" 
+              className={`font-bold text-[#101117] mb-1 ${card.smallText ? 'text-lg sm:text-xl' : 'text-3xl sm:text-5xl'}`}
               style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}
             >
               {card.number}

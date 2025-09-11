@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter } from 'lucide-react';
+import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
+import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
 
 interface Subscriber {
@@ -18,6 +19,7 @@ const EmailSubscribers = () => {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [addSubscriberModalOpen, setAddSubscriberModalOpen] = useState(false);
   const [editSubscriberModalOpen, setEditSubscriberModalOpen] = useState(false);
+  const [espModalOpen, setEspModalOpen] = useState(false);
   const [editingSubscriber, setEditingSubscriber] = useState<Subscriber | null>(null);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -28,6 +30,12 @@ const EmailSubscribers = () => {
     name: '',
     email: '',
     status: 'Active'
+  });
+  const [espConnection, setEspConnection] = useState({
+    provider: '',
+    apiKey: '',
+    listId: '',
+    connected: false
   });
 
   const subscribersData = [
@@ -103,9 +111,18 @@ const EmailSubscribers = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `email-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
+  };
+
+  const handleEspConnection = () => {
+    if (espConnection.provider && espConnection.apiKey && espConnection.listId) {
+      setEspConnection({...espConnection, connected: true});
+      setEspModalOpen(false);
+      // Here you would typically make an API call to connect to the ESP
+      console.log('Connecting to ESP:', espConnection);
+    }
   };
 
   return (
@@ -133,7 +150,7 @@ const EmailSubscribers = () => {
               </button>
               
               <h1 className="text-[#101117] text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                Email Subscribers
+                Newsletter Subscribers
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -142,7 +159,7 @@ const EmailSubscribers = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input 
                   type="text" 
-                  placeholder="Search subscribers..." 
+                  placeholder="Search newsletter subscribers..." 
                   className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-48 md:w-64 font-outfit"
                   style={{ color: '#949494' }}
                 />
@@ -161,6 +178,7 @@ const EmailSubscribers = () => {
                     16
                   </span>
                 </div>
+                <UserProfileDropdown userName="Richard Branson" />
               </div>
             </div>
           </div>
@@ -191,7 +209,18 @@ const EmailSubscribers = () => {
                 className="bg-[#CF3232] text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add New Subscriber</span>
+                <span>Add New Newsletter Subscriber</span>
+              </button>
+              <button 
+                onClick={() => setEspModalOpen(true)}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2 ${
+                  espConnection.connected 
+                    ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200' 
+                    : 'bg-white text-[#CF3232] border border-[#CF3232] hover:bg-red-50'
+                }`}
+              >
+                <LinkIcon className="w-4 h-4" />
+                <span>{espConnection.connected ? 'ESP Connected' : 'Link ESP'}</span>
               </button>
               <button 
                 onClick={handleExportSubscribers}
@@ -270,7 +299,7 @@ const EmailSubscribers = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-gray-100">
                 <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">
-                  Subscriber List
+                  Newsletter Subscriber List
                 </h2>
               </div>
               
@@ -337,7 +366,7 @@ const EmailSubscribers = () => {
               <div className="p-4 sm:p-6 border-t border-gray-100">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <p className="text-sm text-gray-600 text-center sm:text-left">
-                    Showing 1 to 8 of 3,220 subscribers
+                    Showing 1 to 8 of 3,220 newsletter subscribers
                   </p>
                   <div className="flex items-center space-x-2">
                     <button className="p-2 hover:bg-gray-100 rounded">
@@ -369,7 +398,7 @@ const EmailSubscribers = () => {
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                      Filter Subscribers
+                      Filter Newsletter Subscribers
                     </h2>
                     <button
                       onClick={() => setFilterModalOpen(false)}
@@ -475,7 +504,7 @@ const EmailSubscribers = () => {
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                      Add New Subscriber
+                      Add New Newsletter Subscriber
                     </h2>
                     <button
                       onClick={() => setAddSubscriberModalOpen(false)}
@@ -547,7 +576,7 @@ const EmailSubscribers = () => {
                     onClick={handleAddSubscriber}
                     className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
                   >
-                    Add Subscriber
+                    Add Newsletter Subscriber
                   </button>
                 </div>
               </div>
@@ -568,7 +597,7 @@ const EmailSubscribers = () => {
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                      Edit Subscriber
+                      Edit Newsletter Subscriber
                     </h2>
                     <button
                       onClick={() => setEditSubscriberModalOpen(false)}
@@ -640,7 +669,115 @@ const EmailSubscribers = () => {
                     onClick={handleUpdateSubscriber}
                     className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
                   >
-                    Update Subscriber
+                    Update Newsletter Subscriber
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ESP Connection Modal */}
+          {espModalOpen && (
+            <div 
+              className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+              onClick={() => setEspModalOpen(false)}
+            >
+              <div 
+                className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
+                      Link Email Service Provider
+                    </h2>
+                    <button
+                      onClick={() => setEspModalOpen(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 space-y-6">
+                  {/* ESP Provider */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#101117] mb-3">
+                      Email Service Provider
+                    </label>
+                    <select
+                      value={espConnection.provider}
+                      onChange={(e) => setEspConnection({...espConnection, provider: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
+                    >
+                      <option value="" className="text-[#101117]">Select ESP Provider</option>
+                      <option value="mailchimp" className="text-[#101117]">Mailchimp</option>
+                      <option value="constant-contact" className="text-[#101117]">Constant Contact</option>
+                      <option value="aweber" className="text-[#101117]">AWeber</option>
+                      <option value="convertkit" className="text-[#101117]">ConvertKit</option>
+                      <option value="activecampaign" className="text-[#101117]">ActiveCampaign</option>
+                      <option value="sendinblue" className="text-[#101117]">Sendinblue</option>
+                    </select>
+                  </div>
+
+                  {/* API Key */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#101117] mb-3">
+                      API Key
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Enter your API key..."
+                      value={espConnection.apiKey}
+                      onChange={(e) => setEspConnection({...espConnection, apiKey: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                    />
+                  </div>
+
+                  {/* List ID */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#101117] mb-3">
+                      List ID
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter your list ID..."
+                      value={espConnection.listId}
+                      onChange={(e) => setEspConnection({...espConnection, listId: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                    />
+                  </div>
+
+                  {/* Connection Status */}
+                  {espConnection.connected && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                        <span className="text-green-800 text-sm font-medium">
+                          Successfully connected to {espConnection.provider}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-gray-200 flex gap-3">
+                  <button
+                    onClick={() => setEspModalOpen(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleEspConnection}
+                    disabled={!espConnection.provider || !espConnection.apiKey || !espConnection.listId}
+                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    {espConnection.connected ? 'Update Connection' : 'Connect ESP'}
                   </button>
                 </div>
               </div>
