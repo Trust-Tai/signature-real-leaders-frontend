@@ -342,7 +342,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className="hidden xl:block fixed top-4 left-4 z-50 hover:opacity-80 transition-opacity"
           >
             <Image
-              src={images.sideToolBar}
+              src={images.sideToolBarBlack}
               alt="Expand sidebar"
               className="w-8 h-[22px] cursor-pointer"
             />

@@ -15,7 +15,7 @@ const MobileSidebarToggle: React.FC<MobileSidebarToggleProps> = ({ onToggle, cla
       aria-label="Toggle mobile sidebar"
     >
       <Image
-        src={images.sideToolBar}
+        src={images.sideToolBarBlack}
         alt="Sidebar toggle"
         className="w-8 h-8 cursor-pointer"
       />

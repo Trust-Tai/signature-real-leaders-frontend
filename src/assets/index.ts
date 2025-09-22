@@ -41,8 +41,10 @@ import profileBgImage from "./images/profileBgImage.jpg"
 import userProfileImage from "./images/user-prfoile-image.png"
 import userProileReel from "./images/user-profile-reel.png"
 import profileSinature from "./images/profile-signature.png"
+import sideToolBarBlack from "./images/burger_black.png"
 export const images ={
   profileSinature:profileSinature,
+  sideToolBarBlack:sideToolBarBlack,
   userProileReel:userProileReel,
   userProfileImage:userProfileImage,
   profileBgImage:profileBgImage,
