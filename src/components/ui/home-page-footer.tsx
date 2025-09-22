@@ -135,7 +135,7 @@ const FooterBanner = () => {
           
           {/* Button - Responsive */}
           <button 
-            onClick={() => router.push("/name-verification")}
+            onClick={() => router.push("/profile-verification")}
             className="text-white mb-2 sm:mb-3 md:mb-4 hover:bg-gray-800 transition-colors inline-flex items-center justify-center px-2 sm:px-6 md:px-8"
             style={{
               backgroundColor: '#1A1B20',

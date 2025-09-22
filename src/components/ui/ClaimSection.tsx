@@ -36,9 +36,9 @@ const ClaimSection: React.FC<ClaimSectionProps> = ({
   };
 
   return (
-    <div className={cn("text-center space-y-6 sm:space-y-8 px-4", className)}>
+    <div className={cn("text-center space-y-6 sm:space-y-8 px-4 animate-fade-in-up", className)}>
       {/* Section Heading */}
-      <h2 className="section-title">
+      <h2 className="section-title animate-fade-in-down">
         {title}
       </h2>
 
@@ -46,12 +46,12 @@ const ClaimSection: React.FC<ClaimSectionProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Desktop: Input with button inside */}
         <div className="hidden xl:block">
-          <div className="firstVerifyScreen flex">
+          <div className="firstVerifyScreen flex group">
             <input
               type="text"
               value={value || ''}
               onChange={handleInputChange}
-              className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-gray-700 rounded-lg focus:outline-none transition-all duration-200 font-outfit firstVerifyScreenInput"
+              className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-gray-700 rounded-lg focus:outline-none transition-all duration-300 font-outfit firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
               placeholder={placeholder}
               required
               style={{border:"none"}}
@@ -59,7 +59,7 @@ const ClaimSection: React.FC<ClaimSectionProps> = ({
             <button
               type="submit"
               disabled={!value}
-              className="firstVerifyScreenButton"
+              className="firstVerifyScreenButton font-abolition text-[24px] transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
             >
               {buttonText}
             </button>
@@ -69,12 +69,12 @@ const ClaimSection: React.FC<ClaimSectionProps> = ({
         {/* Mobile/Tablet: Input and button separate */}
         <div className="xl:hidden">
           {/* Input Field */}
-          <div className="firstVerifyScreen">
+          <div className="firstVerifyScreen group">
             <input
               type="text"
               value={value || ''}
               onChange={handleInputChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-700 rounded-lg focus:outline-none transition-all duration-200 font-outfit firstVerifyScreenInput"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-700 rounded-lg focus:outline-none transition-all duration-300 font-outfit firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
               placeholder={placeholder}
               required
               style={{border:"none"}}
@@ -86,7 +86,7 @@ const ClaimSection: React.FC<ClaimSectionProps> = ({
             <button
               type="submit"
               disabled={!value}
-              className="firstVerifyScreenButton"
+              className="firstVerifyScreenButton transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
             >
               {buttonText}
             </button>
@@ -95,7 +95,7 @@ const ClaimSection: React.FC<ClaimSectionProps> = ({
 
         {/* Error Message */}
         {error && (
-          <p className="text-custom-red text-sm font-outfit">{error}</p>
+          <p className="text-custom-red text-sm font-outfit animate-fade-in">{error}</p>
         )}
       </form>
     </div>

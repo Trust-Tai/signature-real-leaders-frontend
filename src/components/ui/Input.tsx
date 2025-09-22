@@ -19,12 +19,12 @@ const Input: React.FC<InputProps> = ({
   labelClassName,
   ...props
 }) => {
-  const baseClasses = 'w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed input-text';
+  const baseClasses = 'w-full rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed input-text transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl';
   
   const variants = {
-    default: 'border-gray-300 bg-white text-gray-900 focus:border-custom-red focus:ring-custom-red placeholder:text-gray-500',
-    verification: 'border-custom-red-border bg-white text-gray-900 focus:border-custom-red focus:ring-custom-red text-center font-mono text-lg',
-    outline: 'border-2 border-gray-600 bg-transparent text-white focus:border-custom-red focus:ring-custom-red placeholder:text-gray-400'
+    default: 'border-gray-300 bg-white text-gray-900 focus:border-custom-red focus:ring-custom-red placeholder:text-gray-500 hover:border-gray-400 hover:shadow-gray-200/50 focus:shadow-custom-red/25',
+    verification: 'border-custom-red-border bg-white text-gray-900 focus:border-custom-red focus:ring-custom-red text-center font-mono text-lg hover:border-red-400 hover:shadow-red-200/50 focus:shadow-custom-red/25',
+    outline: 'border-2 border-gray-600 bg-transparent text-white focus:border-custom-red focus:ring-custom-red placeholder:text-gray-400 hover:border-gray-500 hover:shadow-white/10 focus:shadow-custom-red/25'
   };
   
   const sizes = {

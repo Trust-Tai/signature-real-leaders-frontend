@@ -16,7 +16,7 @@ const RightImageSection: React.FC<RightImageSectionProps> = ({
   
   return (
     <div className={cn(
-      "hidden xl:block xl:w-[320px] flex-shrink-0 bg-gradient-to-l from-blue-400 to-blue-300 relative overflow-hidden min-h-screen",
+      "hidden xl:block xl:w-[320px] flex-shrink-0 bg-gradient-to-l from-blue-400 to-blue-300 relative overflow-hidden min-h-screen group",
       
     )} style={style}>
        <Image
@@ -24,7 +24,7 @@ const RightImageSection: React.FC<RightImageSectionProps> = ({
           alt="Right Section"
           
           className={cn(
-      "object-cover w-full h-screen",
+      "object-cover w-full h-screen transition-transform duration-1000 ease-in-out group-hover:rotate-12 group-hover:scale-110",
       className
     )}
         />

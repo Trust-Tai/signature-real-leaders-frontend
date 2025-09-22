@@ -494,21 +494,21 @@ const SignSection: React.FC<SignSectionProps> = ({
   };
 
   return (
-    <div className={cn("text-center space-y-8 px-4", className)}>
+    <div className={cn("text-center space-y-8 px-4 animate-fade-in-up", className)}>
       {/* Section Heading */}
-      <h2 className="section-title">
+      <h2 className="section-title animate-fade-in-down">
         Add Your Signature to Lead with Intention
       </h2>
 
       {/* Form Fields */}
       <div className="space-y-6">
         {/* Signature Input Container */}
-        <div className="relative mx-auto w-full max-w-2xl" style={{ height: '186px' }}>
+        <div className="relative mx-auto w-full max-w-2xl group" style={{ height: '186px' }}>
           {/* Conditional Rendering: Draw box (canvas) or Image Display */}
           {formData.uploadedImage ? (
             /* Show uploaded image */
             <div 
-              className="w-full h-full flex items-center justify-center bg-white relative"
+              className="w-full h-full flex items-center justify-center bg-white relative transform hover:scale-[1.02] transition-all duration-300"
               style={{ 
                 border: '10px solid #CF323240',
                 borderRadius: '6px'
@@ -525,7 +525,7 @@ const SignSection: React.FC<SignSectionProps> = ({
               {/* Clear/Remove image button */}
               <button
                 onClick={() => handleInputChange('uploadedImage', null)}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-all duration-300 transform hover:scale-110"
               >
                 ×
               </button>
@@ -535,7 +535,7 @@ const SignSection: React.FC<SignSectionProps> = ({
             <div className='firstVerifyScreen' style={{height:185, position: 'relative'}}>
               <canvas
                 ref={canvasRef}
-                className="w-full h-full bg-white rounded-[6px]"
+                className="w-full h-full bg-white rounded-[6px] transition-all duration-300 group-hover:shadow-lg"
                 style={{ touchAction: 'none' }} // Disable touch scrolling on canvas
                 onMouseDown={(e) => startDrawing(e.clientX, e.clientY)}
                 onMouseMove={(e) => draw(e.clientX, e.clientY)}
@@ -551,7 +551,7 @@ const SignSection: React.FC<SignSectionProps> = ({
                 <button
                   type="button"
                   onClick={clearSignature}
-                  className="absolute top-2 right-2 rounded px-2 py-1 text-xs transition-colors"
+                  className="absolute top-2 right-2 rounded px-2 py-1 text-xs transition-all duration-300 transform hover:scale-110"
                   style={{ backgroundColor: '#CF3232', color: '#FFFFFF' }}
                 >
                   Clear
@@ -572,7 +572,7 @@ const SignSection: React.FC<SignSectionProps> = ({
           {/* Upload Button - Bottom Right */}
           <button 
             onClick={handleUploadClick}
-            className="absolute bottom-5 right-5 flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm"
+            className="absolute bottom-5 right-5 flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-all duration-300 shadow-sm transform hover:scale-105 hover:-translate-y-1"
           >
             <Upload size={16} color="#8B8B8B" />
             <span className="text-sm text-gray-600 font-outfit">Upload</span>
@@ -580,48 +580,48 @@ const SignSection: React.FC<SignSectionProps> = ({
         </div>
 
         {/* Description Text */}
-        <p className="font-outfit font-medium max-w-2xl mx-auto leading-relaxed text-start px-4" 
+        <p className="font-outfit font-medium max-w-2xl mx-auto leading-relaxed text-start px-4 animate-fade-in" 
           style={{ fontSize: '16px', color: "#00000099" }}>
           By signing below, you confirm your details and agree to be featured as a verified contributor.
         </p>
 
         {/* Options */}
         <div className="space-y-4 max-w-2xl mx-auto text-left px-4 mb-[45]">
-          <label className="flex items-start space-x-3 cursor-pointer">
+          <label className="flex items-start space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={formData.confirmInfo}
               onChange={(e) => handleInputChange('confirmInfo', e.target.checked)}
-              className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2"
+              className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2 transition-all duration-300 transform group-hover:scale-110"
               style={{ accentColor: '#CF3232' }}
             />
-            <span className="font-outfit font-medium text-sm sm:text-base" style={{color:"#00000099"}}>
+            <span className="font-outfit font-medium text-sm sm:text-base transition-colors duration-300 group-hover:text-gray-700" style={{color:"#00000099"}}>
               I confirm all information provided is accurate.
             </span>
           </label>
 
-          <label className="flex items-start space-x-3 cursor-pointer">
+          <label className="flex items-start space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={formData.giveConsent}
               onChange={(e) => handleInputChange('giveConsent', e.target.checked)}
-              className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2"
+              className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2 transition-all duration-300 transform group-hover:scale-110"
               style={{ accentColor: '#CF3232' }}
             />
-            <span className="font-outfit font-medium text-sm sm:text-base" style={{color:"#00000099"}}>
+            <span className="font-outfit font-medium text-sm sm:text-base transition-colors duration-300 group-hover:text-gray-700" style={{color:"#00000099"}}>
               I give consent to feature my name and contributions.
             </span>
             </label>
 
-          <label className="flex items-start space-x-3 cursor-pointer">
+          <label className="flex items-start space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={formData.agreeTerms}
               onChange={(e) => handleInputChange('agreeTerms', e.target.checked)}
-              className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2"
+              className="mt-1 w-5 h-5 text-custom-red border-2 border-gray-300 rounded focus:ring-custom-red focus:ring-2 transition-all duration-300 transform group-hover:scale-110"
               style={{ accentColor: '#CF3232' }}
             />
-            <span className="font-outfit font-medium text-sm sm:text-base" style={{color:"#00000099"}}>
+            <span className="font-outfit font-medium text-sm sm:text-base transition-colors duration-300 group-hover:text-gray-700" style={{color:"#00000099"}}>
               I agree to the Terms of Use and Privacy Policy.
             </span>
           </label>
@@ -631,7 +631,7 @@ const SignSection: React.FC<SignSectionProps> = ({
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
-          className="custom-btn my-3 w-full"
+          className="custom-btn my-3 w-full transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
           style={{width:"100%"}}
         >
           Confirm & Submit Signature
@@ -639,7 +639,7 @@ const SignSection: React.FC<SignSectionProps> = ({
 
         {/* Error Message */}
         {error && (
-          <p className="text-custom-red text-sm font-outfit">{error}</p>
+          <p className="text-custom-red text-sm font-outfit animate-fade-in">{error}</p>
         )}
       </div>
     </div>

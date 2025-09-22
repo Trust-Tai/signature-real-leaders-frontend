@@ -191,15 +191,15 @@ const ProfileTemplateSection: React.FC<ProfileTemplateSectionProps> = ({ onSubmi
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full animate-fade-in-up">
       <div className="mb-6">
-        <h2 className="section-title text-white text-center">Choose your profile template</h2>
-        <p className="text-center mt-2 font-outfit" style={{ color: '#333333' }}>Pick a style. You can change this later.</p>
+        <h2 className="section-title text-white text-center animate-fade-in-down">Choose your profile template</h2>
+        <p className="text-center mt-2 font-outfit animate-fade-in" style={{ color: '#333333' }}>Pick a style. You can change this later.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          {templates.map((t) => {
+          {templates.map((t, index) => {
             const Icon = t.icon;
             const isActive = selectedTemplate === t.id;
             return (
@@ -210,7 +210,8 @@ const ProfileTemplateSection: React.FC<ProfileTemplateSectionProps> = ({ onSubmi
                   setSelectedTemplate(t.id);
                   setExpandedTemplate(prev => (prev === t.id ? null : t.id));
                 }}
-                className={`w-full relative rounded-xl border ${isActive ? 'border-green-500' : 'border-white/10'} p-5 bg-gradient-to-br ${t.preview.container} hover:border-white/30 transition-colors flex flex-col items-center text-center`}
+                className={`w-full relative rounded-xl border ${isActive ? 'border-green-500' : 'border-white/10'} p-5 bg-gradient-to-br ${t.preview.container} hover:border-white/30 transition-all duration-300 flex flex-col items-center text-center transform hover:scale-105 hover:-translate-y-2 active:scale-95 animate-fade-in-up`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Selection tick on right side */}
                 <div className="absolute top-3 right-3">
@@ -242,7 +243,7 @@ const ProfileTemplateSection: React.FC<ProfileTemplateSectionProps> = ({ onSubmi
         <div className="flex justify-center pt-4">
           <button
             type="submit"
-            className="custom-btn"
+            className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
             disabled={!selectedTemplate}
           >
             NEXT

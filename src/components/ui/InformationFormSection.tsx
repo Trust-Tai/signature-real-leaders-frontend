@@ -16,6 +16,7 @@ interface FormData {
   industry: string;
   numberOfEmployees: string;
   contactEmailListSize: string;
+  about:string
 }
 
 const InformationFormSection: React.FC<InformationFormSectionProps> = ({
@@ -30,7 +31,8 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
     companyWebsite: '',
     industry: '',
     numberOfEmployees: '',
-    contactEmailListSize: ''
+    contactEmailListSize: '',
+    about: '' // 👈 default empty
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -47,9 +49,9 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
   const isFormValid = Object.values(formData).every(value => value.trim() !== '');
 
   return (
-    <div className={cn("text-center space-y-8", className)}>
+    <div className={cn("text-center space-y-8 animate-fade-in-up", className)}>
       {/* Section Heading */}
-      <h2 className="section-title">
+      <h2 className="section-title animate-fade-in-down">
         ENTER YOUR INFORMATION
       </h2>
 
@@ -57,22 +59,22 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
       <div className="space-y-6">
         {/* Row 1: First Name & Last Name */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-          <div className='firstVerifyScreen'>
+          <div className='firstVerifyScreen group'>
           <input
             type="text"
             value={formData.firstName}
             onChange={(e) => handleInputChange('firstName', e.target.value)}
-            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             style={{ color: '#949494' }}
             placeholder="First Name"
           />
           </div>
-          <div className='firstVerifyScreen'>
+          <div className='firstVerifyScreen group'>
           <input
             type="text"
             value={formData.lastName}
             onChange={(e) => handleInputChange('lastName', e.target.value)}
-            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             style={{ color: '#949494' }}
             placeholder="Last Name"
           />
@@ -81,22 +83,22 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
 
         {/* Row 2: Company Name & Company Website */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-           <div className='firstVerifyScreen'>
+           <div className='firstVerifyScreen group'>
           <input
             type="text"
             value={formData.companyName}
             onChange={(e) => handleInputChange('companyName', e.target.value)}
-            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             style={{ color: '#949494' }}
             placeholder="Company Name"
           />
           </div>
-           <div className='firstVerifyScreen'>
+           <div className='firstVerifyScreen group'>
           <input
             type="url"
             value={formData.companyWebsite}
             onChange={(e) => handleInputChange('companyWebsite', e.target.value)}
-            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 firstVerifyScreenInput"
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             style={{ color: '#949494' }}
             placeholder="Company Website"
           />
@@ -105,11 +107,11 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
 
         {/* Row 3: Industry & Number of Employees */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-          <div className="relative firstVerifyScreen">
+          <div className="relative firstVerifyScreen group">
             <select
               value={formData.industry}
               onChange={(e) => handleInputChange('industry', e.target.value)}
-              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10 select-custom-color"
+              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             >
               <option value="">Industry</option>
               <option value="Technology">Technology</option>
@@ -121,14 +123,14 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
               <option value="Consulting">Consulting</option>
               <option value="Other">Other</option>
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
           </div>
           
-          <div className="relative firstVerifyScreen">
+          <div className="relative firstVerifyScreen group">
             <select
               value={formData.numberOfEmployees}
               onChange={(e) => handleInputChange('numberOfEmployees', e.target.value)}
-              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10 select-custom-color"
+              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             >
               <option value="">Number of Employees</option>
               <option value="1-10">1-10</option>
@@ -138,16 +140,16 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
               <option value="501-1000">501-1000</option>
               <option value="1000+">1000+</option>
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
           </div>
         </div>
 
         {/* Row 4: Contact Email List Size */}
-        <div className="relative firstVerifyScreen">
+        <div className="relative firstVerifyScreen group">
           <select
             value={formData.contactEmailListSize}
             onChange={(e) => handleInputChange('contactEmailListSize', e.target.value)}
-            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10 select-custom-color"
+            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
           >
             <option value="">Contact email list size</option>
             <option value="0-100">0-100</option>
@@ -157,21 +159,30 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
             <option value="5001-10000">5001-10000</option>
             <option value="10000+">10000+</option>
           </select>
-          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
         </div>
 
+ <div className="firstVerifyScreen group" style={{height:"200px"}}>
+          <textarea
+            value={formData.about}
+            onChange={(e) => handleInputChange('about', e.target.value)}
+            className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+            style={{ color: '#949494',height:"180px" }}
+            placeholder="Tell us a little about yourself and what you do..."
+          />
+        </div>
         {/* Submit Button */}
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
-          className="custom-btn"
+          className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
         >
           CONTINUE
         </button>
 
         {/* Error Message */}
         {error && (
-          <p className="text-custom-red text-sm font-outfit">{error}</p>
+          <p className="text-custom-red text-sm font-outfit animate-fade-in">{error}</p>
         )}
       </div>
 
@@ -219,3 +230,190 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
 };
 
 export default InformationFormSection;
+
+
+// import React, { useState } from 'react';
+// import { cn } from '@/lib/utils';
+// import { ChevronDown } from 'lucide-react';
+
+// interface InformationFormSectionProps {
+//   onSubmit: (data: FormData) => void;
+//   className?: string;
+//   error?: string;
+// }
+
+// interface FormData {
+//   firstName: string;
+//   lastName: string;
+//   companyName: string;
+//   companyWebsite: string;
+//   industry: string;
+//   numberOfEmployees: string;
+//   contactEmailListSize: string;
+//   about: string; // 👈 नया field
+// }
+
+// const InformationFormSection: React.FC<InformationFormSectionProps> = ({
+//   onSubmit,
+//   className,
+//   error
+// }) => {
+//   const [formData, setFormData] = useState<FormData>({
+//     firstName: '',
+//     lastName: '',
+//     companyName: '',
+//     companyWebsite: '',
+//     industry: '',
+//     numberOfEmployees: '',
+//     contactEmailListSize: '',
+//     about: '' // 👈 default empty
+//   });
+
+//   const handleInputChange = (field: keyof FormData, value: string) => {
+//     setFormData(prev => ({
+//       ...prev,
+//       [field]: value
+//     }));
+//   };
+
+//   const handleSubmit = () => {
+//     onSubmit(formData);
+//   };
+
+//   const isFormValid = Object.values(formData).every(value => value.trim() !== '');
+
+//   return (
+//     <div className={cn("text-center space-y-8 animate-fade-in-up", className)}>
+//       {/* Section Heading */}
+//       <h2 className="section-title animate-fade-in-down">
+//         ENTER YOUR INFORMATION
+//       </h2>
+
+//       <div className="space-y-6">
+//         {/* Row 1: First & Last Name */}
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10px]">
+//           <input
+//             type="text"
+//             value={formData.firstName}
+//             onChange={(e) => handleInputChange('firstName', e.target.value)}
+//             className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg"
+//             style={{ color: '#949494' }}
+//             placeholder="First Name"
+//           />
+//           <input
+//             type="text"
+//             value={formData.lastName}
+//             onChange={(e) => handleInputChange('lastName', e.target.value)}
+//             className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg"
+//             style={{ color: '#949494' }}
+//             placeholder="Last Name"
+//           />
+//         </div>
+
+//         {/* Row 2: Company Name & Website */}
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10px]">
+//           <input
+//             type="text"
+//             value={formData.companyName}
+//             onChange={(e) => handleInputChange('companyName', e.target.value)}
+//             className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg"
+//             style={{ color: '#949494' }}
+//             placeholder="Company Name"
+//           />
+//           <input
+//             type="url"
+//             value={formData.companyWebsite}
+//             onChange={(e) => handleInputChange('companyWebsite', e.target.value)}
+//             className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg"
+//             style={{ color: '#949494' }}
+//             placeholder="Company Website"
+//           />
+//         </div>
+
+//         {/* Row 3: Industry & Employees */}
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10px]">
+//           <div className="relative group">
+//             <select
+//               value={formData.industry}
+//               onChange={(e) => handleInputChange('industry', e.target.value)}
+//               className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none pr-10 transform hover:scale-[1.02] hover:shadow-lg"
+//             >
+//               <option value="">Industry</option>
+//               <option value="Technology">Technology</option>
+//               <option value="Healthcare">Healthcare</option>
+//               <option value="Finance">Finance</option>
+//               <option value="Education">Education</option>
+//               <option value="Retail">Retail</option>
+//               <option value="Manufacturing">Manufacturing</option>
+//               <option value="Consulting">Consulting</option>
+//               <option value="Other">Other</option>
+//             </select>
+//             <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+//           </div>
+
+//           <div className="relative group">
+//             <select
+//               value={formData.numberOfEmployees}
+//               onChange={(e) => handleInputChange('numberOfEmployees', e.target.value)}
+//               className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none pr-10 transform hover:scale-[1.02] hover:shadow-lg"
+//             >
+//               <option value="">Number of Employees</option>
+//               <option value="1-10">1-10</option>
+//               <option value="11-50">11-50</option>
+//               <option value="51-200">51-200</option>
+//               <option value="201-500">201-500</option>
+//               <option value="501-1000">501-1000</option>
+//               <option value="1000+">1000+</option>
+//             </select>
+//             <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+//           </div>
+//         </div>
+
+//         {/* Row 4: Contact Email List Size */}
+//         <div className="relative group">
+//           <select
+//             value={formData.contactEmailListSize}
+//             onChange={(e) => handleInputChange('contactEmailListSize', e.target.value)}
+//             className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none pr-10 transform hover:scale-[1.02] hover:shadow-lg"
+//           >
+//             <option value="">Contact email list size</option>
+//             <option value="0-100">0-100</option>
+//             <option value="101-500">101-500</option>
+//             <option value="501-1000">501-1000</option>
+//             <option value="1001-5000">1001-5000</option>
+//             <option value="5001-10000">5001-10000</option>
+//             <option value="10000+">10000+</option>
+//           </select>
+//           <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+//         </div>
+
+//         {/* Row 5: About / Note */}
+//         <div className="firstVerifyScreen group">
+//           <textarea
+//             value={formData.about}
+//             onChange={(e) => handleInputChange('about', e.target.value)}
+//             className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+//             style={{ color: '#949494' }}
+//             placeholder="Tell us a little about yourself and what you do..."
+//           />
+//         </div>
+
+//         {/* Submit Button */}
+//         <button
+//           onClick={handleSubmit}
+//           disabled={!isFormValid}
+//           className="custom-btn w-full transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
+//         >
+//           CONTINUE
+//         </button>
+
+//         {/* Error Message */}
+//         {error && (
+//           <p className="text-custom-red text-sm font-outfit animate-fade-in">{error}</p>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default InformationFormSection;

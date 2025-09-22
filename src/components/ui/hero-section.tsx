@@ -428,7 +428,7 @@ const HeroSection = () => {
                   <button 
                     className="px-4 py-2 lg:px-8 lg:py-4 heroPageButton flex items-center gap-2 lg:gap-3"
                     style={{fontSize:30, color:"#CF3232"}}
-                    onClick={()=>router.push("/name-verification")}
+                    onClick={()=>router.push("/profile-verification")}
                   >
                     <p className='heroSubtilepage text-sm lg:text-3xl' style={{fontSize:30}}>{contentSlides[currentSlide].buttonText}</p>
                     <Image src={images.heroPageBtnRightToggle} alt='' className='h-5 w-5 lg:h-[30px] lg:w-[30px] mt-1 lg:mt-[9px]'/>

@@ -41,9 +41,9 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
   const isFormValid = Object.values(formData).every(value => value.trim() !== '');
 
   return (
-    <div className={cn("text-center space-y-8", className)}>
+    <div className={cn("text-center space-y-8 animate-fade-in-up", className)}>
       {/* Section Heading */}
-      <h2 className="section-title">
+      <h2 className="section-title animate-fade-in-down">
         DEFINE YOUR SUCCESS
       </h2>
 
@@ -51,11 +51,11 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
       <div className="space-y-6">
         {/* Row 1: Number of Bookings & Email List Size */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[10px] gap-y-[16px]">
-          <div className="relative firstVerifyScreen" >
+          <div className="relative firstVerifyScreen group" >
             <select
               value={formData.numberOfBookings}
               onChange={(e) => handleInputChange('numberOfBookings', e.target.value)}
-              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10"
+              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
              
             >
               <option value="">Number of Bookings</option>
@@ -66,14 +66,14 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
               <option value="501-1000">501-1000</option>
               <option value="1000+">1000+</option>
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
           </div>
           
-          <div className="relative firstVerifyScreen" >
+          <div className="relative firstVerifyScreen group" >
             <select
               value={formData.emailListSize}
               onChange={(e) => handleInputChange('emailListSize', e.target.value)}
-              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10"
+              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
              
             >
               <option value="">Email List Size</option>
@@ -84,17 +84,17 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
               <option value="5001-10000">5001-10000</option>
               <option value="10000+">10000+</option>
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
           </div>
         </div>
 
         {/* Row 2: Amount in Sales & Amount in Donations */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[10px] gap-y-[16px]">
-          <div className="relative firstVerifyScreen" >
+          <div className="relative firstVerifyScreen group" >
             <select
               value={formData.amountInSales}
               onChange={(e) => handleInputChange('amountInSales', e.target.value)}
-              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10"
+              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             
             >
               <option value="">Amount in Sales</option>
@@ -105,14 +105,14 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
               <option value="500k-1m">$500K - $1M</option>
               <option value="1m+">$1M+</option>
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
           </div>
           
-          <div className="relative firstVerifyScreen" >
+          <div className="relative firstVerifyScreen group" >
             <select
               value={formData.amountInDonations}
               onChange={(e) => handleInputChange('amountInDonations', e.target.value)}
-              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-200 appearance-none firstVerifyScreenInput pr-10"
+              className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             
             >
               <option value="">Amount in Donations</option>
@@ -123,7 +123,7 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
               <option value="50k-100k">$50K - $100K</option>
               <option value="100k+">$100K+</option>
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
           </div>
         </div>
 
@@ -131,14 +131,14 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
-          className="custom-btn"
+          className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
         >
           CONTINUE
         </button>
 
         {/* Error Message */}
         {error && (
-          <p className="text-custom-red text-sm font-outfit">{error}</p>
+          <p className="text-custom-red text-sm font-outfit animate-fade-in">{error}</p>
         )}
       </div>
 

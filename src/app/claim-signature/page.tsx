@@ -21,7 +21,7 @@ const FirstScreen = () => {
   const handleVerify = (inputName: string) => {
     console.log('Verifying name:', inputName);
     if(inputName !== ""){
-      router.push("/email-verification");
+      router.push("/profile-verification");
     }
   };
 
@@ -50,7 +50,7 @@ const FirstScreen = () => {
       )}
 
       {/* Section 1: Left Sidebar - Hidden on mobile/tablet, shown on desktop */}
-      <div className="hidden xl:block xl:w-[320px] xl:flex-shrink-0">
+      <div className="h-full">
         <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage}/>
       </div>
 

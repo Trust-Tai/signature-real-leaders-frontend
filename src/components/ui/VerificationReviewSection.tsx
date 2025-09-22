@@ -11,22 +11,22 @@ const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
 }) => {
    const router = useRouter();
   return (
-    <div className={`min-h-screen flex items-start justify-center p-4 sm:p-8 ${className || ''}`} 
+    <div className={`min-h-screen flex items-start justify-center p-4 sm:p-8 animate-fade-in-up ${className || ''}`} 
         style={{marginTop:150}} >
       <div className="text-center space-y-6 sm:space-y-8 max-w-2xl px-4">
         
         {/* Target Icon */}
-        <div className="flex justify-center mb-8 sm:mb-12">
+        <div className="flex justify-center mb-8 sm:mb-12 animate-fade-in-down">
            <Image
                     src={images.reviewVerified}
                     alt="Review verified"
-                    className="w-16 h-16 sm:w-20 sm:h-20 lg:w-[144px] lg:h-[134px]"
+                    className="w-16 h-16 sm:w-20 sm:h-20 lg:w-[144px] lg:h-[134px] animate-pulse"
                   />
         </div>
 
         {/* Main Heading */}
         <div className="space-y-4 sm:space-y-6">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold leading-tight" 
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold leading-tight animate-fade-in" 
               style={{ 
                 color: '#CF3232',
                 fontFamily: "Abolition Test",
@@ -40,12 +40,12 @@ const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
           
           {/* Subtitle Text */}
           <div className="space-y-2 sm:space-y-3">
-            <p className="text-sm sm:text-base leading-relaxed font-outfit font-medium"  style={{ 
+            <p className="text-sm sm:text-base leading-relaxed font-outfit font-medium animate-fade-in"  style={{ 
                 color: '#333333CC'
               }}>
               Your information is under review to ensure verified leadership.
             </p>
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-outfit font-medium" style={{ 
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-outfit font-medium animate-fade-in" style={{ 
                 color: '#333333'
               }}>
               You will receive an email when your link is available.
@@ -56,7 +56,7 @@ const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
          <button
           type="submit"
           onClick={()=>router.push("/user-dashboard")}
-          className="custom-btn"
+          className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 animate-fade-in"
         >
            ACCESS DASHBOARD FOR KEVIN
         </button>
