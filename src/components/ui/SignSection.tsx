@@ -329,11 +329,13 @@ interface SignSectionProps {
 }
 
 interface SignFormData {
-  signature: string;
+  signature: string | null;
   confirmInfo: boolean;
   giveConsent: boolean;
   agreeTerms: boolean;
   uploadedImage: string | null;
+  signatureFile: File | null;
+  uploadedImageFile: File | null;
 }
 
 const SignSection: React.FC<SignSectionProps> = ({
@@ -342,11 +344,13 @@ const SignSection: React.FC<SignSectionProps> = ({
   error
 }) => {
   const [formData, setFormData] = useState({
-    signature: '',
+    signature: null,
     confirmInfo: false,
     giveConsent: false,
     agreeTerms: false,
-    uploadedImage: null
+    uploadedImage: null,
+    signatureFile: null,
+    uploadedImageFile: null
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -354,7 +358,7 @@ const SignSection: React.FC<SignSectionProps> = ({
   const isDrawingRef = useRef<boolean>(false);
   const [hasDrawn, setHasDrawn] = useState(false);
 
-  const handleInputChange = (field: string, value: string | boolean | string | null) => {
+  const handleInputChange = (field: string, value: string | boolean | string | null | File) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -373,6 +377,7 @@ const SignSection: React.FC<SignSectionProps> = ({
       reader.onload = (e) => {
         const imageDataUrl = e.target?.result as string;
         handleInputChange('uploadedImage', imageDataUrl);
+        handleInputChange('uploadedImageFile', file);
         console.log('Image uploaded successfully:', file.name);
       };
       reader.readAsDataURL(file);
@@ -385,7 +390,8 @@ const SignSection: React.FC<SignSectionProps> = ({
     onSubmit(formData);
   };
 
-  const isFormValid = formData.confirmInfo && formData.giveConsent && formData.agreeTerms;
+  const isFormValid = formData.confirmInfo && formData.giveConsent && formData.agreeTerms && 
+    (formData.signatureFile || formData.uploadedImageFile);
 
   const setupCanvasForDpr = () => {
     const canvas = canvasRef.current;
@@ -455,12 +461,21 @@ const SignSection: React.FC<SignSectionProps> = ({
     isDrawingRef.current = false;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    // Save drawn signature as data URL
+    // Save drawn signature as data URL and convert to File
     try {
       const dataUrl = canvas.toDataURL('image/png');
       handleInputChange('signature', dataUrl);
-    } catch {
-      console.warn('Unable to export signature image');
+      
+      // Convert dataURL to File
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], 'signature.png', { type: 'image/png' });
+          handleInputChange('signatureFile', file);
+          console.log('Signature converted to file:', file.name, file.size, 'bytes');
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.warn('Unable to export signature image:', error);
     }
   };
 
@@ -470,7 +485,8 @@ const SignSection: React.FC<SignSectionProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    handleInputChange('signature', '');
+    handleInputChange('signature', null);
+    handleInputChange('signatureFile', null);
     setHasDrawn(false);
   };
 
@@ -524,7 +540,10 @@ const SignSection: React.FC<SignSectionProps> = ({
               />
               {/* Clear/Remove image button */}
               <button
-                onClick={() => handleInputChange('uploadedImage', null)}
+                onClick={() => {
+                  handleInputChange('uploadedImage', null);
+                  handleInputChange('uploadedImageFile', null);
+                }}
                 className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-all duration-300 transform hover:scale-110"
               >
                 ×

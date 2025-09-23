@@ -111,12 +111,13 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
        check your email for your Real Leaders access code
       </p>
         
-         <button
+        <button
           type="submit"
-          // disabled={!isValidEmail}
-          className="custom-btn mt-4 mb-0"
+          className="custom-btn mt-4 mb-0 disabled:opacity-50"
+          disabled={isLoading}
+          aria-busy={isLoading}
         >
-          VERIFY AND CONTINUE
+          {isLoading ? 'VERIFYING...' : 'VERIFY AND CONTINUE'}
         </button>
 
         {error && (
@@ -131,11 +132,12 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
     onClick={onResendCode}
     disabled={isLoading}
     className=""
+    aria-busy={isLoading}
   >
     <span className="font-outfit font-normal transition-colors duration-200" style={{fontSize:15, color: '#656060'}}>
       Didn&apos;t receive the code?{' '}
       <span className="font-outfit font-medium hover:text-custom-red transition-colors duration-200" style={{fontSize:15, color: '#000000'}}>
-        [Resend]
+        {isLoading ? '[Resending...]' : '[Resend]'}
       </span>
     </span>
   </button>

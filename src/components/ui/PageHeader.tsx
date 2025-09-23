@@ -11,8 +11,9 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ 
   title, 
   highlightWord,
-  className 
+  className
 }) => {
+
   const renderTitle = () => {
     if (!highlightWord) {
       return <span className="text-gray-800 header-title">{title}</span>;

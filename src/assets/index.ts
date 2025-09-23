@@ -42,6 +42,8 @@ import userProfileImage from "./images/user-prfoile-image.png"
 import userProileReel from "./images/user-profile-reel.png"
 import profileSinature from "./images/profile-signature.png"
 import sideToolBarBlack from "./images/burger_black.png"
+import hubspotIcon from "./icons/hubspotIcon.png"
+import mailchimpIcon from "./icons/mailchimpIcon.png"
 export const images ={
   profileSinature:profileSinature,
   sideToolBarBlack:sideToolBarBlack,
@@ -73,8 +75,9 @@ heroPageBtnRightToggle:heroPageBtnRightToggle,
 eventPageGif:eventPageGif,
 h1First:h1First,
 h1Second:h1Second,
-realLeadersWhite:realLeadersWhite
-
+realLeadersWhite:realLeadersWhite,
+hubspotIcon:hubspotIcon,
+mailchimpIcon:mailchimpIcon
 }
 // Fonts (if needed)
 export const FONTS = {

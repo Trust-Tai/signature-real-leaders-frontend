@@ -5,12 +5,14 @@ interface EmailVerificationSectionProps {
   onSendCode: (email: string) => void;
   className?: string;
   error?: string;
+  isLoading?: boolean;
 }
 
 const EmailVerificationSection: React.FC<EmailVerificationSectionProps> = ({
   onSendCode,
   className,
-  error
+  error,
+  isLoading = false
 }) => {
   const [email, setEmail] = useState('');
 
@@ -47,16 +49,18 @@ const EmailVerificationSection: React.FC<EmailVerificationSectionProps> = ({
             className="px-4 py-3 w-full text-gray-700 rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
             placeholder="Enter your email..."
             required
+            disabled={!!isLoading}
+            aria-busy={!!isLoading}
           />
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={!isValidEmail}
+          disabled={!isValidEmail || !!isLoading}
           className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
         >
-          SEND VERIFICATION CODE
+          {isLoading ? 'SENDING...' : 'SEND VERIFICATION CODE'}
         </button>
 
         {/* Error Message */}
