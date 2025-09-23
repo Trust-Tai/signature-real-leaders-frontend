@@ -65,7 +65,7 @@ const ProfileVerificationPage = () => {
   const renderCurrentStep = () => {
     console.log('renderCurrentStep called with currentStep:', currentStep);
     switch (currentStep) {
-      case 4:
+      case 1:
         return (
           <ClaimSection
             title="CLAIM YOUR SIGNATURE"
@@ -123,7 +123,7 @@ const ProfileVerificationPage = () => {
           />
         );
       
-      case 1:
+      case 4:
         return (
           <NewsletterSetupSection
             onSubmit={() => {
