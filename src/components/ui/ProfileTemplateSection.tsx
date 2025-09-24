@@ -15,7 +15,7 @@ const ProfileTemplateSection: React.FC<ProfileTemplateSectionProps> = ({ onSubmi
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const { setState } = useOnboarding();
-
+console.log("remoteTemplates",remoteTemplates)
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -105,8 +105,8 @@ const ProfileTemplateSection: React.FC<ProfileTemplateSectionProps> = ({ onSubmi
                     </div>
                   </div>
 
-                  <Image src={t.image_url} alt={t.title} width={200} height={160} className="w-full h-40 object-cover rounded-md" style={{height:'100%'}}/>
-                  <p className="text-white mt-2 text-sm">{t.title}</p>
+                  <Image src={t?.image_url} alt={t?.title} width={200} height={160} className="w-full h-40 object-cover rounded-md" style={{height:'100%'}}/>
+                  <p className="text-white mt-2 text-sm">{t?.title}</p>
                 </button>
               );
             })}

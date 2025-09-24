@@ -41,7 +41,7 @@ const EmailVerificationSection: React.FC<EmailVerificationSectionProps> = ({
 
       {/* Email Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className='firstVerifyScreen w-[609px] mx-auto group'>
+        <div className='firstVerifyScreen  mx-auto group'>
           <input
             type="email"
             value={email}

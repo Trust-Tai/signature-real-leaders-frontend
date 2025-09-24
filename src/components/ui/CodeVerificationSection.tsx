@@ -90,7 +90,7 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
               className={cn(
                 "text-center font-bold font-mono  transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-custom-red/20",
                 // Mobile sizes
-                "w-12 h-12 sm:w-14 sm:h-14 text-xl sm:text-2xl",
+                "w-[50px] h-[50px] sm:w-14 sm:h-14 text-xl sm:text-2xl",
                 // Desktop sizes (xl and above)
                 "xl:w-16 xl:h-20 xl:text-2xl",
                 // Mobile border

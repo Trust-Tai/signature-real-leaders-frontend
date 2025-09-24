@@ -85,7 +85,7 @@ const VerificationCodeInput: React.FC<VerificationCodeInputProps> = ({
             onFocus={() => handleFocus(index)}
             onPaste={handlePaste}
             className={cn(
-              "w-12 h-12 text-center text-xl font-bold font-mono rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-custom-red/20",
+              "w-[50px] h-[50px] sm:w-14 sm:h-14 xl:w-16 xl:h-20 text-center text-xl font-bold font-mono rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-custom-red/20",
               focusedIndex === index 
                 ? "text-custom-red bg-white" 
                 : "text-gray-400 bg-white",

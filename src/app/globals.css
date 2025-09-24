@@ -186,7 +186,7 @@ body {
      border-color: #efc0c0;
     display: flex;
     align-items: center;
-    border: clamp(6px, 1.5vw, 10px) solid rgba(207, 50, 50, 0.25);
+    border: clamp(4px, 1vw, 8px) solid rgba(207, 50, 50, 0.25);
 }
 
 .firstVerifyScreenInput{
@@ -198,7 +198,7 @@ body {
   color: #949494;
   font-style: normal;
   background: #FFFFFF;
-  height: 70px;
+  height: clamp(50px, 9vw, 70px);
 }
 
 .firstVerifyScreenButton{

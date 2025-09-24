@@ -23,6 +23,7 @@ import {
 import { OnboardingProvider, useOnboarding } from '@/components/OnboardingContext';
 import { api } from '@/lib/api';
 import { images } from "../../assets/index";
+import { ArrowLeft } from 'lucide-react';
 
 const InnerProfileVerificationPage = () => {
  
@@ -393,23 +394,22 @@ const InnerProfileVerificationPage = () => {
       {/* Section 2: Middle Content - Takes remaining width */}
       <MainContent>
         {/* Back Button - Top Left of MainContent */}
-        {currentStep >= 2 && (
+       
+
+        <>
+         {currentStep >= 2 && !isMobileMenuOpen && (
           <button
             type="button"
             aria-label="Go back"
             onClick={prevStep}
-            className="absolute top-4 left-4 z-50 p-2 inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg"
+            className="flex gap-[5px] items-center mt-[10px] ml-[10px] cursor-pointer"
           >
-            <span className="h-5 w-5 inline-block" aria-hidden>
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5">
-                <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <span className="text-sm font-medium text-[#33333]">Back</span>
+            <ArrowLeft color="#000000" />
+            <div className="font-outfit font-medium text-[#333333]">Back</div>
           </button>
         )}
-
         <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
+
           <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] ${
             currentStep === 3 || currentStep === 7 || currentStep === 5? 'max-w-[870px]' : 'max-w-2xl'
           }`}>
@@ -427,7 +427,9 @@ const InnerProfileVerificationPage = () => {
             {/* Current Step Component */}
             {renderCurrentStep()}
           </div>
+
         </div>
+        </>
       </MainContent>
 
       {/* Section 3: Right Image Section - Hidden on mobile/tablet, shown on desktop */}

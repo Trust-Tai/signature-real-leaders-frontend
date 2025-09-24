@@ -28,7 +28,7 @@ const AudienceDescriptionSection: React.FC<AudienceDescriptionSectionProps> = ({
       </h2>
 
      
-      <p className="font-outfit mx-auto leading-relaxed text-center px-4 animate-fade-in" style={{ color: '#333333B2', fontSize: 18, fontWeight: 400, width: 485 }}>
+      <p className="font-outfit mx-auto leading-relaxed text-center px-4 animate-fade-in" style={{ color: '#333333B2', fontSize: 18, fontWeight: 400, width: 'clamp(280px, 90vw, 485px)' }}>
        Describe Your Target Audience(s) who you want to reach such as industry, job title, age, location, and pain points.
       </p>
 
