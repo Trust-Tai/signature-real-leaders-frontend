@@ -31,6 +31,7 @@ import UptrendCanvas from '@/components/ui/UptrendCanvas';
 import { NewsletterConnections } from '@/components/ui/NewsletterConnections';
 import SignatureAnimation from '@/components/ui/SignatureAnimation';
 import { AnimatedAudience } from '@/components/ui/AnimatedAudience';
+import AudienceAnimation from '@/components/ui/BrandHandleAnimation';
 
 const InnerProfileVerificationPage = () => {
   const searchParams = useSearchParams();
@@ -386,6 +387,7 @@ const InnerProfileVerificationPage = () => {
       case 2.5:
         return <InteractiveFollowCard />;
       case 3:
+        return <AudienceAnimation />
       case 8:
        return <InteractiveMagazineCards />;
       case 6:
@@ -407,6 +409,14 @@ const InnerProfileVerificationPage = () => {
 
   const getRightImageStyle = () => {
     switch (currentStep) {
+      case 3:
+        return{
+            background: `
+          radial-gradient(800px 600px at 15% 20%, rgba(229,9,20,.22), transparent 60%),
+          radial-gradient(700px 500px at 85% 10%, rgba(229,9,20,.16), transparent 60%),
+          linear-gradient(180deg,#0b0b0f 0%, #050507 100%)
+        `
+        }
       case 6:
       case 7:
       case 8:

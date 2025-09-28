@@ -129,7 +129,7 @@ export const InteractiveFollowCard: React.FC = () => {
       <div className="absolute inset-0" style={{ transformStyle: "preserve-3d", borderRadius: "inherit" }}>
         {/* Front Face */}
         <section
-          className="absolute inset-0 bg-card-dark-bg rounded-[16px] overflow-hidden flex flex-col"
+          className="absolute inset-0 bg-gray-900 rounded-[16px] overflow-hidden flex flex-col"
           style={{ backfaceVisibility: "hidden" }}
         >
           <div
@@ -146,19 +146,19 @@ export const InteractiveFollowCard: React.FC = () => {
 
           <header className="p-4 pb-6 min-h-[35%] flex flex-col justify-center items-center gap-2 text-center">
             <div
-              className="w-16 h-16 rounded-full border-2 border-card-border overflow-hidden bg-card-surface shadow-xl"
+              className="w-16 h-16 rounded-full border-2 border-gray-600 overflow-hidden bg-gray-800 shadow-xl"
               style={{ transform: "translateZ(60px)" }}
             >
               <Image src={richardBransonProfile} alt="Richard Branson" className="w-full h-full object-cover" />
             </div>
             <div
-              className="text-lg font-bold text-card-text-primary tracking-tight"
+              className="text-lg font-bold text-white tracking-tight"
               style={{ transform: "translateZ(55px)" }}
             >
               Richard Branson
             </div>
             <div
-              className="text-xs text-card-text-secondary leading-tight"
+              className="text-xs text-gray-300 leading-tight"
               style={{ transform: "translateZ(50px)" }}
             >
               Founder Of The Virgin Group
@@ -176,11 +176,10 @@ export const InteractiveFollowCard: React.FC = () => {
             ].map((item, i) => (
               <li key={i}>
                 <p
-                 
-                  className="flex items-center justify-between p-2.5 px-3 rounded-xl no-underline text-card-text-primary bg-card-surface border border-card-border hover:bg-card-surface-hover transition-all duration-200 shadow-sm group"
+                  className="flex items-center justify-between p-2.5 px-3 rounded-xl no-underline text-white bg-gray-800 border border-gray-600 hover:bg-gray-700 transition-all duration-200 shadow-sm group"
                 >
                   <strong className="text-xs font-medium">{item.title}</strong>
-                  <span className="text-card-text-muted text-sm font-light group-hover:text-card-text-secondary transition-colors">
+                  <span className="text-gray-400 text-sm font-light group-hover:text-gray-200 transition-colors">
                     {item.icon}
                   </span>
                 </p>
@@ -191,22 +190,22 @@ export const InteractiveFollowCard: React.FC = () => {
           <div className="p-3 space-y-2" style={{ transform: "translateZ(30px)" }}>
             <div className="text-center">
               <div
-                className="text-sm font-light text-card-text-secondary italic mb-2"
+                className="text-sm font-light text-gray-300 italic mb-2"
                 style={{ fontFamily: "serif" }}
               >
                 Richard Branson
               </div>
             </div>
 
-            <label className="flex items-start gap-2 text-xs text-card-text-muted cursor-pointer">
+            <label className="flex items-start gap-2 text-xs text-gray-400 cursor-pointer">
               <input
                 type="checkbox"
-                className="mt-0.5 w-3 h-3 bg-card-surface border border-card-border rounded focus:ring-1 focus:ring-rl-red"
+                className="mt-0.5 w-3 h-3 bg-gray-800 border border-gray-600 rounded focus:ring-1 focus:ring-red-500"
               />
               <span>Join Our Newsletter - Get insights delivered to your inbox</span>
             </label>
 
-            <button style={{background:"rgb(207, 50, 50)"}} className="w-full py-2.5  text-white font-bold text-sm rounded-xl hover:bg-rl-red/90 transition-colors shadow-lg">
+            <button className="w-full py-2.5 bg-red-600 text-white font-bold text-sm rounded-xl hover:bg-red-700 transition-colors shadow-lg">
               FOLLOW
             </button>
           </div>

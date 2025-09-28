@@ -44,8 +44,11 @@ import profileSinature from "./images/profile-signature.png"
 import sideToolBarBlack from "./images/burger_black.png"
 import hubspotIcon from "./icons/hubspotIcon.png"
 import mailchimpIcon from "./icons/mailchimpIcon.png"
-
+import janeGoodallRealLeaders from "./images/jane-goodall-profile.jpeg"
+import janeGoodallHero from "./images/jane-goodall-hero.jpeg"
 export const images ={
+  janeGoodallHero: janeGoodallHero,
+  janeGoodallRealLeaders : janeGoodallRealLeaders,
   profileSinature:profileSinature,
   sideToolBarBlack:sideToolBarBlack,
   userProileReel:userProileReel,
