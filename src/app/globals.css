@@ -469,3 +469,13 @@ align-items: center;
   animation: loading 1s linear infinite;
 }
 
+/* Hide scrollbar but maintain scroll functionality */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+

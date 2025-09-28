@@ -9,7 +9,7 @@ interface MainContentProps {
 const MainContent: React.FC<MainContentProps> = ({ children, className }) => {
   return (
     <div className={cn(
-      "flex-1 bg-[#f9efef] relative overflow-hidden min-w-0 min-h-screen w-full",
+      "flex-1 bg-[#f9efef] relative overflow-hidden min-w-0 h-full w-full",
       className
     )}>
       {children}

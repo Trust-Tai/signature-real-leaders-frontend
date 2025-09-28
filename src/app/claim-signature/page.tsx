@@ -89,7 +89,7 @@ const FirstScreen = () => {
       </MainContent>
 
       {/* Section 3: Right Image Section - Hidden on mobile/tablet, shown on desktop */}
-      <RightImageSection imageUrl={images.verifyFirstPageRightBgImage} className='h-full'  style={{
+      <RightImageSection className='h-full'  style={{
     background: 'linear-gradient(180deg, #1C92D2 0%, #F2FCFE 100%)'
   }} />
     </div>

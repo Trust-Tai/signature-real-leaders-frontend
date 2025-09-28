@@ -44,6 +44,7 @@ import profileSinature from "./images/profile-signature.png"
 import sideToolBarBlack from "./images/burger_black.png"
 import hubspotIcon from "./icons/hubspotIcon.png"
 import mailchimpIcon from "./icons/mailchimpIcon.png"
+
 export const images ={
   profileSinature:profileSinature,
   sideToolBarBlack:sideToolBarBlack,

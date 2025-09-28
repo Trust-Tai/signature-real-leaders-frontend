@@ -17,7 +17,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const api = {
   async sendVerificationCode(email: string) {
-    return request<{ success: boolean; message?: string }>(
+    return request<{ success: boolean; message?: string; code?: string }>(
       '/user/send-verification-code',
       {
         method: 'POST',

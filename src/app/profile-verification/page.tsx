@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Sidebar,
   RightImageSection,
@@ -24,8 +25,15 @@ import { OnboardingProvider, useOnboarding } from '@/components/OnboardingContex
 import { api } from '@/lib/api';
 import { images } from "../../assets/index";
 import { ArrowLeft } from 'lucide-react';
+import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
+import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
+import UptrendCanvas from '@/components/ui/UptrendCanvas';
+import { NewsletterConnections } from '@/components/ui/NewsletterConnections';
+import SignatureAnimation from '@/components/ui/SignatureAnimation';
+import { AnimatedAudience } from '@/components/ui/AnimatedAudience';
 
 const InnerProfileVerificationPage = () => {
+  const searchParams = useSearchParams();
  
   const [currentStep, setCurrentStep] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -38,6 +46,21 @@ const InnerProfileVerificationPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined);
+  const [resendResponseMessage, setResendResponseMessage] = useState<string | undefined>(undefined);
+
+  // Check for name parameter in URL and auto-populate
+  useEffect(() => {
+    const nameParam = searchParams.get('name');
+    if (nameParam) {
+      const decodedName = decodeURIComponent(nameParam);
+      setFormData(prev => ({ ...prev, name: decodedName }));
+      setState(prev => ({ ...prev, first_name: decodedName }));
+      // Skip to step 2 (email verification) if name is provided
+      setCurrentStep(2);
+      console.log('[Auto-populate] Name from URL:', decodedName, 'Skipping to step 2');
+    }
+  }, [searchParams, setState]);
 
   const steps: Step[] = [
     { id: 1, title: 'Claim Your Signature', status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
@@ -64,10 +87,15 @@ const InnerProfileVerificationPage = () => {
   const prevStep = () => {
     if (currentStep === 2 && showCodeVerification) {
       setShowCodeVerification(false);
+      setInfoMessage(undefined); // Clear info message when going back from OTP
+      setResendResponseMessage(undefined); // Clear resend response message when going back from OTP
       return;
     }
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      // Clear messages when going back to any step
+      setInfoMessage(undefined);
+      setResendResponseMessage(undefined);
     }
   };
 
@@ -94,6 +122,7 @@ const InnerProfileVerificationPage = () => {
               }
             }}
             buttonText="VERIFY"
+            
           />
         );
       
@@ -128,17 +157,24 @@ const InnerProfileVerificationPage = () => {
                   if (!state.email) return;
                   setLoading(true);
                   setError(undefined);
+                  setResendResponseMessage(undefined);
                   console.log('[Step 4] Resending verification code', { email: state.email });
-                  await api.sendVerificationCode(state.email);
+                  const res = await api.sendVerificationCode(state.email);
+                  if (res.message) {
+                    setResendResponseMessage(res.message);
+                  }
                 } catch (e: unknown) {
                   const errorMessage = e instanceof Error ? e.message : 'Failed to resend';
                   setError(errorMessage);
+                  setResendResponseMessage(errorMessage);
                 } finally {
                   setLoading(false);
                 }
               }}
               isLoading={loading}
               error={error}
+              infoMessage={infoMessage}
+              resendResponseMessage={resendResponseMessage}
             />
           );
         } else {
@@ -149,13 +185,32 @@ const InnerProfileVerificationPage = () => {
                   setLoading(true);
                   setError(undefined);
                   console.log('[Step 2] Sending verification code', { email });
-                  await api.sendVerificationCode(email);
-                  setState(prev => ({ ...prev, email }));
-                  console.log('[Step 2] Saved email to state, showing OTP step');
-                  setShowCodeVerification(true);
+                  const res = await api.sendVerificationCode(email);
+                  // Expect res.code to be 'sent_email' or 'email_exists'
+                  if (res.code === 'sent_email') {
+                    setState(prev => ({ ...prev, email }));
+                    setInfoMessage(res.message);
+                    console.log('[Step 2] Email verified: code sent. Showing OTP step');
+                    setShowCodeVerification(true);
+                  } else if (res.code === 'email_exists') {
+                    // Stay on same screen and show message
+                    setError(undefined);
+                    setInfoMessage(undefined);
+                    setState(prev => ({ ...prev, email }));
+                    console.log('[Step 2] Email exists. Staying on email screen with message');
+                    const msg = res.message || 'Email already exists';
+                    setError(msg);
+                    alert(msg);
+                  } else {
+                    // Fallback: treat as error
+                    const msg = res.message || 'Failed to send code';
+                    setError(msg);
+                    alert(msg);
+                  }
                 } catch (e: unknown) {
                   const errorMessage = e instanceof Error ? e.message : 'Failed to send code';
                   setError(errorMessage);
+                  alert(errorMessage);
                 } finally {
                   setLoading(false);
                 }
@@ -324,62 +379,55 @@ const InnerProfileVerificationPage = () => {
     }
   };
 
-  const getRightImage = () => {
+  const getRightComponent = () => {
     switch (currentStep) {
       case 1:
       case 2:
       case 2.5:
-        return images.verifyFirstPageRightBgImage;
+        return <InteractiveFollowCard />;
       case 3:
-      case 6:
-        return images.comboInfoAudSideBarImage;
-      case 4:
-        return images.verifyFirstPageRightBgImage;
-      case 5:
-        return images.verifyFirstPageRightBgImage;
-      case 7:
-        return images.successMetrixRightSideImage;
       case 8:
-        return images.linkRightSideImge;
+       return <InteractiveMagazineCards />;
+      case 6:
+        return <AnimatedAudience />;
+      case 4:
+        return <NewsletterConnections />;
+      case 5:
+        return <InteractiveFollowCard />;
+      case 7:
+        return <UptrendCanvas />;
       case 9:
-        return images.signRightImage;
+        return <SignatureAnimation />;
       case 10:
-        return images.verifyFirstPageRightBgImage;
+        return <InteractiveFollowCard />;
       default:
-        return images.verifyFirstPageRightBgImage;
+        return <InteractiveFollowCard />;
     }
   };
 
   const getRightImageStyle = () => {
     switch (currentStep) {
-      case 1:
-      case 2:
-      case 2.5:
-      case 4:
-      case 5:
-      case 10:
-        return {
-          background: 'linear-gradient(180deg, #1C92D2 0%, #F2FCFE 100%)'
-        };
-      case 3:
       case 6:
+      case 7:
+      case 8:
+      case 9:
         return {
-          background: 'linear-gradient(180deg, #4AC29A 0%, #BDFFF3 100%)'
-        };
+        background: 'radial-gradient(800px 600px at 15% 20%, rgba(229, 9, 20, 0.22), transparent 60%), radial-gradient(700px 500px at 85% 10%, rgba(229, 9, 20, 0.16), transparent 60%), linear-gradient(rgb(11, 11, 15) 0%, rgb(5, 5, 7) 100%)'
+      };
       default:
         return {};
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col xl:flex-row relative">
+    <div className="h-screen bg-black flex overflow-hidden">
       {/* Mobile Sidebar Toggle - Only show when sidebar is closed */}
       {!isMobileMenuOpen && (
         <MobileSidebarToggle onToggle={toggleMobileMenu} />
       )}
 
-      {/* Section 1: Left Sidebar - Hidden on mobile/tablet, shown on desktop */}
-      <div className="">
+      {/* Section 1: Left Sidebar - Fixed position */}
+      <div className="hidden xl:block flex-shrink-0">
         <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage}/>
       </div>
 
@@ -391,60 +439,63 @@ const InnerProfileVerificationPage = () => {
         onMobileToggle={toggleMobileMenu}
       />
 
-      {/* Section 2: Middle Content - Takes remaining width */}
+      {/* Section 2: Middle Content - Scrollable */}
       <MainContent>
-        {/* Back Button - Top Left of MainContent */}
-       
+        {/* Scrollable Content with hidden scrollbar */}
+        <div className="h-full overflow-y-auto scrollbar-hide">
+          {/* Back Button - Top Left of MainContent */}
+          {currentStep >= 2 && !isMobileMenuOpen && (
+            <button
+              type="button"
+              aria-label="Go back"
+              onClick={prevStep}
+              className="flex gap-[5px] items-center mt-[10px] ml-[10px] cursor-pointer md:mt-[20px] md:ml-[80px]"
+            >
+              <ArrowLeft color="#000000" />
+              <div className="font-outfit font-medium text-[#333333]">Back</div>
+            </button>
+          )}
+          <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
 
-        <>
-         {currentStep >= 2 && !isMobileMenuOpen && (
-          <button
-            type="button"
-            aria-label="Go back"
-            onClick={prevStep}
-            className="flex gap-[5px] items-center mt-[10px] ml-[10px] cursor-pointer"
-          >
-            <ArrowLeft color="#000000" />
-            <div className="font-outfit font-medium text-[#333333]">Back</div>
-          </button>
-        )}
-        <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
-
-          <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] ${
-            currentStep === 3 || currentStep === 7 || currentStep === 5? 'max-w-[870px]' : 'max-w-2xl'
-          }`}>
-            {/* Header */}
-           {currentStep !== 10 && (
-  <PageHeader
-    title="MAKE YOUR MARK"
-    subtitle="with RealLeaders signature"
-    highlightWord="MARK"
-    className={`lg:mb-[${currentStep === 1 ? '150px' : currentStep === 3 ? '80px' : currentStep === 5 ? '60px' : currentStep === 6 ? '100px' : currentStep === 7 ? '130px' : '90px'}]`}
-  />
+            <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] ${
+              currentStep === 3 || currentStep === 7 || currentStep === 5? 'max-w-[870px]' : 'max-w-2xl'
+            }`}>
+              {/* Header */}
+             {currentStep !== 10 && (
+    <PageHeader
+      title="MAKE YOUR MARK"
+      subtitle="with RealLeaders signature"
+      highlightWord="MARK"
+      className={`lg:mb-[${currentStep === 1 ? '150px' : currentStep === 3 ? '80px' : currentStep === 5 ? '60px' : currentStep === 6 ? '100px' : currentStep === 7 ? '130px' : '90px'}]`}
+    />
 )}
 
+              {/* Current Step Component */}
+              {renderCurrentStep()}
+            </div>
 
-            {/* Current Step Component */}
-            {renderCurrentStep()}
           </div>
-
         </div>
-        </>
       </MainContent>
 
-      {/* Section 3: Right Image Section - Hidden on mobile/tablet, shown on desktop */}
-      <RightImageSection
-        imageUrl={getRightImage()}
-        className='h-full'
-        style={getRightImageStyle()}
-      />
+      {/* Section 3: Right Image Section - Fixed position */}
+      <div className="hidden xl:block flex-shrink-0">
+        <RightImageSection
+          className='h-full'
+          style={getRightImageStyle()}
+        >
+          {getRightComponent()}
+          </RightImageSection>
+      </div>
     </div>
   );
 };
 
 const ProfileVerificationPage = () => (
   <OnboardingProvider>
-    <InnerProfileVerificationPage />
+    <Suspense fallback={<div>Loading...</div>}>
+      <InnerProfileVerificationPage />
+    </Suspense>
   </OnboardingProvider>
 );
 

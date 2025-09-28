@@ -228,11 +228,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  // Full sidebar content
-  const fullSidebarContent = (
+  // Desktop sidebar content
+  const desktopSidebarContent = (
     <div
       className={cn(
-        "relative h-full w-full xl:w-[320px] xl:flex-shrink-0 text-white p-4 sm:p-6 lg:p-8 flex flex-col overflow-hidden",
+        "relative h-screen w-full xl:w-[320px] xl:flex-shrink-0 text-white p-4 sm:p-6 lg:p-8 flex flex-col overflow-hidden",
         className
       )}
     >
@@ -256,19 +256,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       />
 
-      <div className="relative z-10">
-        {/* Mobile close button */}
-        <div className="xl:hidden flex justify-end mb-4">
-          <button
-            onClick={onMobileToggle}
-            className="text-white hover:text-gray-300 transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
+      <div className="relative z-10 flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center mb-8 sm:mb-10 lg:mb-12 mt-[30px]">
           <div className="text-lg sm:text-xl lg:text-2xl font-bold font-abolition flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
@@ -285,6 +273,97 @@ const Sidebar: React.FC<SidebarProps> = ({
                 />
               </button>
             </div>
+            <Image
+              src={images.realLeaders}
+              alt="Real Leaders"
+              className="realLeadersLogo"
+            />
+          </div>
+        </div>
+
+        {/* Steps */}
+        <div className="space-y-4 sm:space-y-6 relative mt-[60px]">
+          {/* Gray line */}
+          <div className="absolute left-3 sm:left-4 top-3 sm:top-4 bottom-0 w-0.5 bg-gray-600"></div>
+
+          {/* Green line for completed steps */}
+          {(() => {
+            const completedSteps = steps.filter(
+              (step) => step.status === "completed"
+            );
+            if (completedSteps.length > 0) {
+              const lastCompletedIndex = steps.findIndex(
+                (step) => step.status === "completed"
+              );
+              const height = (lastCompletedIndex + 1) * 96;
+              return (
+                <div
+                  className="absolute left-3 sm:left-4 top-3 sm:top-4 w-0.5 bg-green-500 z-10"
+                  style={{ height: `${height}px` }}
+                />
+              );
+            }
+            return null;
+          })()}
+
+          {steps.map((step) => (
+            <div key={step.id} className="flex items-center relative z-20 mb-[50px]">
+              {getStepIcon(step)}
+              <span className={cn("font-outfit font-medium text-sm sm:text-base", getStepTextColor(step))}>
+                {step.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Mobile sidebar content - scrollable
+  const mobileSidebarContent = (
+    <div
+      className={cn(
+        "relative h-screen w-full text-white flex flex-col overflow-hidden",
+        className
+      )}
+    >
+      {/* Background Image */}
+      {imageUrl && (
+        <Image
+          src={imageUrl}
+          alt="Sidebar background"
+          fill
+          priority
+          className="object-cover"
+        />
+      )}
+
+      {/* Background overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "#0F1222F2",
+          backgroundBlendMode: "multiply",
+        }}
+      />
+
+      {/* Scrollable content container for mobile */}
+      <div className="relative z-10 flex flex-col h-full overflow-y-auto scrollbar-hide p-4 sm:p-6 lg:p-8">
+        {/* Mobile close button */}
+        <div className="xl:hidden flex justify-end mb-4">
+          <button
+            onClick={onMobileToggle}
+            className="text-white hover:text-gray-300 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center mb-8 sm:mb-10 lg:mb-12 mt-[30px]">
+          <div className="text-lg sm:text-xl lg:text-2xl font-bold font-abolition flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
             <Image
               src={images.realLeaders}
               alt="Real Leaders"
@@ -351,7 +430,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Sidebar content, only shown when not collapsed */}
         {!isDesktopCollapsed && (
           <div className="hidden xl:block xl:w-[320px] xl:flex-shrink-0" style={{height:"100%"}}>
-            {fullSidebarContent}
+            {desktopSidebarContent}
           </div>
         )}
       </>
@@ -376,7 +455,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {fullSidebarContent}
+        {mobileSidebarContent}
       </div>
     </>
   );

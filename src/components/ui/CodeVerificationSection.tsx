@@ -7,8 +7,8 @@ interface CodeVerificationSectionProps {
   className?: string;
   error?: string;
   isLoading?: boolean;
-
-
+  infoMessage?: string;
+  resendResponseMessage?: string;
 }
 
 const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
@@ -17,7 +17,8 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
   className,
   error,
   isLoading = false,
-
+  infoMessage,
+  resendResponseMessage,
 }) => {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -25,6 +26,18 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
   useEffect(() => {
     inputRefs.current = inputRefs.current.slice(0, 6);
   }, []);
+
+  useEffect(() => {
+    if (infoMessage) {
+      alert(infoMessage);
+    }
+  }, [infoMessage]);
+
+  useEffect(() => {
+    if (resendResponseMessage) {
+      alert(resendResponseMessage);
+    }
+  }, [resendResponseMessage]);
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length > 1) return; // Prevent multiple characters
@@ -66,8 +79,6 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
       <h2 className="section-title">
       ENTER CODE (VIA EMAIL)
       </h2>
-
-      
 
       {/* Verification Code Input */}
       <div className="space-y-6">
