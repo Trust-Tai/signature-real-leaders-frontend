@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
 
 interface CodeVerificationSectionProps {
@@ -29,13 +30,13 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
 
   useEffect(() => {
     if (infoMessage) {
-      alert(infoMessage);
+      toast.info(infoMessage, { id: 'otp-info' });
     }
   }, [infoMessage]);
 
   useEffect(() => {
     if (resendResponseMessage) {
-      alert(resendResponseMessage);
+      toast.info(resendResponseMessage, { id: 'otp-resend' });
     }
   }, [resendResponseMessage]);
 

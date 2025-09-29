@@ -318,6 +318,7 @@
 
 
 import React, { useState, useRef, useEffect } from 'react';
+import { toast } from '@/components/ui/toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Upload } from 'lucide-react';
@@ -382,7 +383,7 @@ const SignSection: React.FC<SignSectionProps> = ({
       };
       reader.readAsDataURL(file);
     } else {
-      alert('Please select a valid image file');
+      toast.error('Please select a valid image file');
     }
   };
 

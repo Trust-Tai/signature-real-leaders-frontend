@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { toast } from '@/components/ui/toast';
 import { ArrowLeft, Camera, Save, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { UserProfileSidebar, UserProfileDropdown } from '@/components';
@@ -38,7 +39,7 @@ const ProfilePage = () => {
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
-      alert('New passwords do not match!');
+      toast.error('New passwords do not match!');
       return;
     }
     

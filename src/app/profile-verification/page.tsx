@@ -24,6 +24,7 @@ import {
 import { OnboardingProvider, useOnboarding } from '@/components/OnboardingContext';
 import { api } from '@/lib/api';
 import { images } from "../../assets/index";
+import { toast } from '@/components/ui/toast';
 import { ArrowLeft } from 'lucide-react';
 import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
 import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
@@ -139,6 +140,7 @@ const InnerProfileVerificationPage = () => {
                 
                   console.log('[Step 3] Verifying code with email', { email: state.email, code });
                   const res = await api.verifyCode(state.email, code);
+                
                   if (res.success && res.auth_token) {
                     setState(prev => ({ ...prev, auth_token: res.auth_token }));
                     console.log('[Step 3] Verified. Saved auth_token and moving to next step');
@@ -187,6 +189,7 @@ const InnerProfileVerificationPage = () => {
                   setError(undefined);
                   console.log('[Step 2] Sending verification code', { email });
                   const res = await api.sendVerificationCode(email);
+                 
                   // Expect res.code to be 'sent_email' or 'email_exists'
                   if (res.code === 'sent_email') {
                     setState(prev => ({ ...prev, email }));
@@ -201,17 +204,18 @@ const InnerProfileVerificationPage = () => {
                     console.log('[Step 2] Email exists. Staying on email screen with message');
                     const msg = res.message || 'Email already exists';
                     setError(msg);
-                    alert(msg);
+                    toast.warning(msg, { id: 'email-exists' });
                   } else {
                     // Fallback: treat as error
                     const msg = res.message || 'Failed to send code';
                     setError(msg);
-                    alert(msg);
+                    toast.error(msg, { id: 'send-code-error' });
                   }
                 } catch (e: unknown) {
+              
                   const errorMessage = e instanceof Error ? e.message : 'Failed to send code';
                   setError(errorMessage);
-                  alert(errorMessage);
+                  toast.error(errorMessage, { id: 'send-code-exception' });
                 } finally {
                   setLoading(false);
                 }
@@ -301,19 +305,19 @@ const InnerProfileVerificationPage = () => {
               try {
                 // Submit full user info
                 const payload: Record<string, unknown> = {
-                  first_name: state.first_name,
-                  last_name: state.last_name,
+                  firstName: state.first_name,
+                  lastName: state.last_name,
                   email: state.email,
-                  company_name: state.company_name,
-                  company_website: state.company_website,
+                  companyName: state.company_name,
+                  companyWebsite: state.company_website,
                   industry: state.industry,
-                  num_employees: state.num_employees,
-                  email_list_size: state.email_list_size,
-                  newsletter_service: state.newsletter?.service,
+                  numEmployees: state.num_employees,
+                  emailListSize: state.email_list_size,
+                  newsletterService: state.newsletter?.service,
                   apiKey: state.newsletter?.api_key,
-                  audience_description: state.audience_description,
-                  success_metrics: state.success_metrics,
-                  profile_template_id: state.profile_template_id,
+                  audienceDescription: state.audience_description,
+                  metrics: state.success_metrics,
+                  profileTemplate: state.profile_template_id,
                   links: state.links || [],
                   consentFeatureName: signData.giveConsent,
                   agreeTerms: signData.agreeTerms,
