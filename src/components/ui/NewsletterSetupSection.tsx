@@ -177,7 +177,7 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
             <a
               href={provider === "Mailchimp" 
                 ? "https://mailchimp.com/developer/marketing/guides/quick-start/#generate-your-api-key"
-                : "#" // You mentioned you'll provide HubSpot link later
+                : "https://mailchimp.com/developer/marketing/guides/quick-start/#generate-your-api-key" // You mentioned you'll provide HubSpot link later
               }
               target="_blank"
               rel="noopener noreferrer"

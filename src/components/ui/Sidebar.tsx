@@ -281,39 +281,41 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Steps */}
-        <div className="space-y-4 sm:space-y-6 relative mt-[60px]">
-          {/* Gray line */}
-          <div className="absolute left-3 sm:left-4 top-3 sm:top-4 bottom-0 w-0.5 bg-gray-600"></div>
+        {/* Steps (scrollable) */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide pr-2">
+          <div className="space-y-4 sm:space-y-6 relative mt-[30px]">
+            {/* Gray line */}
+            <div className="absolute left-3 sm:left-4 top-3 sm:top-4 bottom-0 w-0.5 bg-gray-600"></div>
 
-          {/* Green line for completed steps */}
-          {(() => {
-            const completedSteps = steps.filter(
-              (step) => step.status === "completed"
-            );
-            if (completedSteps.length > 0) {
-              const lastCompletedIndex = steps.findIndex(
+            {/* Green line for completed steps */}
+            {(() => {
+              const completedSteps = steps.filter(
                 (step) => step.status === "completed"
               );
-              const height = (lastCompletedIndex + 1) * 96;
-              return (
-                <div
-                  className="absolute left-3 sm:left-4 top-3 sm:top-4 w-0.5 bg-green-500 z-10"
-                  style={{ height: `${height}px` }}
-                />
-              );
-            }
-            return null;
-          })()}
+              if (completedSteps.length > 0) {
+                const lastCompletedIndex = steps.findIndex(
+                  (step) => step.status === "completed"
+                );
+                const height = (lastCompletedIndex + 1) * 96;
+                return (
+                  <div
+                    className="absolute left-3 sm:left-4 top-3 sm:top-4 w-0.5 bg-green-500 z-10"
+                    style={{ height: `${height}px` }}
+                  />
+                );
+              }
+              return null;
+            })()}
 
-          {steps.map((step) => (
-            <div key={step.id} className="flex items-center relative z-20 mb-[50px]">
-              {getStepIcon(step)}
-              <span className={cn("font-outfit font-medium text-sm sm:text-base", getStepTextColor(step))}>
-                {step.title}
-              </span>
-            </div>
-          ))}
+            {steps.map((step) => (
+              <div key={step.id} className="flex items-center relative z-20 mb-[50px]">
+                {getStepIcon(step)}
+                <span className={cn("font-outfit font-medium text-sm sm:text-base", getStepTextColor(step))}>
+                  {step.title}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -373,7 +375,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Steps */}
-        <div className="space-y-4 sm:space-y-6 relative mt-[60px]">
+        <div className="space-y-4 sm:space-y-6 relative mt-[30px]">
           {/* Gray line */}
           <div className="absolute left-3 sm:left-4 top-3 sm:top-4 bottom-0 w-0.5 bg-gray-600"></div>
 
