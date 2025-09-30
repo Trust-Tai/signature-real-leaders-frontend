@@ -327,6 +327,7 @@ interface SignSectionProps {
   onSubmit: (data: SignFormData) => void;
   className?: string;
   error?: string;
+  isSubmitting?: boolean;
 }
 
 interface SignFormData {
@@ -342,7 +343,8 @@ interface SignFormData {
 const SignSection: React.FC<SignSectionProps> = ({
   onSubmit,
   className,
-  error
+  error,
+  isSubmitting
 }) => {
   const [formData, setFormData] = useState({
     signature: null,
@@ -650,11 +652,12 @@ const SignSection: React.FC<SignSectionProps> = ({
         {/* Submit Button */}
         <button
           onClick={handleSubmit}
-          disabled={!isFormValid}
+          disabled={!isFormValid || !!isSubmitting}
           className="custom-btn my-3 w-full transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
-          style={{width:"100%"}}
+          style={{width:"100%", opacity: isSubmitting ? 0.8 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer'}}
+          aria-busy={isSubmitting ? true : undefined}
         >
-          Confirm & Submit Signature
+          {isSubmitting ? 'Submitting...' : 'Confirm & Submit Signature'}
         </button>
 
         {/* Error Message */}

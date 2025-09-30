@@ -301,8 +301,11 @@ const InnerProfileVerificationPage = () => {
       case 9:
         return (
           <SignSection
+            isSubmitting={loading}
             onSubmit={async (signData: { signature: string | null; confirmInfo: boolean; giveConsent: boolean; agreeTerms: boolean; uploadedImage: string | null; signatureFile: File | null; uploadedImageFile: File | null }) => {
               try {
+                setLoading(true);
+                setError(undefined);
                 // Submit full user info
                 const payload: Record<string, unknown> = {
                   firstName: state.first_name,
@@ -326,36 +329,27 @@ const InnerProfileVerificationPage = () => {
                 };
                 if (!state.auth_token) throw new Error('Missing auth token');
                 console.log('[Step 9] Submitting user info', { payload, hasAuthToken: !!state.auth_token });
-                await api.submitUserInfo(state.auth_token, payload);
-
-                // Upload signature image - prioritize uploaded image, fallback to drawn signature
-                let signatureFile = null;
-                if (signData.uploadedImageFile) {
-                  signatureFile = signData.uploadedImageFile;
-                  console.log('[Step 9] Uploading uploaded image file as signature', { 
-                    fileName: signatureFile.name, 
-                    fileSize: signatureFile.size,
-                    consent: !!signData.giveConsent 
-                  });
-                } else if (signData.signatureFile) {
-                  signatureFile = signData.signatureFile;
-                  console.log('[Step 9] Uploading drawn signature file', { 
-                    fileName: signatureFile.name, 
-                    fileSize: signatureFile.size,
-                    consent: !!signData.giveConsent 
-                  });
-                }
-
-                if (signatureFile) {
-                  await api.uploadSignature(state.auth_token, signatureFile, !!signData.giveConsent);
+                const submitRes = await api.submitUserInfo(state.auth_token, payload);
+                if (submitRes?.success) {
+                  const successMsg = submitRes.message || 'Your application has been submitted for review. You will be notified once it is approved.';
+                  toast.success(successMsg, { id: 'submit-user-info-success' });
+                  console.log('[Step 10] Submission complete. Moving to Review');
+                  nextStep();
+                  setLoading(false);
+                  return;
                 } else {
-                  console.warn('[Step 9] No signature file available to upload');
+                  const failMsg = submitRes?.message || 'Submission failed';
+                  setError(failMsg);
+                  toast.error(failMsg, { id: 'submit-user-info-error' });
+                  setLoading(false);
+                  return;
                 }
-
-                console.log('[Step 10] Submission complete. Moving to Review');
-                nextStep();
               } catch (e) {
+                const msg = e instanceof Error ? e.message : 'Submission failed';
+                setError(msg);
+                toast.error(msg, { id: 'submit-user-info-exception' });
                 console.error(e);
+                setLoading(false);
               }
             }}
           />

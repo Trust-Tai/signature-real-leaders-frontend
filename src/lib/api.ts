@@ -78,22 +78,7 @@ export const api = {
     );
   },
 
-  async uploadSignature(authToken: string, file: File, consent: boolean) {
-    const form = new FormData();
-    form.append('file', file);
-    form.append('consent', String(consent));
-    const url = `${API_BASE_URL}/user/upload-signature`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'X-Auth-Token': authToken },
-      body: form,
-    });
-    const data = await response.json();
-    if (!response.ok || !data?.success) {
-      throw new Error(data?.message || 'Upload failed');
-    }
-    return data as { success: boolean; message?: string };
-  },
+  // Removed uploadSignature – signature is now included in submit-user-info payload
 };
 
 
