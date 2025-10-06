@@ -27,7 +27,7 @@ import { images } from "../../assets/index";
 import { toast } from '@/components/ui/toast';
 import { ArrowLeft } from 'lucide-react';
 import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
-import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
+// import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
 import UptrendCanvas from '@/components/ui/UptrendCanvas';
 import { NewsletterConnections } from '@/components/ui/NewsletterConnections';
 import SignatureAnimation from '@/components/ui/SignatureAnimation';
@@ -387,7 +387,8 @@ const InnerProfileVerificationPage = () => {
       case 3:
         return <AudienceAnimation />
       case 8:
-       return <InteractiveMagazineCards />;
+        return <InteractiveFollowCard />;
+      //  return <InteractiveMagazineCards />;
       case 6:
         return <AnimatedAudience />;
       case 4:

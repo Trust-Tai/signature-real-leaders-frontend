@@ -59,7 +59,7 @@ const ClaimSection: React.FC<ClaimSectionProps> = ({
             <button
               type="submit"
               disabled={!value}
-              className="firstVerifyScreenButton"
+              className="firstVerifyScreenButton custom-btn"
             >
               {buttonText}
             </button>
@@ -86,7 +86,7 @@ const ClaimSection: React.FC<ClaimSectionProps> = ({
             <button
               type="submit"
               disabled={!value}
-              className="firstVerifyScreenButton"
+              className="firstVerifyScreenButton custom-btn"
             >
               {buttonText}
             </button>
