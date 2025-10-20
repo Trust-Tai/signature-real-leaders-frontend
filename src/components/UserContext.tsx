@@ -67,25 +67,36 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const fetchUserDetails = async () => {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      setError('No authentication token found');
-      setIsInitialLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
     try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setError('No authentication token found');
+        setIsInitialLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await api.getUserDetails(token);
+      
+      clearTimeout(timeoutId);
+      
       if (response.success) {
         setUser(response.user);
       } else {
         setError('Failed to fetch user details');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch user details');
+      if (err instanceof Error && err.name === 'AbortError') {
+        setError('Request timeout - please try again');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to fetch user details');
+      }
     } finally {
       setLoading(false);
       setIsInitialLoading(false);

@@ -21,18 +21,23 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
   const [hasSeenTour, setHasSeenTour] = useState<boolean>(false);
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
 
-  // Check localStorage on mount
+  // Check localStorage on mount with proper error handling
   useEffect(() => {
-    const tourSeen = localStorage.getItem('realLeaders-tour-completed');
-    setHasSeenTour(tourSeen === 'true');
-    
-    // If user hasn't seen the tour, show it after a short delay
-    if (tourSeen !== 'true') {
-      const timer = setTimeout(() => {
-        setIsTourOpen(true);
-      }, 2000); // 2 second delay to let the page load completely
+    try {
+      const tourSeen = localStorage.getItem('realLeaders-tour-completed');
+      setHasSeenTour(tourSeen === 'true');
       
-      return () => clearTimeout(timer);
+      // If user hasn't seen the tour, show it after a short delay
+      if (tourSeen !== 'true') {
+        const timer = setTimeout(() => {
+          setIsTourOpen(true);
+        }, 3000); // Increased delay to ensure page is fully loaded
+        
+        return () => clearTimeout(timer);
+      }
+    } catch (error) {
+      console.warn('Error accessing localStorage:', error);
+      // If localStorage fails, don't show tour automatically
     }
   }, []);
 
@@ -47,13 +52,21 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
   const completeTour = () => {
     setIsTourOpen(false);
     setHasSeenTour(true);
-    localStorage.setItem('realLeaders-tour-completed', 'true');
+    try {
+      localStorage.setItem('realLeaders-tour-completed', 'true');
+    } catch (error) {
+      console.warn('Error saving tour completion to localStorage:', error);
+    }
   };
 
   const resetTour = () => {
     setHasSeenTour(false);
     setIsTourOpen(false);
-    localStorage.removeItem('realLeaders-tour-completed');
+    try {
+      localStorage.removeItem('realLeaders-tour-completed');
+    } catch (error) {
+      console.warn('Error removing tour completion from localStorage:', error);
+    }
   };
 
   const value: TourContextType = {

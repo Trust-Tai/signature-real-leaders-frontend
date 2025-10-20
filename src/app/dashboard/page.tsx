@@ -3,34 +3,40 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Search, Bell, ChevronLeft, ChevronRight, Menu, Users, Play } from 'lucide-react';
 import { UserProfileSidebar, StatsCards, useTour } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
+
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { startTour } = useTour();
 
-  const statsCards = [
+  // Memoize static data to prevent unnecessary re-renders
+  const statsCards = useMemo(() => [
     { number: '50', label: 'BOOKINGS', description: 'New Meetings, Consultations, Or Events Scheduled', color: '#CF3232' },
     { number: '3,220', label: 'CONTACTS', description: 'People Who Joined Your Mailing List', color: '#CF3232' },
     { number: '9,475', label: 'PAGE VIEWS', description: 'Total Number Of Times Your Signature Page', color: '#CF3232' },
     { number: '2,183', label: 'LINK CLICKS', description: 'Combined Total Of Clicks Across All Links', color: '#CF3232' }
-  ];
+  ], []);
 
-  const demographicsData = [
+  const demographicsData = useMemo(() => [
     { country: 'United States', device: 'Desktop', age: '25-34', role: 'Coaches', percentage: '58%' },
     { country: 'United Kingdom', device: 'Mobile', age: '35-44', role: 'Entrepreneurs', percentage: '20%' },
     { country: 'Canada', device: 'Desktop', age: '45-54', role: 'Marketing Directors', percentage: '72%' },
     { country: 'India', device: 'Mobile', age: '25-34', role: 'Nonprofit Leaders', percentage: '33%' },
     { country: 'Other', device: 'Desktop', age: '18-24', role: 'Coaches', percentage: '8%' }
-  ];
+  ], []);
+
+  // Memoize callback functions
+  const handleSidebarToggle = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
+
 
   return (
     <div className="min-h-screen flex bg-[#FFF9F9]" style={{ fontFamily: 'Outfit, sans-serif' }}>
-      
-    
       <UserProfileSidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -47,7 +53,7 @@ const Dashboard = () => {
             <div className="flex items-center space-x-4">
               {/* Mobile Menu Button */}
               <button 
-                onClick={() => setSidebarOpen(true)}
+                onClick={handleSidebarToggle}
                 className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
               >
                 <Menu className="w-6 h-6 text-gray-600" />

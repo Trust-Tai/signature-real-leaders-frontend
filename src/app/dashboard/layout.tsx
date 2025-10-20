@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { UserProvider, AuthGuard, LoadingScreen, useUser, TourProvider, InteractiveTour, useTour } from '@/components';
+import { UserProvider, AuthGuard, LoadingScreen, useUser, TourProvider, InteractiveTour, useTour, ErrorBoundary } from '@/components';
 
 const DashboardContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isInitialLoading } = useUser();
@@ -12,13 +12,13 @@ const DashboardContent: React.FC<{ children: React.ReactNode }> = ({ children })
   }
   
   return (
-    <>
+    <ErrorBoundary>
       {children}
       <InteractiveTour 
         isActive={isTourOpen}
         onComplete={completeTour}
       />
-    </>
+    </ErrorBoundary>
   );
 };
 
@@ -28,15 +28,17 @@ export default function UserProfileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard>
-      <UserProvider>
-        <TourProvider>
-          <DashboardContent>
-            {children}
-          </DashboardContent>
-        </TourProvider>
-      </UserProvider>
-    </AuthGuard>
+    <ErrorBoundary>
+      <AuthGuard>
+        <UserProvider>
+          <TourProvider>
+            <DashboardContent>
+              {children}
+            </DashboardContent>
+          </TourProvider>
+        </UserProvider>
+      </AuthGuard>
+    </ErrorBoundary>
   );
 }
 
