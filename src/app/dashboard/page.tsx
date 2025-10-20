@@ -4,14 +4,13 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { Search, Bell, ChevronLeft, ChevronRight, Menu, Users, Play } from 'lucide-react';
-import { UserProfileSidebar, StatsCards, useTour } from '@/components';
+import { Search, Bell, ChevronLeft, ChevronRight, Menu, Users } from 'lucide-react';
+import { UserProfileSidebar, StatsCards } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { startTour } = useTour();
 
   // Memoize static data to prevent unnecessary re-renders
   const statsCards = useMemo(() => [
@@ -60,7 +59,6 @@ const Dashboard = () => {
               </button>
               
               <h1 
-                data-tour="dashboard-overview"
                 className="text-[#101117] text-lg sm:text-xl font-semibold" 
                 style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}
               >
@@ -80,15 +78,6 @@ const Dashboard = () => {
                 />
               </div>
               
-              {/* Start Tour Button */}
-              <button
-                data-tour="start-tour-button"
-                onClick={startTour}
-                className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-[#B82A2A] transition-colors text-sm font-medium"
-              >
-                <Play className="w-4 h-4" />
-                <span>Start Tour</span>
-              </button>
               
               {/* Notifications and Profile Icons */}
               <div className="flex items-center space-x-4">
@@ -120,14 +109,6 @@ const Dashboard = () => {
                 style={{ color: '#949494' }}
               />
             </div>
-            <button
-              data-tour="start-tour-button-mobile"
-              onClick={startTour}
-              className="flex items-center justify-center space-x-2 w-full px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-[#B82A2A] transition-colors text-sm font-medium"
-            >
-              <Play className="w-4 h-4" />
-              <span>Start Dashboard Tour</span>
-            </button>
           </div>
         </header>
 
@@ -139,7 +120,7 @@ const Dashboard = () => {
             <div className="flex-1 flex flex-col gap-6 lg:gap-8">
               
                             {/* Stats Cards */}
-              <div data-tour="stats-cards">
+              <div>
                 <StatsCards stats={statsCards} columns={4} />
               </div>
               {/* Audience Demographics */}

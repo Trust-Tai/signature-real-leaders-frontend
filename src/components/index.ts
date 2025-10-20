@@ -29,13 +29,10 @@ export { default as UserProfileSidebar } from './ui/UserProfileSidebar';
 export { default as UserProfileDropdown } from './ui/UserProfileDropdown';
 export { default as LogoutConfirmationPopup } from './ui/LogoutConfirmationPopup';
 export { default as LoadingScreen } from './ui/LoadingScreen';
-export { default as DashboardTourModal } from './ui/DashboardTourModal';
-export { default as InteractiveTour } from './ui/InteractiveTour';
 export { default as ErrorBoundary } from './ui/ErrorBoundary';
 
 // Context
 export { UserProvider, useUser } from './UserContext';
-export { TourProvider, useTour } from './TourContext';
 
 // Auth
 export { AuthGuard } from './AuthGuard';
