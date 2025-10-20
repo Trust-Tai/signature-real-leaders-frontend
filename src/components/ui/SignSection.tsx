@@ -315,7 +315,7 @@
 // export default SignSection;
 
 
-
+"use client"
 
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from '@/components/ui/toast';
@@ -394,7 +394,7 @@ const SignSection: React.FC<SignSectionProps> = ({
   };
 
   const isFormValid = formData.confirmInfo && formData.giveConsent && formData.agreeTerms && 
-    (formData.signatureFile || formData.uploadedImageFile);
+    (formData.signature || formData.uploadedImage || formData.signatureFile || formData.uploadedImageFile);
 
   const setupCanvasForDpr = () => {
     const canvas = canvasRef.current;
@@ -653,8 +653,12 @@ const SignSection: React.FC<SignSectionProps> = ({
         <button
           onClick={handleSubmit}
           disabled={!isFormValid || !!isSubmitting}
-          className="custom-btn my-3 w-full transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
-          style={{width:"100%", opacity: isSubmitting ? 0.8 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer'}}
+          className={`custom-btn my-3 w-full transition-all duration-300 ${
+            !isFormValid || isSubmitting 
+              ? 'opacity-50 cursor-not-allowed transform-none' 
+              : 'transform hover:scale-105 hover:-translate-y-1 active:scale-95'
+          }`}
+          style={{width:"100%"}}
           aria-busy={isSubmitting ? true : undefined}
         >
           {isSubmitting ? 'Submitting...' : 'Confirm & Submit Signature'}

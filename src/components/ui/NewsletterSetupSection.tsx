@@ -1,10 +1,13 @@
+"use client"
+
 import React, { useEffect, useState } from "react";
 import Button from "./Button";
-import { Eye, EyeOff, ExternalLink, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, HelpCircle } from "lucide-react";
 import { api } from "@/lib/api";
 import { useOnboarding } from "@/components/OnboardingContext";
 import { images } from "@/assets";
 import Image from "next/image";
+import { toast } from "./toast";
 interface NewsletterSetupSectionProps {
   onSubmit: (data: { provider: string; apiKey?: string; clientId?: string; clientSecret?: string }) => void;
 }
@@ -19,7 +22,6 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
   const [showApiKey, setShowApiKey] = useState(false);
   const [showClientSecret, setShowClientSecret] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "verifying" | "success" | "error">("idle");
-  const [verificationMessage, setVerificationMessage] = useState("");
   const [availableServices, setAvailableServices] = useState<Record<string, string> | null>(null);
   const [servicesLoading, setServicesLoading] = useState(false);
   const { setState } = useOnboarding();
@@ -43,7 +45,6 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
   // API verification function
   const verifyCredentials = async () => {
     setVerificationStatus("verifying");
-    setVerificationMessage("");
     try {
       let requestBody: Record<string, string> = {};
       
@@ -62,7 +63,7 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
       const data = await api.verifyNewsletterCredentials(requestBody);
       if (data.success) {
         setVerificationStatus("success");
-        setVerificationMessage(data.message || "Credentials verified successfully!");
+        toast.success(data.message || "Credentials verified successfully!");
         // persist in onboarding state
         setState(prev => ({
           ...prev,
@@ -74,7 +75,7 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
     } catch (error) {
       setVerificationStatus("error");
       const errorMessage = error instanceof Error ? error.message : "Network error occurred";
-      setVerificationMessage(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -83,7 +84,7 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
     if (!provider) return;
     
     if (verificationStatus !== "success") {
-      setVerificationMessage("Please verify your credentials before proceeding");
+      toast.error("Please verify your credentials before proceeding");
       return;
     }
 
@@ -114,14 +115,29 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
             if (availableServices && !availableServices.mailchimp) return;
             setProvider("Mailchimp");
             setVerificationStatus("idle");
-            setVerificationMessage("");
           }}
-          className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl ${
+          className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl relative ${
             provider === "Mailchimp"
               ? "border-custom-red shadow-2xl -translate-y-2 bg-pink-50 scale-105"
               : "border-gray-200 shadow-lg hover:border-custom-red hover:bg-pink-50 hover:scale-105"
           }`}
         >
+          {/* Info Icon - Top Right */}
+          <div className="absolute top-4 right-4 group">
+            <HelpCircle className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" />
+            <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+              How to find your Mailchimp API Key
+              <div className="absolute top-full right-4 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+            </div>
+            <a
+              href="https://mailchimp.com/developer/marketing/guides/quick-start/#generate-your-api-key"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute inset-0 z-20"
+              onClick={(e) => e.stopPropagation()}
+            ></a>
+          </div>
+          
           <Image alt="" src={images.mailchimpIcon} />
           <h3 className="font-outfit text-xl font-bold text-[#333333]">Mailchimp {servicesLoading ? '(...)' : ''}</h3>
           <p className="text-sm text-gray-600 text-center">
@@ -138,14 +154,29 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
             if (availableServices && !availableServices.hubspot) return;
             setProvider("HubSpot");
             setVerificationStatus("idle");
-            setVerificationMessage("");
           }}
-          className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl ${
+          className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl relative ${
             provider === "HubSpot"
               ? "border-custom-red shadow-2xl -translate-y-2 bg-blue-50 scale-105"
               : "border-gray-200 shadow-lg hover:border-custom-red hover:bg-blue-50 hover:scale-105"
           }`}
         >
+          {/* Info Icon - Top Right */}
+          <div className="absolute top-4 right-4 group">
+            <HelpCircle className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" />
+            <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+              How to find your HubSpot credentials
+              <div className="absolute top-full right-4 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+            </div>
+            <a
+              href="https://developers.hubspot.com/docs/api/private-apps"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute inset-0 z-20"
+              onClick={(e) => e.stopPropagation()}
+            ></a>
+          </div>
+          
           <Image src={images.hubspotIcon} alt="" />
           <h3 className="font-outfit text-xl font-bold text-[#333333]">HubSpot {servicesLoading ? '(...)' : ''}</h3>
           <p className="text-sm text-gray-600 text-center">
@@ -172,24 +203,6 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
       {/* Step 2: Form (visible only after provider selection) */}
       {provider && (
         <div className="space-y-5">
-          {/* Documentation Link */}
-          <div className="text-center mb-4">
-            <a
-              href={provider === "Mailchimp" 
-                ? "https://mailchimp.com/developer/marketing/guides/quick-start/#generate-your-api-key"
-                : "https://mailchimp.com/developer/marketing/guides/quick-start/#generate-your-api-key" // You mentioned you'll provide HubSpot link later
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm underline transition-colors font-outfit"
-            >
-              <ExternalLink className="w-4 h-4" />
-              {provider === "Mailchimp" 
-                ? "How to find your Mailchimp API Key"
-                : "How to find your HubSpot credentials"
-              }
-            </a>
-          </div>
 
           {provider === "Mailchimp" && (
             <div className="firstVerifyScreen group">
@@ -263,21 +276,6 @@ const NewsletterSetupSection: React.FC<NewsletterSetupSectionProps> = ({
             </Button>
           </div>
 
-          {/* Verification Status */}
-          {verificationMessage && (
-            <div className={`flex items-center gap-2 p-3 rounded-lg font-outfit ${
-              verificationStatus === "success" 
-                ? "bg-green-50 text-green-700 border border-green-200" 
-                : "bg-red-50 text-red-700 border border-red-200"
-            }`}>
-              {verificationStatus === "success" ? (
-                <CheckCircle className="w-5 h-5" />
-              ) : (
-                <XCircle className="w-5 h-5" />
-              )}
-              <span className="text-sm font-medium">{verificationMessage}</span>
-            </div>
-          )}
           
           <div className="flex justify-between pt-2">
             <Button

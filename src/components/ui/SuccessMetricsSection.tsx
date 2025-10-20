@@ -1,9 +1,12 @@
+"use client"
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 
 interface SuccessMetricsSectionProps {
   onSubmit: (data: SuccessMetricsData) => void;
+  onSkip?: () => void;
   className?: string;
   error?: string;
 }
@@ -17,6 +20,7 @@ interface SuccessMetricsData {
 
 const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
   onSubmit,
+  onSkip,
   className,
   error
 }) => {
@@ -36,6 +40,19 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
 
   const handleSubmit = () => {
     onSubmit(formData);
+  };
+
+  const handleSkip = () => {
+    if (onSkip) {
+      onSkip();
+      return;
+    }
+    onSubmit({
+      numberOfBookings: 'Skipped',
+      emailListSize: 'Skipped',
+      amountInSales: 'Skipped',
+      amountInDonations: 'Skipped'
+    });
   };
 
   const isFormValid = Object.values(formData).every(value => value.trim() !== '');
@@ -127,14 +144,23 @@ const SuccessMetricsSection: React.FC<SuccessMetricsSectionProps> = ({
           </div>
         </div>
 
-        {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={!isFormValid}
-          className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
-        >
-          CONTINUE
-        </button>
+        {/* Submit / Skip Buttons */}
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={handleSubmit}
+            disabled={!isFormValid}
+            className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            CONTINUE
+          </button>
+          
+          <button
+            onClick={handleSkip}
+            className="custom-btn !px-6 !py-2 bg-gray-500 hover:bg-gray-600 transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
+          >
+            SKIP
+          </button>
+        </div>
 
         {/* Error Message */}
         {error && (

@@ -4,13 +4,13 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, ChevronLeft, ChevronRight, Menu, Users } from 'lucide-react';
-import { UserProfileSidebar, StatsCards } from '@/components';
+import { Search, Bell, ChevronLeft, ChevronRight, Menu, Users, Play } from 'lucide-react';
+import { UserProfileSidebar, StatsCards, useTour } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 
 const Dashboard = () => {
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { startTour } = useTour();
 
   const statsCards = [
     { number: '50', label: 'BOOKINGS', description: 'New Meetings, Consultations, Or Events Scheduled', color: '#CF3232' },
@@ -34,7 +34,7 @@ const Dashboard = () => {
       <UserProfileSidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        currentPage="user-dashboard"
+        currentPage="dashboard"
       />
 
 
@@ -53,7 +53,11 @@ const Dashboard = () => {
                 <Menu className="w-6 h-6 text-gray-600" />
               </button>
               
-              <h1 className="text-[#101117] text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
+              <h1 
+                data-tour="dashboard-overview"
+                className="text-[#101117] text-lg sm:text-xl font-semibold" 
+                style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}
+              >
                 Signature Dashboard
               </h1>
             </div>
@@ -70,6 +74,16 @@ const Dashboard = () => {
                 />
               </div>
               
+              {/* Start Tour Button */}
+              <button
+                data-tour="start-tour-button"
+                onClick={startTour}
+                className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-[#B82A2A] transition-colors text-sm font-medium"
+              >
+                <Play className="w-4 h-4" />
+                <span>Start Tour</span>
+              </button>
+              
               {/* Notifications and Profile Icons */}
               <div className="flex items-center space-x-4">
                 <div className="relative">
@@ -84,20 +98,30 @@ const Dashboard = () => {
                     16
                   </span>
                 </div>
-                <UserProfileDropdown userName="Richard Branson" />
+                <UserProfileDropdown />
               </div>
             </div>
           </div>
           
-          {/* Mobile Search */}
-          <div className="relative sm:hidden mt-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input 
-              type="text" 
-              placeholder="Search here..." 
-              className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
-              style={{ color: '#949494' }}
-            />
+          {/* Mobile Search and Tour Button */}
+          <div className="sm:hidden mt-4 space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input 
+                type="text" 
+                placeholder="Search here..." 
+                className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
+                style={{ color: '#949494' }}
+              />
+            </div>
+            <button
+              data-tour="start-tour-button-mobile"
+              onClick={startTour}
+              className="flex items-center justify-center space-x-2 w-full px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-[#B82A2A] transition-colors text-sm font-medium"
+            >
+              <Play className="w-4 h-4" />
+              <span>Start Dashboard Tour</span>
+            </button>
           </div>
         </header>
 
@@ -109,7 +133,9 @@ const Dashboard = () => {
             <div className="flex-1 flex flex-col gap-6 lg:gap-8">
               
                             {/* Stats Cards */}
-              <StatsCards stats={statsCards} columns={4} />
+              <div data-tour="stats-cards">
+                <StatsCards stats={statsCards} columns={4} />
+              </div>
               {/* Audience Demographics */}
               <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
                 <h2 className="text-lg sm:text-xl font-semibold text-[#101117] mb-4 sm:mb-6">

@@ -79,6 +79,215 @@ export const api = {
   },
 
   // Removed uploadSignature – signature is now included in submit-user-info payload
+
+  async getUserDetails(authToken: string) {
+    return request<{
+      success: boolean;
+      user: {
+        id: number;
+        username: string;
+        email: string;
+        display_name: string;
+        registered_date: string;
+        signature_url: string;
+        first_name: string;
+        last_name: string;
+        company_name: string;
+        company_website: string;
+        industry: string;
+        num_employees: string;
+        email_list_size: string;
+        newsletter_service: string;
+        audience_description: string;
+        success_metrics: {
+          numberOfBookings: string;
+          emailListSize: string;
+          amountInSales: string;
+          amountInDonations: string;
+        };
+        links: string[];
+        account_status: string;
+        profile_template: {
+          id: number;
+          title: string;
+          image_url: string;
+          image_alt: string;
+        };
+        hubspot_data: string;
+      };
+    }>(
+      '/user/user-details',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
+
+  async updateProfile(authToken: string, payload: JsonRecord) {
+    return request<{
+      success: boolean;
+      message: string;
+      updated_fields: string[];
+      user_id: number;
+    }>(
+      '/user/update-profile',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+  },
+
+  async updatePassword(authToken: string, currentPassword: string, newPassword: string) {
+    return request<{
+      success: boolean;
+      message: string;
+    }>(
+      '/user/update-password',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+        }),
+      }
+    );
+  },
+
+  async getFollowers(authToken: string, page: number = 1, perPage: number = 20) {
+    return request<{
+      success: boolean;
+      followers: Array<{
+        id: number;
+        first_name: string;
+        last_name: string;
+        display_name: string;
+        email: string;
+        date_of_birth: string;
+        occupation: string;
+        company_name: string;
+        date_followed: string;
+        follow_id: number;
+      }>;
+      pagination: {
+        current_page: number;
+        per_page: number;
+        total_followers: number;
+        total_pages: number;
+      };
+    }>(
+      `/get-followers?page=${page}&per_page=${perPage}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
+
+  async exportFollowersCSV(authToken: string) {
+    return request<{
+      success: boolean;
+      csv_data: string;
+    }>(
+      '/export-followers-csv',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
+
+  async searchFollowers(authToken: string, query: string) {
+    return request<{
+      success: boolean;
+      followers: Array<{
+        id: number;
+        first_name: string;
+        last_name: string;
+        display_name: string;
+        email: string;
+        date_of_birth: string;
+        age: string;
+        occupation: string;
+        company_name: string;
+        billing_country: string;
+        billing_state: string;
+        date_followed: string;
+        follow_id: number;
+      }>;
+      search: {
+        query: string;
+        total_matches: number;
+        total_followers: number;
+      };
+      pagination: {
+        current_page: number;
+        per_page: number;
+        total_matches: number;
+        total_pages: number;
+        has_more: boolean;
+      };
+    }>(
+      `/search-followers?q=${query}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
+
+  async getFollowerStats(authToken: string) {
+    return request<{
+      success: boolean;
+      stats: {
+        total_followers: number;
+        current_month_followers: number;
+        top_country: {
+          name: string | null;
+          count: number;
+          percentage: number;
+        };
+        top_location: {
+          name: string | null;
+          count: number;
+          percentage: number;
+        };
+        all_countries: Array<{ name: string; count: number; percentage: number }>;
+        all_locations: Array<{ name: string; count: number; percentage: number }>;
+      };
+      period: {
+        current_month: string;
+        month_start: string;
+        generated_at: string;
+      };
+    }>(
+      '/get-follower-stats',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
 };
 
 

@@ -479,3 +479,28 @@ align-items: center;
   display: none; /* Chrome, Safari, Edge */
 }
 
+.tg-dialog {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+div#tg-dialog-title , div#tg-dialog-body,button#tg-dialog-prev-btn, .tg-dialog-footer-sup, button#tg-dialog-next-btn{
+  color: #333333;
+}
+.tg-dialog-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+.tg-dialog-close-btn{
+ 
+    position: relative;
+    right: -15px;
+    top: -40px;
+    /* border: 1px solid red; */
+    text-align: -webkit-right;
+
+}
+.tg-dialog-spinner{
+  display: none;
+}

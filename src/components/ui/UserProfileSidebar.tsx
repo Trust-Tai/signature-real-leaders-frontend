@@ -20,13 +20,13 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   currentPage 
 }) => {
   const sidebarItems = [
-    { icon: LayoutDashboardIcon, label: 'Dashboard', path: '/user-dashboard', page: 'user-dashboard' },
-    { icon: Calendar, label: 'Bookings This Month', path: '/user-dashboard/booking-this-month', page: 'booking-this-month' },
-    { icon: Mail, label: 'Newsletter Subscribers', path: '/user-dashboard/email-subscribers', page: 'email-subscribers' },
-    { icon: Users, label: 'Followers', path: '/user-dashboard/followers', page: 'followers' },
-    { icon: Eye, label: 'Page Views', path: '/user-dashboard/page-views', page: 'page-views' },
-    { icon: Send, label: 'Total Link Clicks', path: '/user-dashboard/total-link-clicks', page: 'total-link-clicks' },
-    { icon: SquarePlus, label: 'Audience Demographics', path: '/user-dashboard/audience-demographics', page: 'audience-demographics' }
+    { icon: LayoutDashboardIcon, label: 'Dashboard', path: '/dashboard', page: 'dashboard', tourId: 'dashboard-tab' },
+    { icon: Calendar, label: 'Bookings This Month', path: '/dashboard/booking-this-month', page: 'booking-this-month', tourId: 'bookings-tab' },
+    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'newsletter-tab' },
+    { icon: Users, label: 'Followers', path: '/dashboard/followers', page: 'followers', tourId: 'followers-tab' },
+    { icon: Eye, label: 'Page Views', path: '/dashboard/page-views', page: 'page-views', tourId: 'page-views-tab' },
+    { icon: Send, label: 'Total Link Clicks', path: '/dashboard/total-link-clicks', page: 'total-link-clicks', tourId: 'link-clicks-tab' },
+    { icon: SquarePlus, label: 'Audience Demographics', path: '/dashboard/audience-demographics', page: 'audience-demographics', tourId: 'demographics-tab' }
   ];
 
 
@@ -75,6 +75,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
               <Link 
                 key={index}
                 href={item.path}
+                data-tour={item.tourId}
                 className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
                   currentPage === item.page ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
                 }`}

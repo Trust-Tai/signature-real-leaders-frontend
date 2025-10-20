@@ -1,7 +1,8 @@
+"use client"
+
 import React from 'react';
 import Image from "next/image";
 import {images} from '../../assets/index'
-import { useRouter } from "next/navigation";
 interface VerificationReviewSectionProps {
   className?: string;
 }
@@ -9,7 +10,6 @@ interface VerificationReviewSectionProps {
 const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
   className
 }) => {
-   const router = useRouter();
   return (
     <div className={`min-h-screen flex items-start justify-center p-4 sm:p-8 animate-fade-in-up ${className || ''}`} 
         style={{marginTop:150}} >
@@ -53,13 +53,7 @@ const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
           </div>
         </div>
 
-         <button
-          type="submit"
-          onClick={()=>router.push("/user-dashboard")}
-          className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 animate-fade-in"
-        >
-           ACCESS DASHBOARD FOR KEVIN
-        </button>
+     
       </div>
      
     </div>

@@ -176,6 +176,8 @@
 
 // export default Sidebar;
 
+"use client"
+
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Step } from "../types";
@@ -189,6 +191,7 @@ interface SidebarProps {
   imageUrl?: string | StaticImageData;
   isMobileOpen?: boolean;
   onMobileToggle?: () => void;
+  onStepClick?: (stepId: number) => void; // Callback for step navigation
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -197,8 +200,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   imageUrl,
   isMobileOpen = false,
   onMobileToggle,
+  onStepClick,
 }) => {
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
+
+  const handleStepClick = (step: Step) => {
+    // Only allow navigation for completed or current steps
+    if ((step.status === 'completed' || step.status === 'current') && onStepClick) {
+      onStepClick(step.id);
+    }
+  };
 
   const getStepIcon = (step: Step) => {
     switch (step.status) {
@@ -307,14 +318,24 @@ const Sidebar: React.FC<SidebarProps> = ({
               return null;
             })()}
 
-            {steps.map((step) => (
-              <div key={step.id} className="flex items-center relative z-20 mb-[50px]">
-                {getStepIcon(step)}
-                <span className={cn("font-outfit font-medium text-sm sm:text-base", getStepTextColor(step))}>
-                  {step.title}
-                </span>
-              </div>
-            ))}
+            {steps.map((step) => {
+              const isClickable = (step.status === 'completed' || step.status === 'current') && onStepClick;
+              return (
+                <div 
+                  key={step.id} 
+                  className={cn(
+                    "flex items-center relative z-20 mb-[50px]",
+                    isClickable && "cursor-pointer hover:opacity-80 transition-opacity"
+                  )}
+                  onClick={() => handleStepClick(step)}
+                >
+                  {getStepIcon(step)}
+                  <span className={cn("font-outfit font-medium text-sm sm:text-base", getStepTextColor(step))}>
+                    {step.title}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -399,14 +420,24 @@ const Sidebar: React.FC<SidebarProps> = ({
             return null;
           })()}
 
-          {steps.map((step) => (
-            <div key={step.id} className="flex items-center relative z-20 mb-[50px]">
-              {getStepIcon(step)}
-              <span className={cn("font-outfit font-medium text-sm sm:text-base", getStepTextColor(step))}>
-                {step.title}
-              </span>
-            </div>
-          ))}
+          {steps.map((step) => {
+            const isClickable = (step.status === 'completed' || step.status === 'current') && onStepClick;
+            return (
+              <div 
+                key={step.id} 
+                className={cn(
+                  "flex items-center relative z-20 mb-[50px]",
+                  isClickable && "cursor-pointer hover:opacity-80 transition-opacity"
+                )}
+                onClick={() => handleStepClick(step)}
+              >
+                {getStepIcon(step)}
+                <span className={cn("font-outfit font-medium text-sm sm:text-base", getStepTextColor(step))}>
+                  {step.title}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

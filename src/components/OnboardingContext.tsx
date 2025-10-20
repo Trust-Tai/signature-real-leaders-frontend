@@ -27,8 +27,29 @@ export interface OnboardingState {
   industry?: string;
   num_employees?: string;
   email_list_size?: string;
-  audience_description?: string;
+  audience_description?: {
+    name: string;
+    age_range: string;
+    demographic_details: string;
+  };
   success_metrics?: SuccessMetrics;
+
+  // Address Fields
+  billing_address_1?: string;
+  billing_address_2?: string;
+  billing_city?: string;
+  billing_postcode?: string;
+  billing_country?: string;
+  billing_phone?: string;
+
+  // Additional Fields
+  brand_voice?: string;
+  unique_differentiation?: string;
+  top_pain_points?: string;
+  content_preference_industry?: string[];
+  primary_call_to_action?: string;
+  date_of_birth?: string;
+  occupation?: string;
 
   newsletter?: NewsletterCredentials;
   profile_template_id?: number;

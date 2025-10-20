@@ -10,7 +10,11 @@ interface FollowCardStyles extends React.CSSProperties {
   "--gy"?: string;
 }
 
-export const InteractiveFollowCard: React.FC = () => {
+type InteractiveFollowCardProps = {
+  name?: string;
+};
+
+export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = ({ name }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const glareRef = useRef<HTMLDivElement>(null);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
@@ -155,7 +159,7 @@ export const InteractiveFollowCard: React.FC = () => {
               className="text-lg font-bold text-white tracking-tight"
               style={{ transform: "translateZ(55px)" }}
             >
-              Richard Branson
+              {name && name.trim().length > 0 ? name : "Richard Branson"}
             </div>
             <div
               className="text-xs text-gray-300 leading-tight"
@@ -193,7 +197,7 @@ export const InteractiveFollowCard: React.FC = () => {
                 className="text-sm font-light text-gray-300 italic mb-2"
                 style={{ fontFamily: "serif" }}
               >
-                Richard Branson
+                {name && name.trim().length > 0 ? name : "Richard Branson"}
               </div>
             </div>
 

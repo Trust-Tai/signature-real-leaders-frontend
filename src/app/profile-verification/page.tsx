@@ -25,7 +25,6 @@ import { OnboardingProvider, useOnboarding } from '@/components/OnboardingContex
 import { api } from '@/lib/api';
 import { images } from "../../assets/index";
 import { toast } from '@/components/ui/toast';
-import { ArrowLeft } from 'lucide-react';
 import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
 // import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
 import UptrendCanvas from '@/components/ui/UptrendCanvas';
@@ -77,6 +76,33 @@ const InnerProfileVerificationPage = () => {
     { id: 10, title: 'Review in Progress', status: currentStep === 10 ? 'current' : 'pending' }
   ];
 
+  const handleStepClick = (stepId: number) => {
+    // Allow navigation to completed and current steps
+    if (stepId <= currentStep) {
+      setCurrentStep(stepId);
+      
+      // Special handling for step 1 (Claim) - reset email and verification state
+      if (stepId === 1) {
+        setState(prev => ({ ...prev, email: undefined }));
+        setShowCodeVerification(false);
+        setInfoMessage(undefined);
+        setResendResponseMessage(undefined);
+        setError(undefined);
+        console.log(`Navigated to step ${stepId} - reset email and verification state`);
+      }
+      // Special handling for step 2 (Verification) - reset OTP state
+      else if (stepId === 2) {
+        setShowCodeVerification(false);
+        setInfoMessage(undefined);
+        setResendResponseMessage(undefined);
+        setError(undefined);
+        console.log(`Navigated to step ${stepId} - reset OTP state`);
+      } else {
+        console.log(`Navigated to step ${stepId}`);
+      }
+    }
+  };
+
   const nextStep = () => {
     console.log('nextStep called, current step:', currentStep);
     if (currentStep < 10) {
@@ -86,20 +112,6 @@ const InnerProfileVerificationPage = () => {
     }
   };
 
-  const prevStep = () => {
-    if (currentStep === 2 && showCodeVerification) {
-      setShowCodeVerification(false);
-      setInfoMessage(undefined); // Clear info message when going back from OTP
-      setResendResponseMessage(undefined); // Clear resend response message when going back from OTP
-      return;
-    }
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      // Clear messages when going back to any step
-      setInfoMessage(undefined);
-      setResendResponseMessage(undefined);
-    }
-  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -229,7 +241,32 @@ const InnerProfileVerificationPage = () => {
       case 3:
         return (
           <InformationFormSection
-            onSubmit={(data: { firstName: string; lastName: string; companyName: string; companyWebsite: string; industry: string; numberOfEmployees: string; contactEmailListSize: string; about: string }) => {
+            initialData={{
+              firstName: state.first_name || formData.name
+            }}
+            onSubmit={(data: {
+              firstName: string;
+              lastName: string;
+              companyName: string;
+              companyWebsite: string;
+              industry: string;
+              numberOfEmployees: string;
+              contactEmailListSize: string;
+              about: string;
+              billing_address_1: string;
+              billing_address_2: string;
+              billing_city: string;
+              billing_postcode: string;
+              billing_country: string;
+              billing_phone: string;
+              brand_voice: string;
+              unique_differentiation: string;
+              top_pain_points: string;
+              content_preference_industry: string[];
+              primary_call_to_action: string;
+              date_of_birth: string;
+              occupation: string;
+            }) => {
               setState(prev => ({
                 ...prev,
                 first_name: data.firstName,
@@ -239,9 +276,23 @@ const InnerProfileVerificationPage = () => {
                 industry: data.industry,
                 num_employees: data.numberOfEmployees,
                 email_list_size: data.contactEmailListSize,
-                audience_description: data.about,
+                // Address Fields
+                billing_address_1: data.billing_address_1,
+                billing_address_2: data.billing_address_2,
+                billing_city: data.billing_city,
+                billing_postcode: data.billing_postcode,
+                billing_country: data.billing_country,
+                billing_phone: data.billing_phone,
+                // Additional Fields
+                brand_voice: data.brand_voice,
+                unique_differentiation: data.unique_differentiation,
+                top_pain_points: data.top_pain_points,
+                content_preference_industry: data.content_preference_industry,
+                primary_call_to_action: data.primary_call_to_action,
+                date_of_birth: data.date_of_birth,
+                occupation: data.occupation,
               }));
-              console.log('[Step 5] Saved user information to state', { data });
+              console.log('[Step 3] Saved user information to state', { data });
               nextStep();
             }}
           />
@@ -326,6 +377,21 @@ const InnerProfileVerificationPage = () => {
                   agreeTerms: signData.agreeTerms,
                   confimInFoAccurate: signData.confirmInfo,
                   signature: signData.signature || signData.uploadedImage,
+                  // Address Fields
+                  billing_address_1: state.billing_address_1,
+                  billing_address_2: state.billing_address_2,
+                  billing_city: state.billing_city,
+                  billing_postcode: state.billing_postcode,
+                  billing_country: state.billing_country,
+                  billing_phone: state.billing_phone,
+                  // Additional Fields
+                  brand_voice: state.brand_voice,
+                  unique_differentiation: state.unique_differentiation,
+                  top_pain_points: state.top_pain_points,
+                  content_preference_industry: state.content_preference_industry,
+                  primary_call_to_action: state.primary_call_to_action,
+                  date_of_birth: state.date_of_birth,
+                  occupation: state.occupation,
                 };
                 if (!state.auth_token) throw new Error('Missing auth token');
                 console.log('[Step 9] Submitting user info', { payload, hasAuthToken: !!state.auth_token });
@@ -383,26 +449,26 @@ const InnerProfileVerificationPage = () => {
       case 1:
       case 2:
       case 2.5:
-        return <InteractiveFollowCard />;
+        return <InteractiveFollowCard name={formData.name} />;
       case 3:
         return <AudienceAnimation />
       case 8:
-        return <InteractiveFollowCard />;
+        return <InteractiveFollowCard name={state.first_name || formData.name} />;
       //  return <InteractiveMagazineCards />;
       case 6:
         return <AnimatedAudience />;
       case 4:
         return <NewsletterConnections />;
       case 5:
-        return <InteractiveFollowCard />;
+        return <InteractiveFollowCard name={state.first_name || formData.name} />;
       case 7:
         return <UptrendCanvas />;
       case 9:
         return <SignatureAnimation />;
       case 10:
-        return <InteractiveFollowCard />;
+        return <InteractiveFollowCard name={state.first_name || formData.name} />;
       default:
-        return <InteractiveFollowCard />;
+        return <InteractiveFollowCard name={state.first_name || formData.name} />;
     }
   };
 
@@ -437,7 +503,7 @@ const InnerProfileVerificationPage = () => {
 
       {/* Section 1: Left Sidebar - Fixed position */}
       <div className="hidden xl:block flex-shrink-0">
-        <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage}/>
+        <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage} onStepClick={handleStepClick}/>
       </div>
 
       {/* Mobile/Tablet Sidebar - Overlay */}
@@ -446,24 +512,13 @@ const InnerProfileVerificationPage = () => {
         imageUrl={images.verifyPageLefBgImage}
         isMobileOpen={isMobileMenuOpen}
         onMobileToggle={toggleMobileMenu}
+        onStepClick={handleStepClick}
       />
 
       {/* Section 2: Middle Content - Scrollable */}
       <MainContent>
         {/* Scrollable Content with hidden scrollbar */}
         <div className="h-full overflow-y-auto scrollbar-hide">
-          {/* Back Button - Top Left of MainContent */}
-          {currentStep >= 2 && !isMobileMenuOpen && (
-            <button
-              type="button"
-              aria-label="Go back"
-              onClick={prevStep}
-              className="flex gap-[5px] items-center mt-[10px] ml-[10px] cursor-pointer md:mt-[20px] md:ml-[80px]"
-            >
-              <ArrowLeft color="#000000" />
-              <div className="font-outfit font-medium text-[#333333]">Back</div>
-            </button>
-          )}
           <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
 
             <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] ${

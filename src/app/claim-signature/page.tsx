@@ -42,6 +42,14 @@ const FirstScreen = () => {
     { id: 10, title: 'Review in Progress', status: 'pending' }
   ];
 
+  const handleStepClick = (stepId: number) => {
+    // Only allow navigation to step 1 (current step) in claim-signature page
+    if (stepId === 1) {
+      // Already on step 1, no action needed
+      console.log('Already on step 1');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black flex flex-col xl:flex-row relative">
       {/* Mobile Sidebar Toggle - Only show when sidebar is closed */}
@@ -51,7 +59,7 @@ const FirstScreen = () => {
 
       {/* Section 1: Left Sidebar - Hidden on mobile/tablet, shown on desktop */}
       <div className="h-full">
-        <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage}/>
+        <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage} onStepClick={handleStepClick}/>
       </div>
 
       {/* Mobile/Tablet Sidebar - Overlay */}
@@ -60,6 +68,7 @@ const FirstScreen = () => {
         imageUrl={images.verifyPageLefBgImage}
         isMobileOpen={isMobileMenuOpen}
         onMobileToggle={toggleMobileMenu}
+        onStepClick={handleStepClick}
       />
 
       {/* Section 2: Middle Content - Takes remaining width */}
