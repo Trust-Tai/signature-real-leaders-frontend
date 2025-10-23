@@ -4,7 +4,12 @@ import React from 'react';
 import Image from 'next/image';
 import { images } from '@/assets';
 
-const LoadingScreen: React.FC = () => {
+interface LoadingScreenProps {
+  text1?: string;
+  text2?: string;
+}
+
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ text1 = "", text2 = "" }) => {
   return (
     <div className="fixed inset-0 bg-[#000] flex items-center justify-center z-50" style={{ fontFamily: 'Outfit, sans-serif' }}>
       <div className="text-center">
@@ -24,10 +29,10 @@ const LoadingScreen: React.FC = () => {
         
         {/* Loading Text */}
         <div className="text-[#fff] text-lg font-medium">
-          Loading your dashboard...
+          {text1}
         </div>
         <div className="text-[#fff] text-sm mt-2">
-          Please wait while we fetch your profile data
+          {text2}
         </div>
       </div>
     </div>

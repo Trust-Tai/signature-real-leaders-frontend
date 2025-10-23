@@ -53,7 +53,8 @@ export interface OnboardingState {
 
   newsletter?: NewsletterCredentials;
   profile_template_id?: number;
-  links?: string[];
+  links?: Array<{ name: string; url: string }>;
+  profilePicture?: string;
 }
 
 interface OnboardingContextValue {

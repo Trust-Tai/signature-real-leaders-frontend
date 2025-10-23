@@ -35,19 +35,18 @@ const Dashboard = () => {
 
 
   return (
-    <div className="min-h-screen flex bg-[#FFF9F9]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+    <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
       <UserProfileSidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         currentPage="dashboard"
       />
 
-
-      {/* Right Side (Header + Main Content) */}
-      <div className="flex-1 flex flex-col w-full lg:w-auto">
+      {/* Right Side (Header + Main Content + Footer) */}
+      <div className="flex-1 flex flex-col w-full lg:w-auto h-full">
         
-        {/* Header */}
-        <header className="bg-[#FFF9F9] px-4 sm:px-6 py-4">
+        {/* Fixed Header */}
+        <header className="bg-[#FFF9F9] px-4 sm:px-6 py-4 flex-shrink-0 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {/* Mobile Menu Button */}
@@ -112,12 +111,12 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1 flex flex-col">
-          <div className="flex-1 flex flex-col p-4 sm:p-6 lg:p-8 gap-6">
+        {/* Scrollable Main Content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             
             {/* Main Content */}
-            <div className="flex-1 flex flex-col gap-6 lg:gap-8">
+            <div className="space-y-6 lg:space-y-8">
               
                             {/* Stats Cards */}
               <div>
@@ -205,14 +204,14 @@ const Dashboard = () => {
             </div>
 
           </div>
-          
-          {/* Footer */}
-          <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px]">
-            <div className="text-xs sm:text-sm text-center">
-              © 2025 RealLeaders. All Rights Reserved.
-            </div>
-          </footer>
         </main>
+        
+        {/* Fixed Footer */}
+        <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px] flex-shrink-0">
+          <div className="text-xs sm:text-sm text-center">
+            © 2025 RealLeaders. All Rights Reserved.
+          </div>
+        </footer>
       </div>
     </div>
   );

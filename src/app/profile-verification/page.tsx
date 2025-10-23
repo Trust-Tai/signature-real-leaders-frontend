@@ -216,18 +216,18 @@ const InnerProfileVerificationPage = () => {
                     console.log('[Step 2] Email exists. Staying on email screen with message');
                     const msg = res.message || 'Email already exists';
                     setError(msg);
-                    toast.warning(msg, { id: 'email-exists' });
+                    toast.warning(msg, { id: 'email-exists', autoClose: false });
                   } else {
                     // Fallback: treat as error
                     const msg = res.message || 'Failed to send code';
                     setError(msg);
-                    toast.error(msg, { id: 'send-code-error' });
+                    toast.error(msg, { id: 'send-code-error', autoClose: false });
                   }
                 } catch (e: unknown) {
               
                   const errorMessage = e instanceof Error ? e.message : 'Failed to send code';
                   setError(errorMessage);
-                  toast.error(errorMessage, { id: 'send-code-exception' });
+                  toast.error(errorMessage, { id: 'send-code-exception', autoClose: false });
                 } finally {
                   setLoading(false);
                 }
@@ -266,6 +266,7 @@ const InnerProfileVerificationPage = () => {
               primary_call_to_action: string;
               date_of_birth: string;
               occupation: string;
+              profilePicture: string;
             }) => {
               setState(prev => ({
                 ...prev,
@@ -291,6 +292,7 @@ const InnerProfileVerificationPage = () => {
                 primary_call_to_action: data.primary_call_to_action,
                 date_of_birth: data.date_of_birth,
                 occupation: data.occupation,
+                profilePicture: data.profilePicture,
               }));
               console.log('[Step 3] Saved user information to state', { data });
               nextStep();
@@ -392,6 +394,7 @@ const InnerProfileVerificationPage = () => {
                   primary_call_to_action: state.primary_call_to_action,
                   date_of_birth: state.date_of_birth,
                   occupation: state.occupation,
+                  profilePicture: state.profilePicture,
                 };
                 if (!state.auth_token) throw new Error('Missing auth token');
                 console.log('[Step 9] Submitting user info', { payload, hasAuthToken: !!state.auth_token });

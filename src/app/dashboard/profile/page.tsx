@@ -27,7 +27,7 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [informationData, setInformationData] = useState<{ firstName: string; lastName: string; companyName: string; companyWebsite: string; industry: string; numberOfEmployees: string; contactEmailListSize: string; about: string } | null>(null);
   const [metricsData, setMetricsData] = useState<{ numberOfBookings: string; emailListSize: string; amountInSales: string; amountInDonations: string } | null>(null);
-  const [links, setLinks] = useState<string[] | null>(null);
+  const [links, setLinks] = useState<Array<{ name: string; url: string }> | null>(null);
   const [newsletter, setNewsletter] = useState<{ provider: string; apiKey?: string; clientId?: string; clientSecret?: string } | null>(null);
   
   // Links section state
@@ -107,6 +107,14 @@ const ProfilePage = () => {
   const setSuggestedValue = (label: string, value: string) => {
     setItemValues(prev => ({ ...prev, [label]: value }));
   };
+
+  // Update links state when form inputs change
+  useEffect(() => {
+    const processedLinks = Object.entries(itemValues)
+      .filter(([, url]) => url && url.trim() !== '')
+      .map(([name, url]) => ({ name, url: url.trim() }));
+    setLinks(processedLinks);
+  }, [itemValues]);
 
   const handleOtherSubmit = () => {
     if (otherLabel.trim() && !expandedItems.has(otherLabel.trim())) {
@@ -316,6 +324,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (user) {
       setBio(user.audience_description || '');
+      setProfileImage(user.profile_picture_url || null);
       setInformationData({
         firstName: user.first_name || '',
         lastName: user.last_name || '',
@@ -333,6 +342,21 @@ const ProfilePage = () => {
         amountInDonations: '',
       });
       setLinks(user.links || []);
+      
+      // Initialize form state from existing links
+      if (user.links && user.links.length > 0) {
+        const initialItemValues: Record<string, string> = {};
+        const initialExpandedItems = new Set<string>();
+        
+        user.links.forEach(link => {
+          initialItemValues[link.name] = link.url;
+          initialExpandedItems.add(link.name);
+        });
+        
+        setItemValues(initialItemValues);
+        setExpandedItems(initialExpandedItems);
+      }
+      
       setNewsletter({
         provider: user.newsletter_service || '',
       });
@@ -361,11 +385,15 @@ const ProfilePage = () => {
 
       const response = await api.updateProfile(token, {
         audience_description: bio,
+        profilePicture: profileImage || '',
       });
 
       if (response.success) {
         toast.success(response.message);
-        updateUser({ audience_description: bio });
+        updateUser({ 
+          audience_description: bio,
+          profile_picture_url: profileImage || undefined 
+        });
       } else {
         toast.error('Failed to update profile');
       }
@@ -539,6 +567,9 @@ const ProfilePage = () => {
                     <Image 
                       src={profileImage} 
                       alt="Profile" 
+                      width={96}
+                       unoptimized
+                      height={96}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -1010,7 +1041,7 @@ const ProfilePage = () => {
                     ></a>
                   </div>
                   
-                  <Image alt="" src={images.mailchimpIcon} />
+                  <Image alt="" src={images.mailchimpIcon} width={48} height={48} />
                   <h3 className="font-outfit text-xl font-bold text-[#333333]">Mailchimp {servicesLoading ? '(...)' : ''}</h3>
                   <p className="text-sm text-gray-600 text-center">
                     Connect via API Key
@@ -1049,7 +1080,7 @@ const ProfilePage = () => {
                     ></a>
                   </div>
                   
-                  <Image src={images.hubspotIcon} alt="" />
+                  <Image src={images.hubspotIcon} alt="" width={48} height={48} />
                   <h3 className="font-outfit text-xl font-bold text-[#333333]">HubSpot {servicesLoading ? '(...)' : ''}</h3>
                   <p className="text-sm text-gray-600 text-center">
                     Connect via Client ID and Client Secret

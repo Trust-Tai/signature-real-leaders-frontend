@@ -257,9 +257,9 @@ const LoginPage = () => {
           </div>
           {renderCurrentScreen()}
         </div>
-        <div style={{width:"50%",height:"auto"}}>
-        <InteractiveMagazineCards />
-        </div>
+        <div className="hidden lg:block w-1/2 h-auto">
+  <InteractiveMagazineCards />
+</div>
       </div>
     </div>
   );

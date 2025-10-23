@@ -194,13 +194,13 @@ const CodeVerificationSection: React.FC<CodeVerificationSectionProps> = ({
 
   useEffect(() => {
     if (infoMessage) {
-      toast.info(infoMessage, { id: 'otp-info' });
+      toast.info(infoMessage, { id: 'otp-info', autoClose: false });
     }
   }, [infoMessage]);
 
   useEffect(() => {
     if (resendResponseMessage) {
-      toast.info(resendResponseMessage, { id: 'otp-resend' });
+      toast.info(resendResponseMessage, { id: 'otp-resend', autoClose: false });
     }
   }, [resendResponseMessage]);
 

@@ -81,6 +81,7 @@ export const api = {
   // Removed uploadSignature – signature is now included in submit-user-info payload
 
   async getUserDetails(authToken: string) {
+    console.log("authToken",authToken)
     return request<{
       success: boolean;
       user: {
@@ -90,6 +91,7 @@ export const api = {
         display_name: string;
         registered_date: string;
         signature_url: string;
+        profile_picture_url: string;
         first_name: string;
         last_name: string;
         company_name: string;
@@ -105,7 +107,7 @@ export const api = {
           amountInSales: string;
           amountInDonations: string;
         };
-        links: string[];
+        links: Array<{ name: string; url: string }>;
         account_status: string;
         profile_template: {
           id: number;
@@ -287,6 +289,162 @@ export const api = {
         },
       }
     );
+  },
+
+  async autoLogin(authToken: string, redirectUrl?: string) {
+    return request<{
+      success: boolean;
+      message?: string;
+      redirect_url?: string;
+      login_url?: string;
+    }>(
+      '/auth/auto-login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          redirect_url: redirectUrl || 'https://verified.real-leaders.com/about-us'
+        }),
+      }
+    );
+  },
+
+  async getPublicProfile(username: string) {
+    return request<{
+      success: boolean;
+      profile: {
+        user_id: number;
+        username: string;
+        email: string;
+        first_name: string;
+        last_name: string;
+        full_name: string;
+        description: string;
+        company_name: string;
+        company_website: string;
+        industry: string;
+        newsletter_service: string;
+        occupation: string;
+        location: string;
+        profile_image: string;
+        profile_picture_url: string;
+        signature_url: string;
+        links: Array<{
+          key: number;
+          label: string;
+          value: string;
+          url: string;
+          icon: string;
+        }>;
+        primary_call_to_action: string;
+        profile_template: {
+          id: number;
+          title: string;
+          image_url: string;
+          image_alt: string;
+        };
+        profile_privacy: string;
+      };
+      meta: {
+        total_links: number;
+        profile_url: string;
+        last_updated: string;
+      };
+    }>(
+      `/profile/${username}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  },
+
+  async followUser(userId: number, optIn: boolean = false) {
+    const authToken = localStorage.getItem('auth_token');
+    const url = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/follow-user';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      },
+      body: JSON.stringify({ user_id: userId, opt_in: optIn }),
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to follow user');
+    }
+    
+    return data as {
+      success: boolean;
+      message: string;
+      follow_id: number;
+      follower: {
+        id: number;
+        name: string;
+      };
+      followed_user: {
+        id: number;
+        name: string;
+      };
+    };
+  },
+
+  async unfollowUser(userId: number) {
+    const authToken = localStorage.getItem('auth_token');
+    const url = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/unfollow-user';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      },
+      body: JSON.stringify({ user_id: userId }),
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to unfollow user');
+    }
+    
+    return data as {
+      success: boolean;
+      message: string;
+      unfollowed_user: {
+        id: number;
+        name: string;
+      };
+    };
+  },
+
+  async checkFollowStatus(userId: number) {
+    const authToken = localStorage.getItem('auth_token');
+    const url = `https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/check-follow-status?user_id=${userId}`;
+  const response = await fetch(url, {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+    ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+  }
+});
+console.log("response>>>>",response)
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to check follow status');
+    }
+    
+    return data as {
+      success: boolean;
+      is_following: boolean;
+      follow_id?: number;
+    };
   },
 };
 

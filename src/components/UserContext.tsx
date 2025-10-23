@@ -10,6 +10,7 @@ interface User {
   display_name: string;
   registered_date: string;
   signature_url: string;
+  profile_picture_url: string;
   first_name: string;
   last_name: string;
   company_name: string;
@@ -25,7 +26,7 @@ interface User {
     amountInSales: string;
     amountInDonations: string;
   };
-  links: string[];
+  links: Array<{ name: string; url: string }>;
   account_status: string;
   profile_template: {
     id: number;

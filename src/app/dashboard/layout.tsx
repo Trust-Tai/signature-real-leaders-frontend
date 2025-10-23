@@ -7,7 +7,7 @@ const DashboardContent: React.FC<{ children: React.ReactNode }> = ({ children })
   const { isInitialLoading } = useUser();
   
   if (isInitialLoading) {
-    return <LoadingScreen />;
+    return <LoadingScreen  text1="Loading your dashboard..." text2="Please wait while we fetch your profile data"/>;
   }
   
   return (

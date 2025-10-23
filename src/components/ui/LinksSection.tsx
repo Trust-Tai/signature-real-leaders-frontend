@@ -8,7 +8,7 @@ import { FaMapMarkedAlt } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
 
 interface LinksSectionProps {
-  onSubmit: (links: string[]) => void;
+  onSubmit: (links: Array<{ name: string; url: string }>) => void;
   className?: string;
   error?: string;
 }
@@ -81,7 +81,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({
   const handleSubmit = () => {
     const suggestedFilled = Object.entries(itemValues)
       .filter(([, v]) => v && v.trim() !== '')
-      .map(([, v]) => v.trim());
+      .map(([name, url]) => ({ name, url: url.trim() }));
     console.log('LinksSection: Submitting links array:', suggestedFilled);
     onSubmit(suggestedFilled);
   };
