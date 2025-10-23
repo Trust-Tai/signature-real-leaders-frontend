@@ -6,8 +6,10 @@ import Image from 'next/image';
 import { images } from '@/assets';
 import FooterBanner from '@/components/ui/home-page-footer';
 import { useRouter } from "next/navigation";
+import { useUser } from '@/components';
 export default function UserProfile() {
-    const router = useRouter()
+    const router = useRouter();
+    const { user } = useUser();
   const [emailSubscribed, setEmailSubscribed] = useState(false);
   const [newsletterModalOpen, setNewsletterModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -147,7 +149,7 @@ export default function UserProfile() {
               fontSize: '43px',
             }}
           >
-            Richard Branson
+            {user?.display_name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.first_name) || user?.username || 'User'}
           </h1>
 
           {/* Founder title */}
@@ -299,7 +301,7 @@ export default function UserProfile() {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               <p className="text-gray-600 text-sm mb-4">
-                Please fill in your details to join our newsletter and follow Richard Branson.
+                Please fill in your details to join our newsletter and follow {user?.display_name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.first_name) || user?.username || 'this user'}.
               </p>
               
               {/* Name */}

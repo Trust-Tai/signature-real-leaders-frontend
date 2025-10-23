@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from "next/image";
+import Link from "next/link";
 import {images} from '../../assets/index'
 interface VerificationReviewSectionProps {
   className?: string;
@@ -53,7 +54,42 @@ const VerificationReviewSection: React.FC<VerificationReviewSectionProps> = ({
           </div>
         </div>
 
-     
+        {/* Login Section */}
+        <div className="mt-12 sm:mt-16 space-y-6 animate-fade-in">
+          <div className="border-t border-gray-200 pt-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4" 
+                style={{ 
+                  color: '#CF3232',
+                  fontFamily: "Abolition Test",
+                  fontWeight: 400
+                }}>
+              ALREADY HAVE AN ACCOUNT?
+            </h2>
+            
+            <p className="text-sm sm:text-base text-gray-600 mb-6 font-outfit font-medium" 
+               style={{ color: '#333333CC' }}>
+              Sign in to access your dashboard and manage your signature link.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link 
+                href="/login"
+                className="w-full sm:w-auto px-8 py-3 bg-[#CF3232] text-white font-semibold rounded-lg hover:bg-red-700 transition-colors duration-200 font-outfit text-center inline-block"
+              >
+                LOGIN TO DASHBOARD
+              </Link>
+              
+              <span className="text-gray-400 font-outfit">or</span>
+              
+              <Link 
+                href="/"
+                className="w-full sm:w-auto px-8 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200 font-outfit text-center inline-block"
+              >
+                BACK TO HOME
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
      
     </div>

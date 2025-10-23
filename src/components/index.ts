@@ -24,7 +24,6 @@ export { default as MobileSidebarToggle } from './ui/MobileSidebarToggle';
 export { default as StatsCards } from './ui/StatsCards';
 export { default as ArticlesModal } from './ui/ArticlesModal';
 export { default as AutoLoginButton } from './ui/AutoLoginButton';
-export { default as WordPressAccessPanel } from './ui/WordPressAccessPanel';
 
 // Layout Components
 export { default as Sidebar } from './ui/Sidebar';
@@ -37,8 +36,8 @@ export { default as ErrorBoundary } from './ui/ErrorBoundary';
 // Context
 export { UserProvider, useUser } from './UserContext';
 
-// Auth
-export { AuthGuard } from './AuthGuard';
+// Auth Components
+export { default as AuthGuard } from './AuthGuard';
 
 // Types
 export type { Step } from './types';

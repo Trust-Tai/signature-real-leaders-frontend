@@ -27,11 +27,11 @@ export interface OnboardingState {
   industry?: string;
   num_employees?: string;
   email_list_size?: string;
-  audience_description?: {
+  target_audience?: Array<{
     name: string;
-    age_range: string;
+    age_group: string;
     demographic_details: string;
-  };
+  }>;
   success_metrics?: SuccessMetrics;
 
   // Address Fields

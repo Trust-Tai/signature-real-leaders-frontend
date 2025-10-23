@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/toast';
 import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { UserProfileSidebar, UserProfileDropdown, useUser } from '@/components';
 import Image from 'next/image';
 import { OnboardingProvider } from '@/components/OnboardingContext';
@@ -15,6 +16,7 @@ import { FaMapMarkedAlt } from 'react-icons/fa';
 import { images } from '@/assets';
 
 const ProfilePage = () => {
+  const router = useRouter();
   const { user, updateUser } = useUser();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [bio, setBio] = useState("");
@@ -380,6 +382,7 @@ const ProfilePage = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
         toast.error('Authentication token not found');
+        router.push('/login');
         return;
       }
 
@@ -410,6 +413,7 @@ const ProfilePage = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
         toast.error('Authentication token not found');
+        router.push('/login');
         return;
       }
 
@@ -464,6 +468,7 @@ const ProfilePage = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
         toast.error('Authentication token not found');
+        router.push('/login');
         return;
       }
 

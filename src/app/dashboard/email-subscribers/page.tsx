@@ -178,7 +178,7 @@ const EmailSubscribers = () => {
                     16
                   </span>
                 </div>
-                <UserProfileDropdown userName="Richard Branson" />
+                <UserProfileDropdown />
               </div>
             </div>
           </div>

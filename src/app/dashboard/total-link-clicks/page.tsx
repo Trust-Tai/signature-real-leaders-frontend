@@ -148,7 +148,7 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
                     16
                   </span>
                 </div>
-                <UserProfileDropdown userName="Richard Branson" />
+                <UserProfileDropdown />
               </div>
             </div>
           </div>

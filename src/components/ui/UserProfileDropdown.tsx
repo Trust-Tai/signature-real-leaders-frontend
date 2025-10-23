@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { User, ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
+import { User, ChevronDown, LogOut, User as UserIcon, UserRoundCheck } from 'lucide-react';
 import Link from 'next/link';
 import LogoutConfirmationPopup from './LogoutConfirmationPopup';
 import Image from 'next/image';
@@ -56,10 +56,10 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
           onClick={toggleDropdown}
           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors mb-[10]"
         >
-          {userImage || user?.profile_template?.image_url ? (
+          {userImage || user?.profile_picture_url || user?.profile_template?.image_url ? (
             <Image 
-              src={userImage || user?.profile_template?.image_url || ''} 
-              alt={userName || user?.display_name || 'User'}
+              src={userImage || user?.profile_picture_url || user?.profile_template?.image_url || ''} 
+              alt={userName || user?.display_name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.first_name) || user?.username || 'User'}
               className="w-8 h-8 rounded-full object-cover"
               width={32}
               height={32}
@@ -70,7 +70,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
             </div>
           )}
           <span className="hidden sm:block text-sm font-medium text-gray-700">
-            {userName || user?.display_name || 'User'}
+            {userName || user?.display_name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.first_name) || user?.username || 'User'}
           </span>
           <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -85,7 +85,15 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
               <UserIcon className="w-4 h-4" />
               <span>View Profile</span>
             </Link>
-            
+             <Link
+              href={`${user?.username}`}
+              className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <UserRoundCheck className="w-4 h-4"/>
+             
+              <span>View Public Profile</span>
+            </Link>
             <div className="border-t border-gray-100 my-1"></div>
             
             <button

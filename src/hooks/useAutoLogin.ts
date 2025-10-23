@@ -26,8 +26,7 @@ export const useAutoLogin = (): UseAutoLoginReturn => {
 
       console.log('[AutoLogin] Starting auto-login process...', { redirectUrl });
       
-      // Show loading toast
-      toast.info('Connecting to WordPress...', { autoClose: 2000 });
+     
 
       // Call auto-login API
       const response = await api.autoLogin(authToken, redirectUrl);
@@ -35,8 +34,7 @@ export const useAutoLogin = (): UseAutoLoginReturn => {
       if (response.success) {
         console.log('[AutoLogin] Auto-login successful:', response);
         
-        // Show success toast
-        toast.success('Successfully connected to WordPress!', { autoClose: 3000 });
+
 
         // If we get a login URL or redirect URL, open it in a new tab
         const targetUrl = response.login_url || response.redirect_url || redirectUrl;

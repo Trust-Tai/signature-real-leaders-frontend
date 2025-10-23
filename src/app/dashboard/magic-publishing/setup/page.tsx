@@ -61,49 +61,35 @@ const MagicPublishingSetup = () => {
   const [customLinkLabel, setCustomLinkLabel] = useState('');
   const [customLinkUrl, setCustomLinkUrl] = useState('');
 
-  // Load existing user data on component mount
-  useEffect(() => {
-    // Try to load from localStorage or make API call to get user profile data
-    const loadUserData = async () => {
-      try {
-        // You can replace this with an actual API call to get user profile data
-        const savedData = localStorage.getItem('magicPublishingSetup');
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          setFormData(parsedData);
-        }
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    };
-
-    loadUserData();
-  }, []);
+  // Note: Removed localStorage loading to prioritize API data
+  // TODO: Add localStorage fallback after API data loading is confirmed working
 
   // Populate form with user data when user is loaded
   useEffect(() => {
     if (user) {
+      const mappedAudience = user.target_audience && user.target_audience.length > 0 
+        ? user.target_audience.map(audience => ({
+            role: audience.name || '',
+            ageRange: audience.age_group || '',
+            demographics: audience.demographic_details || ''
+          }))
+        : [{ role: '', ageRange: '', demographics: '' }];
+      
       setFormData(prev => ({
         ...prev,
         // Map user data to form fields
-        billing_city: '',
-        billing_postcode: '',
-        billing_country: '',
-        targetAudience: user.audience_description ? [
-          {
-            role: user.audience_description || '',
-            ageRange: '',
-            demographics: ''
-          }
-        ] : [{ role: '', ageRange: '', demographics: '' }],
-        topPainPoints: '',
-        brandVoice: '',
-        uniqueDifferentiation: '',
-        primaryCallToAction: '',
-        contentPreferenceIndustries: [],
+        billing_city: user.billing_city || '',
+        billing_postcode: user.billing_postcode || '',
+        billing_country: user.billing_country || '',
+        targetAudience: mappedAudience,
+        topPainPoints: user.top_pain_points || '',
+        brandVoice: user.brand_voice || '',
+        uniqueDifferentiation: user.unique_differentiation || '',
+        primaryCallToAction: user.primary_call_to_action || '',
+        contentPreferenceIndustries: user.content_preference_industry || [],
         companySocialProfiles: user.links && user.links.length > 0 
           ? user.links.map(link => ({ platform: link.name, url: link.url }))
-          : [{ platform: 'Website', url: '' }]
+          : [{ platform: 'Website', url: user.company_website || '' }]
       }));
     }
   }, [user]);
@@ -122,6 +108,8 @@ const MagicPublishingSetup = () => {
     '55-64',
     '65+'
   ];
+  
+
 
   const suggestedItems: { label: string; icon: React.ReactNode; placeholder?: string }[] = [
     { label: 'Work With Me', icon: <FaHandshake style={{ color: '#1CA235' }} />, placeholder: 'https://your-website.com/work-with-me' },
@@ -240,11 +228,11 @@ const MagicPublishingSetup = () => {
         billing_city: formData.billing_city,
         billing_postcode: formData.billing_postcode,
         billing_country: formData.billing_country,
-        audience_description: {
-          name: formData.targetAudience[0]?.role || '',
-          age_range: formData.targetAudience[0]?.ageRange || '',
-          demographic_details: formData.targetAudience[0]?.demographics || ''
-        },
+        target_audience: formData.targetAudience.map(audience => ({
+          name: audience.role || '',
+          age_group: audience.ageRange || '',
+          demographic_details: audience.demographics || ''
+        })),
         top_pain_points: formData.topPainPoints,
         brand_voice: formData.brandVoice,
         unique_differentiation: formData.uniqueDifferentiation,
@@ -773,33 +761,7 @@ const MagicPublishingSetup = () => {
 
               {/* Action Buttons */}
               <div className="flex justify-between pt-6 mt-8 border-t border-gray-200">
-                <button
-                  onClick={() => {
-                    const sampleData = {
-                      billing_city: 'San Francisco',
-                      billing_postcode: '94102',
-                      billing_country: 'US',
-                      targetAudience: [
-                        { role: 'Startup founders', ageRange: '25-34', demographics: 'Tech-savvy, high income, urban' },
-                        { role: 'Marketing directors', ageRange: '30-45', demographics: 'B2B focused, data-driven' }
-                      ],
-                      topPainPoints: 'Struggling to generate consistent content, lack of time for content creation, difficulty in maintaining brand voice across platforms',
-                      brandVoice: 'Bold, data-driven, friendly',
-                      uniqueDifferentiation: 'AI-powered content that sounds human and drives real results',
-                      primaryCallToAction: 'Book a demo',
-                      contentPreferenceIndustries: ['Technology', 'Nonprofit', 'Real Estate'],
-                      companySocialProfiles: [
-                        { platform: 'Website', url: 'https://example.com' },
-                        { platform: 'LinkedIn', url: 'https://linkedin.com/company/example' }
-                      ]
-                    };
-                    setFormData(sampleData);
-                  }}
-                  className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Load Sample Data
-                </button>
-                
+
                 <div className="flex space-x-4">
                   <button
                     onClick={() => {

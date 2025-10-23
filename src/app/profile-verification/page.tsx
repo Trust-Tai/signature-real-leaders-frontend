@@ -321,9 +321,9 @@ const InnerProfileVerificationPage = () => {
       case 6:
         return (
           <AudienceDescriptionSection
-            onSubmit={(description) => {
-              setState(prev => ({ ...prev, audience_description: description }));
-              console.log('[Step 8] Saved audience description', { description });
+            onSubmit={(descriptions) => {
+              setState(prev => ({ ...prev, target_audience: descriptions }));
+              console.log('[Step 6] Saved target audience', { descriptions });
               nextStep();
             }}
           />
@@ -371,7 +371,7 @@ const InnerProfileVerificationPage = () => {
                   emailListSize: state.email_list_size,
                   newsletterService: state.newsletter?.service,
                   apiKey: state.newsletter?.api_key,
-                  audienceDescription: state.audience_description,
+                  targetAudience: state.target_audience,
                   metrics: state.success_metrics,
                   profileTemplate: state.profile_template_id,
                   links: state.links || [],

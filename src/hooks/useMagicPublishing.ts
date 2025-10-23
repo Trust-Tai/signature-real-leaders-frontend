@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   generateArticles, 
   getGeneratedContent, 
@@ -11,6 +12,7 @@ import {
 import { toast } from '@/components/ui/toast';
 
 export const useMagicPublishing = () => {
+  const router = useRouter();
   const [generatedContents, setGeneratedContents] = useState<GenerationRequest[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +23,7 @@ export const useMagicPublishing = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
         setError('No authentication token found');
+        router.push('/login');
         return;
       }
       
@@ -35,7 +38,7 @@ export const useMagicPublishing = () => {
       console.error('[Hook] Error fetching generation requests:', error);
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
     }
-  }, []);
+  }, [router]);
 
   const handleGenerateArticles = useCallback(async (params: GenerateArticlesRequest) => {
     setIsGenerating(true);
@@ -47,6 +50,7 @@ export const useMagicPublishing = () => {
         setError('No authentication token found');
         toast.error('Authentication token not found');
         setIsGenerating(false);
+        router.push('/login');
         return;
       }
 
@@ -166,13 +170,14 @@ export const useMagicPublishing = () => {
       setError(errorMessage);
       toast.error(`Delete failed: ${errorMessage}`);
     }
-  }, []);
+  }, [router]);
 
   const refreshContent = useCallback(async (contentId: string) => {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
         setError('No authentication token found');
+        router.push('/login');
         return;
       }
 

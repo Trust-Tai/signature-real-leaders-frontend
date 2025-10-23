@@ -34,15 +34,14 @@ export const performAutoLogin = async (
 
     console.log('[AutoLogin Utility] Starting auto-login...', { redirectUrl, openInNewTab });
     
-    // Show loading feedback
-    toast.info('Connecting to WordPress...', { autoClose: 2000 });
+  
 
     // Call auto-login API
     const response = await api.autoLogin(authToken, redirectUrl);
 
     if (response.success) {
       console.log('[AutoLogin Utility] Success:', response);
-      toast.success('Successfully connected to WordPress!', { autoClose: 3000 });
+
 
       // Handle redirect
       const targetUrl = response.login_url || response.redirect_url || redirectUrl;

@@ -84,7 +84,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
               </button>
             </div>
             <div className="lg:hidden">
-              <UserProfileDropdown userName="Richard Branson" />
+              <UserProfileDropdown />
             </div>
           </div>
         </div>

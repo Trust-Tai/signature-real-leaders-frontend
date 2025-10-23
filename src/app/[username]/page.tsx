@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronRight, X } from 'lucide-react';
 import Image from 'next/image';
 import { images } from '@/assets';
-import FooterBanner from '@/components/ui/home-page-footer';
 import { useRouter, useParams } from "next/navigation";
 import { api } from '@/lib/api';
 import { toast } from '@/components/ui/toast';
@@ -540,7 +539,6 @@ export default function DynamicUserProfile() {
 
 
 
-      <FooterBanner />
     </div>
   );
 }

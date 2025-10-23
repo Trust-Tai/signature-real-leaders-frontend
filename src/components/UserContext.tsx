@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
 interface User {
@@ -35,6 +36,21 @@ interface User {
     image_alt: string;
   };
   hubspot_data: string;
+  billing_address_1: string;
+  billing_address_2: string;
+  billing_city: string;
+  billing_postcode: string;
+  billing_country: string;
+  billing_phone: string;
+  content_preference_industry: string[];
+  top_pain_points: string;
+  brand_voice: string;
+  unique_differentiation: string;
+  primary_call_to_action: string;
+  target_audience: Array<{ name: string; age_group: string; demographic_details: string }>;
+  date_of_birth: string;
+  occupation: string;
+  profile_privacy: boolean;
 }
 
 interface UserContextType {
@@ -62,6 +78,7 @@ interface UserProviderProps {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +90,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       if (!token) {
         setError('No authentication token found');
         setIsInitialLoading(false);
+        router.push('/login');
         return;
       }
 

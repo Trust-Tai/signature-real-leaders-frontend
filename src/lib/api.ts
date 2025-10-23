@@ -116,6 +116,21 @@ export const api = {
           image_alt: string;
         };
         hubspot_data: string;
+        billing_address_1: string;
+        billing_address_2: string;
+        billing_city: string;
+        billing_postcode: string;
+        billing_country: string;
+        billing_phone: string;
+        content_preference_industry: string[];
+        top_pain_points: string;
+        brand_voice: string;
+        unique_differentiation: string;
+        primary_call_to_action: string;
+        target_audience: Array<{ name: string; age_group: string; demographic_details: string }>;
+        date_of_birth: string;
+        occupation: string;
+        profile_privacy: boolean;
       };
     }>(
       '/user/user-details',
