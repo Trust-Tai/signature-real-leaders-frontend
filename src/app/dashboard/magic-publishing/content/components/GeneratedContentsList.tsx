@@ -5,6 +5,7 @@ import { Trash2, RefreshCw, RotateCcw, X, MoreVertical } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useMagicPublishing } from '@/hooks/useMagicPublishing';
 import MagicPublishingForm from './MagicPublishingForm';
+import { useRouter } from 'next/navigation';
 
 interface GenerationRequest {
   id: number;
@@ -35,7 +36,7 @@ const GeneratedArticlesList: React.FC = () => {
   const [contentToDelete, setContentToDelete] = useState<number | null>(null);
 
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-
+  const router = useRouter()
   useEffect(() => {
     console.log('Initial load - fetching all generation requests...');
     const loadData = async () => {
@@ -88,7 +89,8 @@ const GeneratedArticlesList: React.FC = () => {
   const handleViewArticles = (contentId: string, title: string) => {
     console.log('View Articles clicked:', contentId, title);
     // Navigate to the content detail page
-    window.location.href = `/dashboard/magic-publishing/content/${contentId}`;
+    router.push(`/dashboard/magic-publishing/content/${contentId}`)
+    
   };
 
   const handleDropdownToggle = (contentId: string, e: React.MouseEvent) => {
