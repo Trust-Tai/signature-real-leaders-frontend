@@ -2,11 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { User, ChevronDown, LogOut, User as UserIcon, UserRoundCheck } from 'lucide-react';
-import Link from 'next/link';
 import LogoutConfirmationPopup from './LogoutConfirmationPopup';
 import Image from 'next/image';
 import { useUser } from '../UserContext';
-
+import { useRouter } from 'next/navigation';
 interface UserProfileDropdownProps {
   userName?: string;
   userImage?: string;
@@ -20,7 +19,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const router = useRouter()
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -77,23 +76,28 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
 
         {isOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-            <Link
-              href="/dashboard/profile"
-              className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              onClick={() => setIsOpen(false)}
+            <div
+             
+              className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              onClick={() => {
+                setIsOpen(false)
+                router.push("/dashboard/profile")
+              }
+              }
             >
               <UserIcon className="w-4 h-4" />
               <span>View Profile</span>
-            </Link>
-             <Link
-              href={`${user?.username}`}
+            </div>
+             <a
+              href={`/${user?.username}`}
+              target="_blank"
               className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <UserRoundCheck className="w-4 h-4"/>
              
               <span>View Public Profile</span>
-            </Link>
+            </a>
             <div className="border-t border-gray-100 my-1"></div>
             
             <button

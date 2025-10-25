@@ -1,18 +1,28 @@
+import { authFetch } from './authUtils';
+
 export const API_BASE_URL = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1';
 
 type JsonRecord = Record<string, unknown>;
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
-  const response = await fetch(url, options);
-  const isJson = (response.headers.get('content-type') || '').includes('application/json');
-  const data = isJson ? await response.json() : (undefined as unknown as T);
-  if (!response.ok) {
-    const message = isJson && (data as Record<string, unknown>)?.message ? 
-      (data as Record<string, unknown>).message as string : response.statusText;
-    throw new Error(message || 'Request failed');
+  
+  try {
+    const response = await authFetch(url, options);
+    const isJson = (response.headers.get('content-type') || '').includes('application/json');
+    const data = isJson ? await response.json() : (undefined as unknown as T);
+    
+    if (!response.ok) {
+      const message = isJson && (data as Record<string, unknown>)?.message ? 
+        (data as Record<string, unknown>).message as string : response.statusText;
+      throw new Error(message || 'Request failed');
+    }
+    
+    return data as T;
+  } catch (error) {
+    // If it's a 401 error, it's already handled by authFetch
+    throw error;
   }
-  return data as T;
 }
 
 export const api = {
@@ -215,18 +225,33 @@ export const api = {
   },
 
   async exportFollowersCSV(authToken: string) {
-    return request<{
-      success: boolean;
-      csv_data: string;
-    }>(
-      '/export-followers-csv',
-      {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/export-followers-csv`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
+          'Accept': 'text/csv, text/plain, */*',
         },
+      });
+      console.log("response>>>>>",response)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    );
+
+      // Get the raw CSV text directly - API returns raw CSV without JSON wrapper
+      const csvData = await response.text();
+      console.log("csvData",csvData)
+      // Basic check to ensure we got some data
+      if (!csvData || csvData.trim().length === 0) {
+        throw new Error('Received empty response from server');
+      }
+      
+      // Return the raw CSV data directly since API doesn't wrap it in JSON
+      return csvData;
+    } catch (error) {
+      console.error('Export followers CSV error:', error);
+      throw error; // Re-throw the error to be handled by the calling function
+    }
   },
 
   async searchFollowers(authToken: string, query: string) {
@@ -382,7 +407,7 @@ export const api = {
   async followUser(userId: number, optIn: boolean = false) {
     const authToken = localStorage.getItem('auth_token');
     const url = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/follow-user';
-    const response = await fetch(url, {
+    const response = await authFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -414,7 +439,7 @@ export const api = {
   async unfollowUser(userId: number) {
     const authToken = localStorage.getItem('auth_token');
     const url = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/unfollow-user';
-    const response = await fetch(url, {
+    const response = await authFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -441,14 +466,14 @@ export const api = {
   async checkFollowStatus(userId: number) {
     const authToken = localStorage.getItem('auth_token');
     const url = `https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/check-follow-status?user_id=${userId}`;
-  const response = await fetch(url, {
-  method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-    ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-  }
-});
-console.log("response>>>>",response)
+    const response = await authFetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      }
+    });
+    console.log("response>>>>",response)
     
     const data = await response.json();
     if (!response.ok) {

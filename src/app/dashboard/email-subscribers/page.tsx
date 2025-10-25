@@ -5,6 +5,7 @@ import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download,
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
+import DashBoardFooter from '@/components/ui/dashboardFooter';
 
 interface Subscriber {
   id: number;
@@ -786,11 +787,7 @@ const EmailSubscribers = () => {
         </main>
         
         {/* Fixed Footer */}
-        <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px] flex-shrink-0">
-          <div className="text-xs sm:text-sm text-center">
-            © 2025 RealLeaders. All Rights Reserved.
-          </div>
-        </footer>
+         <DashBoardFooter />
       </div>
     </div>
   );

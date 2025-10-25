@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Menu, Users, Globe, BookOpen, Mic, Info, Plus, Trash2, Sparkles, Loader2 } from 'lucide-react';
+import { Search, Bell, Menu, Users, Info, Plus, Trash2, Sparkles, Loader2 } from 'lucide-react';
 import { UserProfileSidebar, useUser } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
-import Link from 'next/link';
+import DashBoardFooter from "@/components/ui/dashboardFooter"
 import { useRouter } from 'next/navigation';
 import { countries } from '@/default/countries';
 import { api } from '@/lib/api';
@@ -268,16 +268,24 @@ const MagicPublishingSetup = () => {
       console.log('[Setup] Starting article generation with params:', articleParams);
       
       // Start the generation process
-      await handleGenerateArticles(articleParams);
+      const result = await handleGenerateArticles(articleParams);
       
-      // Navigate to content page immediately after starting generation
-      console.log('[Setup] Generation started, navigating to content page...');
-      toast.info('Redirecting to content page to track generation progress...', { autoClose: 2000 });
-      
-      // Small delay to let the user see the toast before navigation
-      setTimeout(() => {
-        router.push('/dashboard/magic-publishing/content');
-      }, 1000);
+      // Navigate to specific content page with content_id
+      if (result && result.content_id) {
+        console.log('[Setup] Generation started, navigating to content detail page with ID:', result.content_id);
+        toast.info('Redirecting to track generation progress...', { autoClose: 2000 });
+        
+        // Small delay to let the user see the toast before navigation
+        setTimeout(() => {
+          router.push(`/dashboard/magic-publishing/content/${result.content_id}`);
+        }, 1000);
+      } else {
+        // Fallback to general content page if no content_id
+        console.log('[Setup] No content_id returned, navigating to general content page...');
+        setTimeout(() => {
+          router.push('/dashboard/magic-publishing/content');
+        }, 1000);
+      }
       
     } catch (error) {
       console.error('Error in Start Magic:', error);
@@ -308,16 +316,24 @@ const MagicPublishingSetup = () => {
       console.log('[Setup] Regenerating articles with modified params:', articleParams);
       
       // Start the regeneration process
-      await handleGenerateArticles(articleParams);
+      const result = await handleGenerateArticles(articleParams);
       
-      // Navigate to content page immediately after starting regeneration
-      console.log('[Setup] Regeneration started, navigating to content page...');
-      toast.info('Redirecting to content page to track regeneration progress...', { autoClose: 2000 });
-      
-      // Small delay to let the user see the toast before navigation
-      setTimeout(() => {
-        router.push('/dashboard/magic-publishing/content');
-      }, 1000);
+      // Navigate to specific content page with content_id
+      if (result && result.content_id) {
+        console.log('[Setup] Regeneration started, navigating to content detail page with ID:', result.content_id);
+        toast.info('Redirecting to track regeneration progress...', { autoClose: 2000 });
+        
+        // Small delay to let the user see the toast before navigation
+        setTimeout(() => {
+          router.push(`/dashboard/magic-publishing/content/${result.content_id}`);
+        }, 1000);
+      } else {
+        // Fallback to general content page if no content_id
+        console.log('[Setup] No content_id returned, navigating to general content page...');
+        setTimeout(() => {
+          router.push('/dashboard/magic-publishing/content');
+        }, 1000);
+      }
       
     } catch (error) {
       console.error('Error in regenerate:', error);
@@ -439,44 +455,7 @@ const MagicPublishingSetup = () => {
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             
-            {/* Magic Publishing Header */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <h2 className="text-2xl font-bold text-[#101117]">Magic Publishing</h2>
-                  <Info className="w-5 h-5 text-gray-400" />
-                </div>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  Edit Details
-                </button>
-              </div>
-              <p className="text-gray-600 mb-6">Generate and manage your content across all platforms.</p>
-              
-              {/* Navigation Tabs */}
-              <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
-                <Link 
-                  href="/dashboard/magic-publishing/content"
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  <Globe className="w-4 h-4" />
-                  <span>Content</span>
-                </Link>
-                <Link 
-                  href="/dashboard/magic-publishing/books"
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span>Books</span>
-                </Link>
-                <Link 
-                  href="/dashboard/magic-publishing/podcasts"
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  <Mic className="w-4 h-4" />
-                  <span>Podcasts</span>
-                </Link>
-              </div>
-            </div>
+           
 
             {/* Setup Form */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -760,7 +739,7 @@ const MagicPublishingSetup = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between pt-6 mt-8 border-t border-gray-200">
+              <div className="flex justify-end pt-6 mt-8 border-t border-gray-200">
 
                 <div className="flex space-x-4">
                   <button
@@ -811,7 +790,7 @@ const MagicPublishingSetup = () => {
                   ) : (
                     <button
                       onClick={handleModifyResults}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="px-6 py-2 bg-[#cf3232] text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       Modify Results
                     </button>
@@ -964,11 +943,7 @@ const MagicPublishingSetup = () => {
         </main>
         
         {/* Fixed Footer */}
-        <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px] flex-shrink-0">
-          <div className="text-xs sm:text-sm text-center">
-            © 2025 RealLeaders. All Rights Reserved.
-          </div>
-        </footer>
+        <DashBoardFooter />
       </div>
     </div>
   );

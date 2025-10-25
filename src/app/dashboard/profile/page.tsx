@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/toast';
 import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { UserProfileSidebar, UserProfileDropdown, useUser } from '@/components';
 import Image from 'next/image';
@@ -14,6 +13,7 @@ import {
 } from 'react-icons/fa6';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { images } from '@/assets';
+import DashBoardFooter from '@/components/ui/dashboardFooter';
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -545,12 +545,12 @@ const ProfilePage = () => {
         <header className="bg-[#FFF9F9] px-4 sm:px-6 py-4 border-b border-[#efc0c0]">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link 
-                href="/dashboard"
+              <div 
+              onClick={()=>router.push("/dashboard")}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
-              </Link>
+              </div>
               <h1 className="text-xl font-outift font-semibold text-[#333333]">Profile Settings</h1>
             </div>
             
@@ -1404,11 +1404,7 @@ const ProfilePage = () => {
       </main>
       
       {/* Footer */}
-      <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px]">
-        <div className="text-xs sm:text-sm text-center">
-          © 2025 RealLeaders. All Rights Reserved.
-        </div>
-      </footer>
+      <DashBoardFooter />
       </div>
     </div>
     </OnboardingProvider>

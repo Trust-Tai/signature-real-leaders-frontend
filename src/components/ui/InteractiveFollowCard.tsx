@@ -153,13 +153,13 @@ export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = ({ na
               className="w-16 h-16 rounded-full border-2 border-gray-600 overflow-hidden bg-gray-800 shadow-xl"
               style={{ transform: "translateZ(60px)" }}
             >
-              <Image src={richardBransonProfile} alt="Richard Branson" className="w-full h-full object-cover" />
+              <Image src={richardBransonProfile} alt="John Doe" className="w-full h-full object-cover" />
             </div>
             <div
               className="text-lg font-bold text-white tracking-tight"
               style={{ transform: "translateZ(55px)" }}
             >
-              {name && name.trim().length > 0 ? name : "Richard Branson"}
+              {name && name.trim().length > 0 ? name : "John Doe"}
             </div>
             <div
               className="text-xs text-gray-300 leading-tight"
@@ -197,7 +197,7 @@ export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = ({ na
                 className="text-sm font-light text-gray-300 italic mb-2"
                 style={{ fontFamily: "serif" }}
               >
-                {name && name.trim().length > 0 ? name : "Richard Branson"}
+                {name && name.trim().length > 0 ? name : "John Doe"}
               </div>
             </div>
 

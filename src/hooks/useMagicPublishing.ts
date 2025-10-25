@@ -16,7 +16,7 @@ export const useMagicPublishing = () => {
   const [generatedContents, setGeneratedContents] = useState<GenerationRequest[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pendingContentIds, setPendingContentIds] = useState<Set<string>>(new Set());
+  const [processingContentIds, setProcessingContentIds] = useState<Set<string>>(new Set());
 
   const fetchAllGenerationRequests = useCallback(async () => {
     try {
@@ -51,7 +51,7 @@ export const useMagicPublishing = () => {
         toast.error('Authentication token not found');
         setIsGenerating(false);
         router.push('/login');
-        return;
+        return null;
       }
 
       console.log('[Hook] Starting article generation with params:', params);
@@ -68,14 +68,14 @@ export const useMagicPublishing = () => {
         });
 
         // Add content ID to pending set
-        setPendingContentIds(prev => new Set([...prev, response.content_id.toString()]));
+        setProcessingContentIds(prev => new Set([...prev, response.content_id.toString()]));
 
         // Create immediate UI feedback - add pending card
-        const newPendingContent: GenerationRequest = {
+        const newProcessingContent: GenerationRequest = {
           id: response.content_id,
           title: `Generating ${params.article_count} Articles...`,
           content_type: 'articles',
-          status: 'pending',
+          status: 'processing',
           created_at: new Date().toISOString(),
           duration: '0s',
           request_id: response.request_id,
@@ -89,7 +89,7 @@ export const useMagicPublishing = () => {
         };
 
         // Add to the beginning of the list for immediate feedback
-        setGeneratedContents(prev => [newPendingContent, ...prev]);
+        setGeneratedContents(prev => [newProcessingContent, ...prev]);
 
         // Start polling for completion
         pollForCompletion(
@@ -109,7 +109,7 @@ export const useMagicPublishing = () => {
           (content) => {
             console.log('[Hook] Content generation completed!', content);
             // Content generation completed
-            setPendingContentIds(prev => {
+            setProcessingContentIds(prev => {
               const newSet = new Set(prev);
               newSet.delete(content.id);
               return newSet;
@@ -130,7 +130,7 @@ export const useMagicPublishing = () => {
             setIsGenerating(false);
             
             // Remove from pending set
-            setPendingContentIds(prev => {
+            setProcessingContentIds(prev => {
               const newSet = new Set(prev);
               newSet.delete(response.content_id.toString());
               return newSet;
@@ -138,11 +138,15 @@ export const useMagicPublishing = () => {
           },
           fetchAllGenerationRequests // Pass the refresh function
         );
+
+        // Return the response so caller can access content_id
+        return response;
       } else {
         console.error('[Hook] Failed to start article generation:', response);
         setError('Failed to start article generation');
         toast.error('Failed to start article generation');
         setIsGenerating(false);
+        return null;
       }
     } catch (error) {
       console.error('[Hook] Exception during article generation:', error);
@@ -150,8 +154,9 @@ export const useMagicPublishing = () => {
       setError(errorMessage);
       toast.error(`Error: ${errorMessage}`);
       setIsGenerating(false);
+      return null;
     }
-  }, [fetchAllGenerationRequests]);
+  }, [fetchAllGenerationRequests, router]);
 
   const handleDeleteContent = useCallback(async (contentId: string) => {
     try {
@@ -170,7 +175,7 @@ export const useMagicPublishing = () => {
       setError(errorMessage);
       toast.error(`Delete failed: ${errorMessage}`);
     }
-  }, [router]);
+  }, []);
 
   const refreshContent = useCallback(async (contentId: string) => {
     try {
@@ -195,9 +200,9 @@ export const useMagicPublishing = () => {
         );
 
         // If content just completed, refresh all data
-        if (response.content.status === 'completed' && pendingContentIds.has(contentId)) {
+        if (response.content.status === 'completed' && processingContentIds.has(contentId)) {
           console.log('[Hook] Content completed during refresh, fetching all data');
-          setPendingContentIds(prev => {
+          setProcessingContentIds(prev => {
             const newSet = new Set(prev);
             newSet.delete(contentId);
             return newSet;
@@ -209,7 +214,7 @@ export const useMagicPublishing = () => {
       console.error('[Hook] Error refreshing content:', error);
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
     }
-  }, [pendingContentIds, fetchAllGenerationRequests]);
+  }, [processingContentIds, fetchAllGenerationRequests, router]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -219,7 +224,7 @@ export const useMagicPublishing = () => {
     generatedContents,
     isGenerating,
     error,
-    pendingContentIds,
+    processingContentIds,
     handleGenerateArticles,
     handleDeleteContent,
     refreshContent,

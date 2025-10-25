@@ -6,6 +6,7 @@ import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
 import { api } from '@/lib/api';
+import DashBoardFooter from '@/components/ui/dashboardFooter';
 
 type Follower = {
   id: number;
@@ -124,7 +125,7 @@ const FollowersPage: React.FC = () => {
 
     try {
       const response = await api.getFollowers(token, page, 20);
-      if (response.success) {
+      if (response && response.success) {
         const transformedFollowers = response.followers.map(transformFollowerData);
         setFollowersData(transformedFollowers);
         setCurrentPage(response.pagination.current_page);
@@ -149,7 +150,7 @@ const FollowersPage: React.FC = () => {
 
     try {
       const response = await api.getFollowerStats(token);
-      if (response.success) {
+      if (response && response.success) {
         setStatsData(response);
       }
     } catch (err) {
@@ -176,7 +177,7 @@ const FollowersPage: React.FC = () => {
 
     try {
       const response = await api.searchFollowers(token, query.trim());
-      if (response.success) {
+      if (response && response.success) {
         const transformedFollowers = response.followers.map(transformFollowerData);
         setFollowersData(transformedFollowers);
         setCurrentPage(response.pagination.current_page);
@@ -221,7 +222,7 @@ const FollowersPage: React.FC = () => {
   }, [followersData, searchTerm, isSearchMode]);
 
   const statsCards = useMemo(() => {
-    if (!statsData) {
+    if (!statsData || !statsData.stats) {
       return [
         { number: '...', label: 'TOTAL FOLLOWERS', description: 'All people following you', color: '#CF3232' },
         { number: '...', label: 'NEW THIS MONTH', description: 'Followers added this month', color: '#CF3232' },
@@ -231,10 +232,10 @@ const FollowersPage: React.FC = () => {
     }
 
     const { stats } = statsData;
-    const total = stats.total_followers.toString();
-    const newThisMonth = stats.current_month_followers.toString();
-    const topCountry = stats.top_country.name || 'N/A';
-    const topLocation = stats.top_location.name || 'N/A';
+    const total = stats.total_followers?.toString() || '0';
+    const newThisMonth = stats.current_month_followers?.toString() || '0';
+    const topCountry = stats.top_country?.name || 'N/A';
+    const topLocation = stats.top_location?.name || 'N/A';
 
     return [
       { number: total, label: 'TOTAL FOLLOWERS', description: 'All people following you', color: '#CF3232' },
@@ -252,22 +253,40 @@ const FollowersPage: React.FC = () => {
     }
 
     setExportLoading(true);
+    setError(null); // Clear any previous errors
+    
     try {
-      const response = await api.exportFollowersCSV(token);
-      if (response.success) {
-        // Create and download the CSV file
-        const blob = new Blob([response.csv_data], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `followers-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      } else {
-        setError('Failed to export followers');
+      console.log('Starting CSV export...');
+      
+      // API now returns raw CSV data directly
+      const csvData = await api.exportFollowersCSV(token);
+      console.log('CSV data received:', csvData ? 'Data received' : 'No data');
+      
+      // Basic validation
+      if (!csvData || typeof csvData !== 'string' || csvData.trim().length === 0) {
+        setError('No CSV data received from server');
+        return;
       }
+
+      // Create and download the CSV file directly
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      
+      a.href = url;
+      a.download = `followers-export-${new Date().toISOString().split('T')[0]}.csv`;
+      a.style.display = 'none';
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('Followers exported successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to export followers');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to export followers';
+      setError(errorMessage);
+      console.error('Export error:', err);
     } finally {
       setExportLoading(false);
     }
@@ -384,11 +403,27 @@ const FollowersPage: React.FC = () => {
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-gray-100">
-                <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">Follower List</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">Follower List</h2>
+                  {searchLoading && (
+                    <div className="flex items-center space-x-2 text-[#CF3232]">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#CF3232]"></div>
+                      <span className="text-sm">Filtering...</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Mobile Cards */}
-              <div className="block sm:hidden p-4 space-y-4">
+              <div className={`block sm:hidden p-4 space-y-4 relative ${searchLoading ? 'opacity-60 pointer-events-none' : ''}`}>
+                {searchLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+                    <div className="flex items-center space-x-2 text-[#CF3232]">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#CF3232]"></div>
+                      <span className="text-sm font-medium">Filtering followers...</span>
+                    </div>
+                  </div>
+                )}
                 {filtered.map((f) => (
                   <div key={f.id} className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -407,7 +442,15 @@ const FollowersPage: React.FC = () => {
               </div>
 
               {/* Desktop Table */}
-              <div className="hidden sm:block overflow-x-auto">
+              <div className={`hidden sm:block overflow-x-auto relative ${searchLoading ? 'opacity-60 pointer-events-none' : ''}`}>
+                {searchLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+                    <div className="flex items-center space-x-2 text-[#CF3232]">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#CF3232]"></div>
+                      <span className="text-sm font-medium">Filtering followers...</span>
+                    </div>
+                  </div>
+                )}
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-100" style={{ backgroundColor: '#FEE3E3CC' }}>
@@ -545,9 +588,7 @@ const FollowersPage: React.FC = () => {
             </div>
           )}
 
-          <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px]">
-            <div className="text-xs sm:text-sm text-center">© 2025 RealLeaders. All Rights Reserved.</div>
-          </footer>
+           <DashBoardFooter />
         </main>
       </div>
     </div>

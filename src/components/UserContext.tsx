@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { isUnauthorizedError } from '@/lib/authUtils';
 
 interface User {
   id: number;
@@ -113,6 +114,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
         setError('Request timeout - please try again');
+      } else if (isUnauthorizedError(err)) {
+        // 401 error is already handled by authUtils, just clear user state
+        clearUser();
+        return;
       } else {
         setError(err instanceof Error ? err.message : 'Failed to fetch user details');
       }
@@ -139,6 +144,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     } else {
       setIsInitialLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const value: UserContextType = {

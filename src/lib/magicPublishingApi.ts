@@ -1,4 +1,5 @@
 // Magic Publishing API service
+import { authFetch } from './authUtils';
 
 const BASE_URL = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/magic-publishing';
 
@@ -30,7 +31,7 @@ export interface GeneratedContent {
   id: string;
   title: string;
   content_type: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: 'processing' | 'completed' | 'failed';
   created_at: string;
   completed_at?: string;
   request_id: string;
@@ -56,7 +57,7 @@ export interface GenerationRequest {
   id: number;
   title: string;
   content_type: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: 'processing' | 'completed' | 'failed';
   created_at: string;
   completed_at?: string;
   duration: string;
@@ -78,11 +79,10 @@ export interface GetAllContentResponse {
 // Generate articles
 export const generateArticles = async (params: GenerateArticlesRequest, token: string): Promise<GenerateArticlesResponse> => {
   try {
-    const response = await fetch(`${BASE_URL}/generate-articles`, {
+    const response = await authFetch(`${BASE_URL}/generate-articles`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Add authorization header if needed
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(params),
@@ -103,11 +103,10 @@ export const generateArticles = async (params: GenerateArticlesRequest, token: s
 // Get generated content by ID
 export const getGeneratedContent = async (contentId: string, token: string): Promise<GetContentResponse> => {
   try {
-    const response = await fetch(`${BASE_URL}/get-content/${contentId}`, {
+    const response = await authFetch(`${BASE_URL}/get-content/${contentId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        // Add authorization header if needed
         'Authorization': `Bearer ${token}`,
       },
     });
@@ -146,7 +145,7 @@ export const getAllGenerationRequests = async (
       params.append('status', status);
     }
 
-    const response = await fetch(`${BASE_URL}/get-generation-requests?${params.toString()}`, {
+    const response = await authFetch(`${BASE_URL}/get-generation-requests?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -170,7 +169,7 @@ export const getAllGenerationRequests = async (
 // Delete generated content
 export const deleteGeneratedContent = async (contentId: string): Promise<DeleteContentResponse> => {
   try {
-    const response = await fetch(`${BASE_URL}/delete-content/${contentId}`, {
+    const response = await authFetch(`${BASE_URL}/delete-content/${contentId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -231,7 +230,7 @@ export const pollForCompletion = async (
         }
 
         // Continue polling if still pending
-        console.log(`[Polling] Content still pending, will check again in ${interval / 1000} seconds`);
+        console.log(`[Polling] Content still processing, will check again in ${interval / 1000} seconds`);
         setTimeout(poll, interval);
       } else {
         console.error('[Polling] Failed to fetch content status');

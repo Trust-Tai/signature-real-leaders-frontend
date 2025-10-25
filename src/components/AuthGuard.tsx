@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LoadingScreen } from '@/components';
 
+
 interface AuthGuardProps {
   children: React.ReactNode;
 }

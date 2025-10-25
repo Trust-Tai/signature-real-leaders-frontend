@@ -7,6 +7,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Search, Bell, ChevronLeft, ChevronRight, Menu, Users } from 'lucide-react';
 import { UserProfileSidebar, StatsCards } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
+import DashBoardFooter from '@/components/ui/dashboardFooter';
 
 
 const Dashboard = () => {
@@ -207,11 +208,7 @@ const Dashboard = () => {
         </main>
         
         {/* Fixed Footer */}
-        <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px] flex-shrink-0">
-          <div className="text-xs sm:text-sm text-center">
-            © 2025 RealLeaders. All Rights Reserved.
-          </div>
-        </footer>
+      <DashBoardFooter />
       </div>
     </div>
   );

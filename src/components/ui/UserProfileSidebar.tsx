@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { X, Calendar, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon, Users, Wand2, Globe, BookOpen, Mic, ChevronDown, ChevronRight } from 'lucide-react';
+import { X, Calendar, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon, Users, Wand2, BookOpen, Mic, ChevronDown, ChevronRight, FileText, Settings } from 'lucide-react';
 import { images } from '@/assets';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
+import { useRouter } from 'next/navigation';
 
 interface UserProfileSidebarProps {
   sidebarOpen: boolean;
@@ -20,7 +20,15 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   setSidebarOpen, 
   currentPage 
 }) => {
-  const [magicPublishingOpen, setMagicPublishingOpen] = useState(false);
+  // Auto-expand Magic Publishing submenu when on any magic publishing page
+  const [magicPublishingOpen, setMagicPublishingOpen] = useState(
+    currentPage.startsWith('magic-publishing')
+  );
+  const router = useRouter()
+  // Update submenu state when currentPage changes
+  useEffect(() => {
+    setMagicPublishingOpen(currentPage.startsWith('magic-publishing'));
+  }, [currentPage]);
 
   const handleLogoClick = () => {
     // Navigate to WordPress site with auto-login
@@ -38,8 +46,8 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   ];
 
   const magicPublishingItems = [
-    { icon: Globe, label: 'Setup', path: '/dashboard/magic-publishing/setup', page: 'magic-publishing-setup' },
-    { icon: Globe, label: 'Content', path: '/dashboard/magic-publishing/content', page: 'magic-publishing-content' },
+    { icon: Settings, label: 'Setup', path: '/dashboard/magic-publishing/setup', page: 'magic-publishing-setup' },
+    { icon: FileText, label: 'Content', path: '/dashboard/magic-publishing/content', page: 'magic-publishing-content' },
     { icon: BookOpen, label: 'Books', path: '/dashboard/magic-publishing/books', page: 'magic-publishing-books' },
     { icon: Mic, label: 'Podcasts', path: '/dashboard/magic-publishing/podcasts', page: 'magic-publishing-podcasts' }
   ];
@@ -93,17 +101,21 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
         <div className="p-6 flex-1">
           <nav className="space-y-2">
             {sidebarItems.map((item, index) => (
-              <Link 
+              <div 
                 key={index}
-                href={item.path}
+                // href={item.path}
                 className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
                   currentPage === item.page ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
                 }`}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  setSidebarOpen(false)
+                  router.push(`${item.path}`)
+                }
+                }
               >
                 <item.icon className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm">{item.label}</span>
-              </Link>
+              </div>
             ))}
 
             {/* Magic Publishing Section */}
@@ -118,28 +130,30 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                   <Wand2 className="w-5 h-5 flex-shrink-0" />
                   <span className="text-sm">Magic Publishing</span>
                 </div>
-                {magicPublishingOpen ? (
+                {(magicPublishingOpen || currentPage.startsWith('magic-publishing')) ? (
                   <ChevronDown className="w-4 h-4" />
                 ) : (
                   <ChevronRight className="w-4 h-4" />
                 )}
               </button>
 
-              {/* Magic Publishing Sub-menu */}
-              {magicPublishingOpen && (
+              {/* Magic Publishing Sub-menu - Always show when on magic publishing pages */}
+              {(magicPublishingOpen || currentPage.startsWith('magic-publishing')) && (
                 <div className="ml-6 mt-2 space-y-1">
                   {magicPublishingItems.map((item, index) => (
-                    <Link 
+                    <div 
                       key={index}
-                      href={item.path}
                       className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-colors ${
                         currentPage === item.page ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'
                       }`}
-                      onClick={() => setSidebarOpen(false)}
+                      onClick={() => {
+                        setSidebarOpen(false)
+                        router.push(`${item.path}`)
+                      }}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
                       <span className="text-sm">{item.label}</span>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               )}
@@ -153,7 +167,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
             className="hover:opacity-80 transition-opacity cursor-pointer"
             title="Go to Real Leaders Website"
           >
-            <Image src={images.realLeaders} alt='Real Leaders Logo' className='w-32 h-8 mb-[30] ml-[80]'/>
+            <Image src={images.realLeaders} alt='Real Leaders Logo' className='w-32 h-8 ml-[80]'/>
           </button>
         </div>
       </aside>

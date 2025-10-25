@@ -5,13 +5,14 @@ import { Search, Bell, Menu, Users, Globe, BookOpen, Mic, Info, Plus } from 'luc
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import MagicPublishingForm from './components/MagicPublishingForm';
-import GeneratedArticlesList from './components/GeneratedArticlesList';
-import Link from 'next/link';
+import GeneratedArticlesList from './components/GeneratedContentsList';
+import DashBoardFooter from '@/components/ui/dashboardFooter';
+import { useRouter } from 'next/navigation';
 
 const MagicPublishingContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
-
+  const router = useRouter()
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
       <UserProfileSidebar 
@@ -107,34 +108,34 @@ const MagicPublishingContent = () => {
               
               {/* Navigation Tabs */}
               <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
-                <Link 
-                  href="/dashboard/magic-publishing/setup"
+                <div 
+                 onClick={()=>router.push("/dashboard/magic-publishing/setup")}
                   className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   <Globe className="w-4 h-4" />
                   <span>Setup</span>
-                </Link>
-                <Link 
-                  href="/dashboard/magic-publishing/content"
+                </div>
+                <div 
+                onClick={()=>router.push("/dashboard/magic-publishing/content")}
                   className="flex items-center space-x-2 px-4 py-2 rounded-md bg-[#CF3232] text-white transition-colors"
                 >
                   <Globe className="w-4 h-4" />
                   <span>Content</span>
-                </Link>
-                <Link 
-                  href="/dashboard/magic-publishing/books"
+                </div>
+                <div 
+                onClick={()=>router.push("/dashboard/magic-publishing/books")}
                   className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   <BookOpen className="w-4 h-4" />
                   <span>Books</span>
-                </Link>
-                <Link 
-                  href="/dashboard/magic-publishing/podcasts"
+                </div>
+                <div 
+                onClick={()=>router.push("/dashboard/magic-publishing/podcasts")}
                   className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   <Mic className="w-4 h-4" />
                   <span>Podcasts</span>
-                </Link>
+                </div>
               </div>
             </div>
 
@@ -175,11 +176,7 @@ const MagicPublishingContent = () => {
         </main>
         
         {/* Fixed Footer */}
-        <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px] flex-shrink-0">
-          <div className="text-xs sm:text-sm text-center">
-            © 2025 RealLeaders. All Rights Reserved.
-          </div>
-        </footer>
+         <DashBoardFooter />
       </div>
     </div>
   );

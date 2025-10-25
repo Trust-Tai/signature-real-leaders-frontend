@@ -5,6 +5,7 @@ import { Bell, User, Menu, X, Calendar, ExternalLink, Plus, Download } from 'luc
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
+import DashBoardFooter from '@/components/ui/dashboardFooter';
 
 const TotalLinkClicks = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -515,11 +516,7 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
         </main>
         
         {/* Fixed Footer */}
-        <footer className="flex items-center justify-center lg:justify-end px-4 sm:px-6 py-4 border-t border-gray-200 bg-[#101117] text-white h-[131px] flex-shrink-0">
-          <div className="text-xs sm:text-sm text-center">
-            © 2025 RealLeaders. All Rights Reserved.
-          </div>
-        </footer>
+        <DashBoardFooter />
       </div>
     </div>
   );
