@@ -30,7 +30,6 @@ const ProfilePage = () => {
   const [informationData, setInformationData] = useState<{ firstName: string; lastName: string; companyName: string; companyWebsite: string; industry: string; numberOfEmployees: string; contactEmailListSize: string; about: string } | null>(null);
   const [metricsData, setMetricsData] = useState<{ numberOfBookings: string; emailListSize: string; amountInSales: string; amountInDonations: string } | null>(null);
   const [links, setLinks] = useState<Array<{ name: string; url: string }> | null>(null);
-  const [newsletter, setNewsletter] = useState<{ provider: string; apiKey?: string; clientId?: string; clientSecret?: string } | null>(null);
   
   // Links section state
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -359,9 +358,6 @@ const ProfilePage = () => {
         setExpandedItems(initialExpandedItems);
       }
       
-      setNewsletter({
-        provider: user.newsletter_service || '',
-      });
     }
   }, [user]);
 
@@ -438,8 +434,16 @@ const ProfilePage = () => {
         updateData.links = links;
       }
 
-      if (newsletter) {
-        updateData.newsletter_service = newsletter.provider;
+      // Newsletter settings - include API keys if provider is selected and verified
+      if (newsletterProvider && verificationStatus === "success") {
+        updateData.newsletterService = newsletterProvider;
+        
+        if (newsletterProvider === "Mailchimp" && newsletterApiKey) {
+          updateData.apiKey = newsletterApiKey;
+        } else if (newsletterProvider === "HubSpot" && newsletterClientId && newsletterClientSecret) {
+          updateData.clientId = newsletterClientId;
+          updateData.clientSecret = newsletterClientSecret;
+        }
       }
 
       const response = await api.updateProfile(token, updateData);
@@ -447,6 +451,15 @@ const ProfilePage = () => {
       if (response.success) {
         toast.success(response.message);
         updateUser(updateData);
+        
+        // Reset newsletter form after successful save
+        if (newsletterProvider) {
+          setNewsletterProvider("");
+          setNewsletterApiKey("");
+          setNewsletterClientId("");
+          setNewsletterClientSecret("");
+          setVerificationStatus("idle");
+        }
       } else {
         toast.error('Failed to update profile');
       }
@@ -1009,11 +1022,40 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Newsletter Setup (from verification) */}
+          {/* Newsletter Setup */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
-            <h2 className="font-semibold font-outift text-[#333333] mb-4">Newsletter Setup</h2>
+            <h2 className="font-semibold font-outift text-[#333333] mb-4">Newsletter Service</h2>
             
-            {/* Inline Newsletter Form */}
+            {/* Current Status */}
+            {user?.newsletter_service && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-green-800">Newsletter Service Connected</h4>
+                    <p className="text-sm text-green-600 capitalize">
+                      Currently using: {user.newsletter_service}
+                    </p>
+                  </div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+              </div>
+            )}
+            
+            {!user?.newsletter_service && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-yellow-800">No Newsletter Service Connected</h4>
+                    <p className="text-sm text-yellow-600">
+                      Connect a newsletter service to manage your subscribers
+                    </p>
+                  </div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                </div>
+              </div>
+            )}
+            
+            {/* Newsletter Form */}
             <div className="space-y-6">
               {/* Step 1: Select Provider */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
@@ -1096,8 +1138,6 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-             
-
               {/* Step 2: Form (visible only after provider selection) */}
               {newsletterProvider && (
                 <div className="space-y-5">
@@ -1173,34 +1213,6 @@ const ProfilePage = () => {
                     </button>
                   </div>
 
-                  <div className="flex justify-between pt-2">
-                    <button
-                      type="submit"
-                      onClick={() => {
-                        if (verificationStatus !== "success") {
-                          toast.error("Please verify your credentials before proceeding");
-                          return;
-                        }
-                        if (newsletterProvider === "Mailchimp") {
-                          setNewsletter({ provider: newsletterProvider, apiKey: newsletterApiKey || undefined });
-                        } else if (newsletterProvider === "HubSpot") {
-                          setNewsletter({ provider: newsletterProvider, clientId: newsletterClientId || undefined, clientSecret: newsletterClientSecret || undefined });
-                        }
-                        toast.success('Newsletter settings saved');
-                      }}
-                      disabled={verificationStatus !== "success"}
-                      className="custom-btn !px-6 !py-2 bg-custom-red hover:bg-custom-red disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
-                    >
-                      {verificationStatus === "success" ? 'Save & Continue' : 'Verify to Continue'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setNewsletter({ provider: "Skipped" })}
-                      className="custom-btn !px-6 !py-2 bg-custom-red hover:bg-custom-red transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
-                    >
-                      Skip
-                    </button>
-                  </div>
                 </div>
               )}
             </div>

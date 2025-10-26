@@ -40,7 +40,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ contentId }) => {
         const response = await getGeneratedContent(contentId, token);
 
         if (response.success && response.content) {
-          if (response.content.generated_content?.articles) {
+          if (response.content.generated_content && 'articles' in response.content.generated_content && response.content.generated_content.articles) {
             setArticles(response.content.generated_content.articles);
           } else if (response.content.generated_content_json) {
             // Parse JSON if articles are stored as JSON string
@@ -152,8 +152,8 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ contentId }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-[#101117]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">
           Generated Articles ({articles.length})
         </h2>
         <div className="text-sm text-gray-500">
@@ -165,10 +165,10 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ contentId }) => {
         {articles.map((article, index) => (
           <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
             {/* Article Header */}
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[#101117] mb-2">
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base sm:text-lg font-semibold text-[#101117] mb-2">
                     {article.title}
                   </h3>
                   <p className="text-sm text-gray-600 mb-3">
@@ -182,20 +182,20 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ contentId }) => {
                     ))}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2 ml-4">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleCopyArticle(article)}
-                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                     title="Copy article"
                   >
-                    <Copy className="w-5 h-5" />
+                    <Copy className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                   <button
                     onClick={() => handleDownloadArticle(article, index)}
-                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                     title="Download article"
                   >
-                    <Download className="w-5 h-5" />
+                    <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
               </div>
@@ -210,33 +210,33 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ contentId }) => {
               </div>
 
               {/* Action Buttons */}
-            
+
 
               {/* Preview Buttons */}
-              <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
+              <div className="flex flex-wrap gap-2 sm:gap-3 pt-4 border-t border-gray-100">
                 <button
                   onClick={() => handlePreviewClick('linkedin', article)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                  className="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition-colors flex-1 sm:flex-none min-w-0"
                 >
-                  Preview for LinkedIn
+                  <span className="hidden sm:inline">Preview for </span>LinkedIn
                 </button>
                 <button
                   onClick={() => handlePreviewClick('twitter', article)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                  className="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition-colors flex-1 sm:flex-none min-w-0"
                 >
-                  Preview for X
+                  <span className="hidden sm:inline">Preview for </span>X
                 </button>
                 <button
                   onClick={() => handlePreviewClick('facebook', article)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                  className="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition-colors flex-1 sm:flex-none min-w-0"
                 >
-                  Preview for Facebook
+                  <span className="hidden sm:inline">Preview for </span>Facebook
                 </button>
                 <button
                   onClick={() => handlePreviewClick('newsletter', article)}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex-1 sm:flex-none min-w-0"
                 >
-                  Preview for Newsletter
+                  <span className="hidden sm:inline">Preview for </span>Newsletter
                 </button>
               </div>
             </div>

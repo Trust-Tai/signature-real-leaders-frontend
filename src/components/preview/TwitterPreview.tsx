@@ -149,6 +149,8 @@ const TwitterPostPage: React.FC<TwitterPostPageProps> = ({ article, onBack }) =>
                             <Image
                               src={displayImage}
                               alt="Tweet content"
+                              width={800}
+                              height={600}
                               className="w-full h-auto"
                               onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                                 e.currentTarget.style.display = 'none';

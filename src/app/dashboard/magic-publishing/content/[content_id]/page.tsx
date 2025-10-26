@@ -76,14 +76,14 @@ const ContentDetailPage = () => {
         />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Content Not Found</h2>
-            <p className="text-gray-600 mb-4">The requested content could not be found.</p>
-            <div 
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Content Not Found</h2>
+            <p className="text-gray-600 mb-4 text-sm sm:text-base px-4">The requested content could not be found.</p>
+            <button 
             onClick={()=>router.push("/dashboard/magic-publishing/content")}
-              className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
             >
               Back to Content List
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -134,18 +134,18 @@ const ContentDetailPage = () => {
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </div>
               
-              <div>
+              <div className="min-w-0 flex-1">
                 <h1 
-                  className="text-[#101117] text-lg sm:text-xl font-semibold" 
+                  className="text-[#101117] text-base sm:text-lg lg:text-xl font-semibold truncate" 
                   style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}
                 >
                   {currentContent.title}
                 </h1>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentContent.status)}`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentContent.status)} whitespace-nowrap`}>
                     {currentContent.status}
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                     {currentContent.generated_count} articles
                   </span>
                 </div>
@@ -202,62 +202,62 @@ const ContentDetailPage = () => {
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             
             {/* Content Status Card */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <h2 className="text-2xl font-bold text-[#101117]">Content Details</h2>
+            <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#101117]">Content Details</h2>
                   <Info className="w-5 h-5 text-gray-400" />
                 </div>
                 <div className="flex space-x-2">
-                  <div 
+                  <button 
                   onClick={()=>router.push("/dashboard/magic-publishing/content")}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base w-full sm:w-auto"
                   >
                     Back to List
-                  </div>
+                  </button>
                 </div>
               </div>
               
               {/* Navigation Tabs */}
-              <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit mb-6">
+              <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg w-full sm:w-fit mb-6 overflow-x-auto">
                 <div 
                 onClick={()=>router.push("/dashboard/magic-publishing/setup")}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <Globe className="w-4 h-4" />
-                  <span>Setup</span>
+                  <span className="text-sm sm:text-base">Setup</span>
                 </div>
                 <div 
                 onClick={()=>router.push("/dashboard/magic-publishing/content")}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md bg-[#CF3232] text-white transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md bg-[#CF3232] text-white transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <Globe className="w-4 h-4" />
-                  <span>Content</span>
+                  <span className="text-sm sm:text-base">Content</span>
                 </div>
                 <div 
                 onClick={()=>router.push("/dashboard/magic-publishing/books")}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <BookOpen className="w-4 h-4" />
-                  <span>Books</span>
+                  <span className="text-sm sm:text-base">Books</span>
                 </div>
                 <div 
                 onClick={()=>router.push("/dashboard/magic-publishing/podcasts")}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <Mic className="w-4 h-4" />
-                  <span>Podcasts</span>
+                  <span className="text-sm sm:text-base">Podcasts</span>
                 </div>
               </div>
 
               {/* Content Status Display */}
               {currentContent.status === 'processing' && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#cf3232]"></div>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6 mb-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-2 border-gray-300 border-t-[#cf3232] flex-shrink-0"></div>
                     
-                    <div className="flex-1">
-                      <h3 className="text-base font-medium text-[#333333] mb-2">
+                    <div className="flex-1 w-full">
+                      <h3 className="text-sm sm:text-base font-medium text-[#333333] mb-2">
                         Processing {currentContent.requested_count} articles...
                       </h3>
                       
@@ -269,7 +269,7 @@ const ContentDetailPage = () => {
                         ></div>
                       </div>
                       
-                      <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm text-gray-500 gap-1">
                         <span>
                           {currentContent.completion_percentage > 0 
                             ? `${currentContent.completion_percentage}% complete` 
@@ -286,14 +286,14 @@ const ContentDetailPage = () => {
             
 
               {currentContent.status === 'failed' && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-red-600 text-2xl">❌</div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-red-800">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6 mb-6">
+                  <div className="flex items-start space-x-3">
+                    <div className="text-red-600 text-xl sm:text-2xl flex-shrink-0">❌</div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base sm:text-lg font-semibold text-red-800">
                         Generation Failed
                       </h3>
-                      <p className="text-red-700">
+                      <p className="text-red-700 text-sm sm:text-base break-words">
                         {currentContent.error_message || 'An error occurred during article generation.'}
                       </p>
                     </div>

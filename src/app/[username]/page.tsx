@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { toast } from '@/components/ui/toast';
 import { LoadingScreen } from '@/components';
 import { useUser } from '@/components/UserContext';
+import { recordProfileVisit, recordLinkClick } from '@/lib/statisticsApi';
 
 interface ProfileData {
   user_id: number;
@@ -87,7 +88,8 @@ export default function DynamicUserProfile() {
         
         console.log('[Profile] Fetching profile for username:', username);
         const response = await api.getPublicProfile(username);
-        console.log("response>>>>",response)
+        console.log("response>>>>", response);
+        
         if (response.success) {
           // Transform links to match the expected format
           const transformedProfile = {
@@ -110,6 +112,18 @@ export default function DynamicUserProfile() {
           };
           setProfileData(transformedProfile);
           
+          // Record profile visit only if it's not the user's own profile
+          const isOwnProfile = user && user.username === response.profile.username;
+          if (!isOwnProfile) {
+            try {
+              const visitResponse = await recordProfileVisit(response.profile.user_id);
+              console.log('[Profile] Visit recorded:', visitResponse);
+            } catch (error) {
+              console.error('[Profile] Error recording visit:', error);
+              // Don't show error to user as this is background tracking
+            }
+          }
+          
           // Check follow status if user is logged in and viewing someone else's profile
           if (user && response.profile.user_id !== user.id) {
             checkFollowStatus(response.profile.user_id);
@@ -131,8 +145,6 @@ export default function DynamicUserProfile() {
 
     fetchProfile();
   }, [username, user, checkFollowStatus]);
-
-
 
   // Handle follow/unfollow button click
   const handleFollowToggle = async () => {
@@ -176,15 +188,61 @@ export default function DynamicUserProfile() {
     router.push('/dashboard');
   };
 
-  // Handle link click
-  const handleLinkClick = (link: { url: string; display_name: string; name: string }) => {
+  // Handle link click with tracking
+  const handleLinkClick = async (link: { url: string; display_name: string; name: string }) => {
     console.log('[Profile] Link clicked:', link);
+    
+    // Record link click only if it's not the user's own profile
+    if (profileData && user && user.username !== profileData.username) {
+      try {
+        const clickResponse = await recordLinkClick(profileData.user_id, link.url);
+        console.log('[Profile] Link click recorded:', clickResponse);
+      } catch (error) {
+        console.error('[Profile] Error recording link click:', error);
+        // Don't show error to user as this is background tracking
+      }
+    }
+    
+    // Open the link
     window.open(link.url, '_blank', 'noopener,noreferrer');
+  };
+
+  // Handle company website click with tracking
+  const handleCompanyWebsiteClick = async (websiteUrl: string) => {
+    // Record link click only if it's not the user's own profile
+    if (profileData && user && user.username !== profileData.username) {
+      try {
+        const clickResponse = await recordLinkClick(profileData.user_id, websiteUrl);
+        console.log('[Profile] Company website click recorded:', clickResponse);
+      } catch (error) {
+        console.error('[Profile] Error recording company website click:', error);
+      }
+    }
+    // Open the link
+    window.open(websiteUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  // Handle primary CTA click with tracking
+  const handlePrimaryCTAClick = async (ctaText: string) => {
+    // Record CTA click only if it's not the user's own profile
+    if (profileData && user && user.username !== profileData.username) {
+      try {
+        const clickResponse = await recordLinkClick(profileData.user_id, ctaText);
+        console.log('[Profile] Primary CTA click recorded:', clickResponse);
+      } catch (error) {
+        console.error('[Profile] Error recording primary CTA click:', error);
+      }
+    }
+    
+    // If it's a URL, open it
+    if (ctaText.startsWith('http')) {
+      window.open(ctaText, '_blank', 'noopener,noreferrer');
+    }
   };
 
   // Loading state
   if (loading) {
-    return <LoadingScreen text1="Loading profile..." text2={`Fetching data for @${username}`}/>
+    return <LoadingScreen text1="Loading profile..." text2={`Fetching data for @${username}`} />
   }
 
   // Error state
@@ -212,31 +270,27 @@ export default function DynamicUserProfile() {
 
   return (
     <div className="min-h-screen text-white relative overflow-x-hidden overflow-y-auto">
-     <div className="absolute inset-0">
-             <div 
-               className="w-full h-full bg-cover bg-center bg-no-repeat ">
-             <Image src={images.profileBgImage} alt='' className='w-full'style={{height:"1440px"}}/>
-             </div>
-             <div className="absolute inset-0  bg-black/92 h-[1440px]"></div>
-           </div>
-
-      {/* Header */}
-   
+      <div className="absolute inset-0">
+        <div className="w-full h-full bg-cover bg-center bg-no-repeat ">
+          <Image src={images.profileBgImage} alt='' className='w-full' style={{ height: "1440px" }} />
+        </div>
+        <div className="absolute inset-0  bg-black/92 h-[1440px]"></div>
+      </div>
 
       {/* Main Content Container */}
       <div className="relative z-20 pb-20 mt-[100px] lg:mt-[30]">
-        <div 
+        <div
           className="relative mx-auto"
           style={{
             width: '504px',
             maxWidth: '90vw',
             minHeight: '1250px',
-            marginTop:'25px',
+            marginTop: '25px',
             opacity: 1
           }}
         >
           {/* Profile Image */}
-          <div 
+          <div
             className="relative mx-auto bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center border border-white overflow-hidden mb-8"
             style={{
               width: '180px',
@@ -247,8 +301,8 @@ export default function DynamicUserProfile() {
             }}
           >
             {(profileData.profile_picture_url || profileData.profile_image) ? (
-              <Image 
-                src={profileData.profile_picture_url || profileData.profile_image} 
+              <Image
+                src={profileData.profile_picture_url || profileData.profile_image}
                 alt={`${profileData.full_name} Profile`}
                 width={180}
                 height={180}
@@ -259,8 +313,8 @@ export default function DynamicUserProfile() {
                 }}
               />
             ) : (
-              <Image 
-                src={images.userProfileImage} 
+              <Image
+                src={images.userProfileImage}
                 alt={`${profileData.full_name} Profile`}
                 width={180}
                 height={180}
@@ -270,7 +324,7 @@ export default function DynamicUserProfile() {
           </div>
 
           {/* Name */}
-          <h1 
+          <h1
             className="text-white text-center font-outift font-medium w-full mb-4"
             style={{
               fontSize: '43px',
@@ -281,7 +335,7 @@ export default function DynamicUserProfile() {
 
           {/* Company/Title */}
           {(profileData.occupation || profileData.company_name) && (
-            <p 
+            <p
               className="text-white text-center w-full font-outift mb-2"
               style={{
                 fontFamily: 'Outfit',
@@ -289,7 +343,7 @@ export default function DynamicUserProfile() {
                 fontSize: '18px',
               }}
             >
-              {profileData.occupation && profileData.company_name 
+              {profileData.occupation && profileData.company_name
                 ? `${profileData.occupation} at ${profileData.company_name}`
                 : profileData.company_name || profileData.occupation
               }
@@ -298,7 +352,7 @@ export default function DynamicUserProfile() {
 
           {/* Industry */}
           {profileData.industry && (
-            <p 
+            <p
               className="text-white text-center w-full font-outift mb-2"
               style={{
                 fontFamily: 'Outfit',
@@ -313,7 +367,7 @@ export default function DynamicUserProfile() {
 
           {/* Location */}
           {profileData.location && (
-            <p 
+            <p
               className="text-white text-center w-full font-outift mb-2"
               style={{
                 fontFamily: 'Outfit',
@@ -328,7 +382,7 @@ export default function DynamicUserProfile() {
 
           {/* Company Website */}
           {profileData.company_website && (
-            <p 
+            <p
               className="text-white text-center w-full font-outift mb-4"
               style={{
                 fontFamily: 'Outfit',
@@ -337,11 +391,15 @@ export default function DynamicUserProfile() {
                 opacity: 0.8
               }}
             >
-              🌐 <a 
-                href={profileData.company_website} 
-                target="_blank" 
+              🌐 <a
+                href={profileData.company_website}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-300 hover:text-blue-200 underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleCompanyWebsiteClick(profileData.company_website);
+                }}
               >
                 {profileData.company_website.replace(/^https?:\/\//, '')}
               </a>
@@ -350,7 +408,7 @@ export default function DynamicUserProfile() {
 
           {/* Description */}
           {profileData.description && (
-            <p 
+            <p
               className="text-center text-white px-4 py-2 rounded mb-8 mx-auto max-w-md"
               style={{
                 fontFamily: 'Outfit',
@@ -389,6 +447,7 @@ export default function DynamicUserProfile() {
             {/* Primary Call to Action - Show first if exists */}
             {profileData.primary_call_to_action && (
               <button
+                onClick={() => handlePrimaryCTAClick(profileData.primary_call_to_action)}
                 className="w-full backdrop-blur-[20px] bg-red-600/80 rounded-lg flex items-center justify-between group px-4 hover:bg-red-600/90 transition-colors"
                 style={{
                   height: '80px',
@@ -398,7 +457,7 @@ export default function DynamicUserProfile() {
               >
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">⭐</span>
-                  <span className="text-white text-left font-outfit" style={{fontSize:18,fontWeight:600}}>
+                  <span className="text-white text-left font-outfit" style={{ fontSize: 18, fontWeight: 600 }}>
                     {profileData.primary_call_to_action}
                   </span>
                 </div>
@@ -421,7 +480,7 @@ export default function DynamicUserProfile() {
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">{link.icon || '🔗'}</span>
                   <div className="text-left">
-                    <span className="text-white font-outfit block" style={{fontSize:18,fontWeight:500}}>
+                    <span className="text-white font-outfit block" style={{ fontSize: 18, fontWeight: 500 }}>
                       {link.display_name || link.name || 'Link'}
                     </span>
                     {link.url && (
@@ -446,7 +505,7 @@ export default function DynamicUserProfile() {
             )}
 
             {/* Signature Box */}
-            <div 
+            <div
               className="w-full backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-center mb-8"
               style={{
                 height: '126px',
@@ -455,8 +514,8 @@ export default function DynamicUserProfile() {
               }}
             >
               {profileData.signature_url ? (
-                <Image 
-                  src={profileData.signature_url} 
+                <Image
+                  src={profileData.signature_url}
                   alt={`${profileData.full_name} Signature`}
                   width={300}
                   height={100}
@@ -467,8 +526,8 @@ export default function DynamicUserProfile() {
                   }}
                 />
               ) : (
-                <Image 
-                  src={images.profileSinature} 
+                <Image
+                  src={images.profileSinature}
                   alt='Default Signature'
                   width={300}
                   height={100}
@@ -487,8 +546,8 @@ export default function DynamicUserProfile() {
                   onChange={(e) => setOptIn(e.target.checked)}
                   className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded mt-[5] focus:ring-red-500 flex-shrink-0"
                 />
-                <label 
-                  htmlFor="newsletter" 
+                <label
+                  htmlFor="newsletter"
                   className="text-start cursor-pointer"
                   style={{
                     fontFamily: 'Outfit, sans-serif',
@@ -507,27 +566,27 @@ export default function DynamicUserProfile() {
             {/* Follow/Dashboard Button */}
             {user && profileData && user.username === profileData.username ? (
               // Show "Go to Dashboard" if user is viewing their own profile
-              <button 
+              <button
                 onClick={handleGoToDashboard}
                 className="w-full transition-colors duration-200 text-white rounded-lg mb-4 bg-[#CF3232] hover:bg-red-600 cursor-pointer"
                 style={{
                   height: '60px',
-                  fontSize:"25px",
-                  fontFamily:"Abolition Test"
+                  fontSize: "25px",
+                  fontFamily: "Abolition Test"
                 }}
               >
                 GO TO DASHBOARD
               </button>
             ) : (
               // Show Follow/Unfollow button for other users
-              <button 
+              <button
                 onClick={handleFollowToggle}
                 disabled={followLoading || checkingFollowStatus}
                 className="w-full transition-colors duration-200 text-white rounded-lg mb-4 bg-[#CF3232] hover:bg-red-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   height: '60px',
-                  fontSize:"25px",
-                  fontFamily:"Abolition Test"
+                  fontSize: "25px",
+                  fontFamily: "Abolition Test"
                 }}
               >
                 {followLoading ? 'LOADING...' : (isFollowing ? 'UNFOLLOW' : 'FOLLOW')}
@@ -536,9 +595,6 @@ export default function DynamicUserProfile() {
           </div>
         </div>
       </div>
-
-
-
     </div>
   );
 }

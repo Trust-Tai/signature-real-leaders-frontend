@@ -96,6 +96,8 @@ const NewsletterPage: React.FC<NewsletterPageProps> = ({ article, onBack }) => {
                       <Image
                         src={displayImage}
                         alt="Newsletter header"
+                        width={800}
+                        height={600}
                         className="w-full h-auto"
                         onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                           e.currentTarget.style.display = 'none';

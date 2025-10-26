@@ -94,65 +94,65 @@ const MagicPublishingContent = () => {
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             
             {/* Magic Publishing Header */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <h2 className="text-2xl font-bold text-[#101117]">Magic Publishing</h2>
+            <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#101117]">Magic Publishing</h2>
                   <Info className="w-5 h-5 text-gray-400" />
                 </div>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base w-full sm:w-auto">
                   Edit Details
                 </button>
               </div>
-              <p className="text-gray-600 mb-6">Generate and manage your content across all platforms.</p>
+              <p className="text-gray-600 mb-6 text-sm sm:text-base">Generate and manage your content across all platforms.</p>
               
               {/* Navigation Tabs */}
-              <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+              <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg w-full sm:w-fit overflow-x-auto">
                 <div 
                  onClick={()=>router.push("/dashboard/magic-publishing/setup")}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <Globe className="w-4 h-4" />
-                  <span>Setup</span>
+                  <span className="text-sm sm:text-base">Setup</span>
                 </div>
                 <div 
                 onClick={()=>router.push("/dashboard/magic-publishing/content")}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md bg-[#CF3232] text-white transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md bg-[#CF3232] text-white transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <Globe className="w-4 h-4" />
-                  <span>Content</span>
+                  <span className="text-sm sm:text-base">Content</span>
                 </div>
                 <div 
                 onClick={()=>router.push("/dashboard/magic-publishing/books")}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <BookOpen className="w-4 h-4" />
-                  <span>Books</span>
+                  <span className="text-sm sm:text-base">Books</span>
                 </div>
                 <div 
                 onClick={()=>router.push("/dashboard/magic-publishing/podcasts")}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <Mic className="w-4 h-4" />
-                  <span>Podcasts</span>
+                  <span className="text-sm sm:text-base">Podcasts</span>
                 </div>
               </div>
             </div>
 
             {/* Add Article Button */}
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-[#101117] mb-2">
+                  <h2 className="text-lg sm:text-xl font-semibold text-[#101117] mb-2">
                     Article Generation
                   </h2>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-sm sm:text-base">
                     Generate new articles with AI-powered content creation
                   </p>
                 </div>
                 <button
                   onClick={() => setShowForm(!showForm)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base w-full sm:w-auto"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Article</span>

@@ -145,6 +145,8 @@ const FacebookPostPage: React.FC<FacebookPostPageProps> = ({ article, onBack }) 
                       <Image
                         src={displayImage}
                         alt="Post content"
+                        width={800}
+                        height={600}
                         className="w-full h-auto"
                         onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                           e.currentTarget.style.display = 'none';

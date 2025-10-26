@@ -20,7 +20,7 @@ interface GenerationRequest {
   generated_count: number;
   items_with_images: number;
   completion_percentage: number;
-  generation_params: Record<string, unknown>;
+  generation_params: Record<string, unknown> | null;
   error_message: string;
   preview: string;
 }

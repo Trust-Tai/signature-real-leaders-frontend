@@ -12,6 +12,13 @@ export interface GenerateArticlesRequest {
   platform_optimization: string;
 }
 
+export interface GenerateBookRequest {
+  book_title: string;
+  book_genre: string;
+  chapter_count: number;
+  writing_style: string;
+}
+
 export interface GenerateArticlesResponse {
   success: boolean;
   message: string;
@@ -27,6 +34,37 @@ export interface Article {
   meta_description: string;
 }
 
+export interface Chapter {
+  chapter_number: number;
+  title: string;
+  content: string;
+  key_points?: string[];
+  exercises?: unknown[];
+  case_study?: string;
+  summary?: string;
+}
+
+export interface Book {
+  title: string;
+  genre: string;
+  writing_style: string;
+  outline: string;
+  chapters: Chapter[];
+}
+
+export interface BookContent {
+  title: string;
+  summary?: string;
+  target_audience?: string;
+  chapters: Chapter[];
+  conclusion?: string;
+  about_author?: string;
+}
+
+export interface ArticleContent {
+  articles: Article[];
+}
+
 export interface GeneratedContent {
   id: string;
   title: string;
@@ -35,8 +73,9 @@ export interface GeneratedContent {
   created_at: string;
   completed_at?: string;
   request_id: string;
-  generated_content?: {
-    articles: Article[];
+  generated_content?: BookContent | ArticleContent | {
+    articles?: Article[];
+    book?: Book;
   };
   generated_content_json?: string;
   error_message?: string;
@@ -66,7 +105,7 @@ export interface GenerationRequest {
   generated_count: number;
   items_with_images: number;
   completion_percentage: number;
-  generation_params: Record<string, unknown>;
+  generation_params: Record<string, unknown> | null;
   error_message: string;
   preview: string;
 }
@@ -100,6 +139,30 @@ export const generateArticles = async (params: GenerateArticlesRequest, token: s
   }
 };
 
+// Generate book
+export const generateBook = async (params: GenerateBookRequest, token: string): Promise<GenerateArticlesResponse> => {
+  try {
+    const response = await authFetch(`${BASE_URL}/generate-book`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error generating book:', error);
+    throw error;
+  }
+};
+
 // Get generated content by ID
 export const getGeneratedContent = async (contentId: string, token: string): Promise<GetContentResponse> => {
   try {
@@ -128,7 +191,7 @@ export const getAllGenerationRequests = async (
   token: string,
   page: number = 1,
   per_page: number = 10,
-  type: string = 'articles',
+  type: string = 'article',
   status?: string
 ): Promise<GetAllContentResponse> => {
   try {
@@ -138,8 +201,9 @@ export const getAllGenerationRequests = async (
     const params = new URLSearchParams({
       page: page.toString(),
       per_page: per_page.toString(),
-      type: type
+      type:type
     });
+    
 
     if (status) {
       params.append('status', status);

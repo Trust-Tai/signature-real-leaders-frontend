@@ -13,6 +13,7 @@ import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCar
 const LoginPage = () => {
   const router = useRouter();
   const [currentScreen, setCurrentScreen] = useState<'signin' | 'forgot-password' | 'verify-otp' | 'update-password'>('signin');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -25,6 +26,28 @@ const LoginPage = () => {
     confirmPassword: '',
     rememberMe: false,
   });
+
+  // Check if user is already logged in
+  React.useEffect(() => {
+    const checkExistingAuth = () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          // User is already logged in, redirect to dashboard
+          router.replace('/dashboard');
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking existing auth:', error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    // Small delay to ensure localStorage is available
+    const timeoutId = setTimeout(checkExistingAuth, 100);
+    return () => clearTimeout(timeoutId);
+  }, [router]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -247,6 +270,18 @@ const LoginPage = () => {
         return SignInScreen;
     }
   };
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="h-screen flex items-center justify-center" style={{background:"#f9efef"}}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen lg:min-h-screen bg-gray-800 flex items-center justify-center p-0 sm:p-4" style={{background:"#f9efef"}}>

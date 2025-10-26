@@ -87,8 +87,8 @@ mailchimpIcon:mailchimpIcon
 export const FONTS = {
   ABOLITION: 'Abolition Test',
   OUTFIT: 'Outfit',
-  GEIST_SANS: 'Geist Sans',
-  GEIST_MONO: 'Geist Mono'
+  SYSTEM_SANS: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  SYSTEM_MONO: '"SF Mono", Monaco, Inconsolata, "Roboto Mono", "Source Code Pro", monospace'
 } as const;
 
 // Colors

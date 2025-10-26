@@ -1,31 +1,43 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
+import { 
+  getNewsletterStats, 
+  getNewsletterSubscribers, 
+  getDateRange,
+  type NewsletterStats,
+  type SubscriberFilters 
+} from '@/lib/newsletterApi';
 
-interface Subscriber {
+interface LocalSubscriber {
   id: number;
   email: string;
   name: string;
   status: string;
   date: string;
+  list_name?: string;
 }
 
 const EmailSubscribers = () => {
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [addSubscriberModalOpen, setAddSubscriberModalOpen] = useState(false);
   const [editSubscriberModalOpen, setEditSubscriberModalOpen] = useState(false);
   const [espModalOpen, setEspModalOpen] = useState(false);
-  const [editingSubscriber, setEditingSubscriber] = useState<Subscriber | null>(null);
+  const [editingSubscriber, setEditingSubscriber] = useState<LocalSubscriber | null>(null);
   const [filters, setFilters] = useState({
     status: 'all',
     dateRange: 'all',
-    searchTerm: ''
+    searchTerm: '',
+    dateFrom: '',
+    dateTo: ''
   });
   const [newSubscriber, setNewSubscriber] = useState({
     name: '',
@@ -39,73 +51,196 @@ const EmailSubscribers = () => {
     connected: false
   });
 
-  const subscribersData = [
-    { id: 1, email: 'john.doe@example.com', name: 'John Doe', status: 'Active', date: '2025-01-15' },
-    { id: 2, email: 'jane.smith@example.com', name: 'Jane Smith', status: 'Active', date: '2025-01-14' },
-    { id: 3, email: 'mike.johnson@example.com', name: 'Mike Johnson', status: 'Unsubscribed', date: '2025-01-13' },
-    { id: 4, email: 'sarah.wilson@example.com', name: 'Sarah Wilson', status: 'Active', date: '2025-01-12' },
-    { id: 5, email: 'david.brown@example.com', name: 'David Brown', status: 'Active', date: '2025-01-11' },
-    { id: 6, email: 'emma.davis@example.com', name: 'Emma Davis', status: 'Active', date: '2025-01-10' },
-    { id: 7, email: 'alex.taylor@example.com', name: 'Alex Taylor', status: 'Unsubscribed', date: '2025-01-09' },
-    { id: 8, email: 'lisa.anderson@example.com', name: 'Lisa Anderson', status: 'Active', date: '2025-01-08' }
-  ];
+  // API State
+  const [stats, setStats] = useState<NewsletterStats | null>(null);
+  const [subscribersData, setSubscribersData] = useState<LocalSubscriber[]>([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    per_page: 20,
+    total: 0,
+    total_pages: 1
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const statsCards = [
-    { number: '3,220', label: 'TOTAL SUBSCRIBERS', description: 'People who joined your mailing list', color: '#CF3232' },
-    { number: '2,890', label: 'ACTIVE SUBSCRIBERS', description: 'Currently receiving your emails', color: '#CF3232' },
-    { number: '330', label: 'UNSUBSCRIBED', description: 'People who opted out', color: '#CF3232' },
-    { number: '12.5%', label: 'GROWTH RATE', description: 'Monthly subscriber increase', color: '#CF3232' }
+  // Fetch newsletter stats
+  const fetchStats = async () => {
+    try {
+      const statsData = await getNewsletterStats();
+      setStats(statsData);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      if (err instanceof Error && err.message === 'NO_NEWSLETTER_SERVICE') {
+        setError('NO_NEWSLETTER_SERVICE');
+      } else {
+        setError('Failed to load newsletter statistics');
+      }
+    }
+  };
+
+  // Fetch subscribers with filters
+  const fetchSubscribers = async (page = 1) => {
+    try {
+      setLoading(true);
+      const apiFilters: SubscriberFilters = {
+        page,
+        per_page: 20
+      };
+
+      // Apply filters
+      if (filters.status !== 'all') {
+        apiFilters.status = filters.status as 'active' | 'unsubscribed';
+      }
+      if (filters.searchTerm) {
+        apiFilters.search = filters.searchTerm;
+      }
+
+      // Handle date range
+      if (filters.dateRange !== 'all') {
+        const dateRange = getDateRange(filters.dateRange);
+        if (dateRange.date_from) apiFilters.date_from = dateRange.date_from;
+        if (dateRange.date_to) apiFilters.date_to = dateRange.date_to;
+      }
+
+      // Handle custom date range
+      if (filters.dateFrom) apiFilters.date_from = filters.dateFrom;
+      if (filters.dateTo) apiFilters.date_to = filters.dateTo;
+
+      const subscribersResponse = await getNewsletterSubscribers(apiFilters);
+      
+      if (subscribersResponse.success) {
+        // Convert API subscribers to local format
+        const localSubscribers: LocalSubscriber[] = subscribersResponse.data.subscribers.map((sub, index) => ({
+          id: (page - 1) * 20 + index + 1,
+          name: sub.name,
+          email: sub.email,
+          status: sub.status,
+          date: sub.date_joined.split(' ')[0], // Extract date part
+          list_name: sub.list_name
+        }));
+
+        setSubscribersData(localSubscribers);
+        setPagination(subscribersResponse.data.pagination);
+        setCurrentPage(page);
+      }
+    } catch (err) {
+      console.error('Error fetching subscribers:', err);
+      if (err instanceof Error && err.message === 'NO_NEWSLETTER_SERVICE') {
+        setError('NO_NEWSLETTER_SERVICE');
+      } else {
+        setError('Failed to load subscribers');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchStats();
+    fetchSubscribers();
+  }, []);
+
+  // Refetch when filters change
+  useEffect(() => {
+    fetchSubscribers(1);
+  }, [filters]);
+
+  // Generate stats cards from API data
+  const statsCards = stats ? [
+    { 
+      number: stats.data.total_subscribers.toLocaleString(), 
+      label: 'TOTAL SUBSCRIBERS', 
+      description: 'People who joined your mailing list', 
+      color: '#CF3232' 
+    },
+    { 
+      number: stats.data.active_subscribers.toLocaleString(), 
+      label: 'ACTIVE SUBSCRIBERS', 
+      description: 'Currently receiving your emails', 
+      color: '#CF3232' 
+    },
+    { 
+      number: stats.data.unsubscribed_users.toLocaleString(), 
+      label: 'UNSUBSCRIBED', 
+      description: 'People who opted out', 
+      color: '#CF3232' 
+    },
+    { 
+      number: `${stats.data.monthly_growth_rate}%`, 
+      label: 'GROWTH RATE', 
+      description: 'Monthly subscriber increase', 
+      color: '#CF3232' 
+    }
+  ] : [
+    { number: '0', label: 'TOTAL SUBSCRIBERS', description: 'People who joined your mailing list', color: '#CF3232' },
+    { number: '0', label: 'ACTIVE SUBSCRIBERS', description: 'Currently receiving your emails', color: '#CF3232' },
+    { number: '0', label: 'UNSUBSCRIBED', description: 'People who opted out', color: '#CF3232' },
+    { number: '0%', label: 'GROWTH RATE', description: 'Monthly subscriber increase', color: '#CF3232' }
   ];
 
   const handleAddSubscriber = () => {
     if (newSubscriber.name && newSubscriber.email) {
-      const newSubscriberItem = {
-        id: subscribersData.length + 1,
-        email: newSubscriber.email,
-        name: newSubscriber.name,
-        status: newSubscriber.status,
-        date: new Date().toISOString().split('T')[0]
-      };
-      subscribersData.push(newSubscriberItem);
+      // In a real implementation, you would call an API to add the subscriber
+      // For now, we'll just refresh the data
+      fetchSubscribers(currentPage);
       setNewSubscriber({ name: '', email: '', status: 'Active' });
       setAddSubscriberModalOpen(false);
     }
   };
 
-  const handleEditSubscriber = (subscriber: Subscriber) => {
+  const handleEditSubscriber = (subscriber: LocalSubscriber) => {
     setEditingSubscriber(subscriber);
     setEditSubscriberModalOpen(true);
   };
 
   const handleUpdateSubscriber = () => {
     if (editingSubscriber) {
-      const index = subscribersData.findIndex(s => s.id === editingSubscriber.id);
-      if (index !== -1) {
-        const updated: Subscriber = {
-          id: editingSubscriber.id,
-          email: editingSubscriber.email,
-          name: editingSubscriber.name,
-          status: editingSubscriber.status,
-          date: editingSubscriber.date,
-        };
-        subscribersData[index] = updated;
-        setEditSubscriberModalOpen(false);
-        setEditingSubscriber(null);
-      }
+      // In a real implementation, you would call an API to update the subscriber
+      // For now, we'll just refresh the data
+      fetchSubscribers(currentPage);
+      setEditSubscriberModalOpen(false);
+      setEditingSubscriber(null);
     }
   };
 
+  const handlePageChange = (page: number) => {
+    fetchSubscribers(page);
+  };
+
+  const handleApplyFilters = () => {
+    setFilterModalOpen(false);
+    fetchSubscribers(1);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      status: 'all',
+      dateRange: 'all',
+      searchTerm: '',
+      dateFrom: '',
+      dateTo: ''
+    });
+  };
+
   const handleExportSubscribers = () => {
+    if (subscribersData.length === 0) {
+      alert('No subscribers to export');
+      return;
+    }
+
     const exportData = subscribersData.map(sub => ({
       Name: sub.name,
       Email: sub.email,
       Status: sub.status,
-      'Date Joined': sub.date
+      'Date Joined': sub.date,
+      'List Name': sub.list_name || ''
     }));
     
     const csvContent = [
       Object.keys(exportData[0]).join(','),
-      ...exportData.map(row => Object.values(row).join(','))
+      ...exportData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
     ].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -161,6 +296,8 @@ const EmailSubscribers = () => {
                 <input 
                   type="text" 
                   placeholder="Search newsletter subscribers..." 
+                  value={filters.searchTerm}
+                  onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
                   className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-48 md:w-64 font-outfit"
                   style={{ color: '#949494' }}
                 />
@@ -190,6 +327,8 @@ const EmailSubscribers = () => {
             <input 
               type="text" 
               placeholder="Search subscribers..." 
+              value={filters.searchTerm}
+              onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
               className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
               style={{ color: '#949494' }}
             />
@@ -201,10 +340,13 @@ const EmailSubscribers = () => {
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             
             {/* Stats Cards */}
-            <StatsCards stats={statsCards} columns={4} />
+            {error !== 'NO_NEWSLETTER_SERVICE' && (
+              <StatsCards stats={statsCards} columns={4} />
+            )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            {error !== 'NO_NEWSLETTER_SERVICE' && (
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button 
                 onClick={() => setAddSubscriberModalOpen(true)}
                 className="bg-[#CF3232] text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center space-x-2"
@@ -238,20 +380,58 @@ const EmailSubscribers = () => {
                 <span>Filter</span>
               </button>
             </div>
+            )}
+
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                {error === 'NO_NEWSLETTER_SERVICE' ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Settings className="w-5 h-5 text-red-600" />
+                      <div>
+                        <div className="text-red-800 text-sm font-medium">
+                          Newsletter Service Not Configured
+                        </div>
+                        <div className="text-red-600 text-sm">
+                          Please add your newsletter service to view subscriber data
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => router.push('/dashboard/profile')}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                    >
+                      Setup Newsletter Service
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center">
+                    <div className="text-red-800 text-sm font-medium">
+                      {error}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setError(null);
+                        fetchStats();
+                        fetchSubscribers(currentPage);
+                      }}
+                      className="ml-auto text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Active Filters Display */}
-            {(filters.status !== 'all' || filters.dateRange !== 'all' || filters.searchTerm) && (
+            {(filters.status !== 'all' || filters.dateRange !== 'all' || filters.searchTerm || filters.dateFrom || filters.dateTo) && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium text-blue-800">Active Filters:</h3>
                   <button
-                    onClick={() => {
-                      setFilters({
-                        status: 'all',
-                        dateRange: 'all',
-                        searchTerm: ''
-                      });
-                    }}
+                    onClick={handleResetFilters}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
                     Clear All
@@ -281,6 +461,7 @@ const EmailSubscribers = () => {
                       </button>
                     </span>
                   )}
+                  
                   {filters.searchTerm && (
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       Search: &quot;{filters.searchTerm}&quot;
@@ -292,97 +473,163 @@ const EmailSubscribers = () => {
                       </button>
                     </span>
                   )}
+
+                  {(filters.dateFrom || filters.dateTo) && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Custom Date: {filters.dateFrom} - {filters.dateTo}
+                      <button
+                        onClick={() => setFilters({...filters, dateFrom: '', dateTo: ''})}
+                        className="ml-1 text-blue-600 hover:text-blue-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
                 </div>
               </div>
             )}
 
             {/* Subscribers Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {error !== 'NO_NEWSLETTER_SERVICE' && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-gray-100">
-                <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">
-                  Newsletter Subscriber List
-                </h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">
+                    Newsletter Subscriber List
+                  </h2>
+                  {stats && (
+                    <div className="text-sm text-gray-500">
+                      Platform: {stats.data.marketing_platform} | {stats.data.account_name}
+                    </div>
+                  )}
+                </div>
               </div>
               
-              {/* Mobile View - Cards */}
-              <div className="block sm:hidden p-4 space-y-4">
-                {subscribersData.map((subscriber) => (
-                  <div key={subscriber.id} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-[#101117]">{subscriber.name}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        subscriber.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {subscriber.status}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-2">{subscriber.email}</p>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Joined: {subscriber.date}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Desktop Table */}
-              <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-100" style={{ backgroundColor: '#FEE3E3CC' }}>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Name</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Email</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Status</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Date Joined</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#CF3232]" />
+                  <span className="ml-2 text-gray-600">Loading subscribers...</span>
+                </div>
+              ) : subscribersData.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-gray-500 text-lg mb-2">No subscribers found</div>
+                  <div className="text-gray-400 text-sm">Try adjusting your filters or add new subscribers</div>
+                </div>
+              ) : (
+                <>
+                  {/* Mobile View - Cards */}
+                  <div className="block sm:hidden p-4 space-y-4">
                     {subscribersData.map((subscriber) => (
-                      <tr key={subscriber.id} className="border-b border-gray-50 hover:bg-gray-50">
-                        <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.name}</td>
-                        <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.email}</td>
-                        <td className="py-4 px-4">
+                      <div key={subscriber.id} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold text-[#101117]">{subscriber.name}</h3>
                           <span className={`px-2 py-1 rounded-full text-xs ${
-                            subscriber.status === 'Active' ? 'bg-green-100 text-green-800 sm:text-base font-outfit font-regular' : 'bg-red-100 text-red-800sm:text-base font-outfit font-regular text-[#414141]'
+                            subscriber.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
                             {subscriber.status}
                           </span>
-                        </td>
-                        <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.date}</td>
-                        <td className="py-4 px-4">
-                          <button 
-                            onClick={() => handleEditSubscriber(subscriber)}
-                            className="text-[#CF3232] hover:text-red-600 text-sm font-medium"
-                          >
-                            Edit
-                          </button>
-                        </td>
-                      </tr>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-2">{subscriber.email}</p>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>Joined: {subscriber.date}</span>
+                          {subscriber.list_name && <span>List: {subscriber.list_name}</span>}
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+
+                  {/* Desktop Table */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-100" style={{ backgroundColor: '#FEE3E3CC' }}>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Name</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Email</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Status</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Date Joined</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">List</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-[#101117]">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {subscribersData.map((subscriber) => (
+                          <tr key={subscriber.id} className="border-b border-gray-50 hover:bg-gray-50">
+                            <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.name}</td>
+                            <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.email}</td>
+                            <td className="py-4 px-4">
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                subscriber.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {subscriber.status}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.date}</td>
+                            <td className="py-4 px-4 text-sm sm:text-base font-outfit font-regular text-[#414141]">{subscriber.list_name || '-'}</td>
+                            <td className="py-4 px-4">
+                              <button 
+                                onClick={() => handleEditSubscriber(subscriber)}
+                                className="text-[#CF3232] hover:text-red-600 text-sm font-medium"
+                              >
+                                Edit
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
 
               {/* Pagination */}
-              <div className="p-4 sm:p-6 border-t border-gray-100">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <p className="text-sm text-gray-600 text-center sm:text-left">
-                    Showing 1 to 8 of 3,220 newsletter subscribers
-                  </p>
-                  <div className="flex items-center space-x-2">
-                    <button className="p-2 hover:bg-gray-100 rounded">
-                      <ChevronLeft className="w-4 h-4 text-gray-400" />
-                    </button>
-                    <span className="px-3 py-1 bg-[#CF3232] text-white rounded text-sm">1</span>
-                    <span className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded cursor-pointer text-sm">2</span>
-                    <span className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded cursor-pointer text-sm">3</span>
-                    <button className="p-2 hover:bg-gray-100 rounded">
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
-                    </button>
+              {!loading && subscribersData.length > 0 && (
+                <div className="p-4 sm:p-6 border-t border-gray-100">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-gray-600 text-center sm:text-left">
+                      Showing {((pagination.page - 1) * pagination.per_page) + 1} to {Math.min(pagination.page * pagination.per_page, pagination.total)} of {pagination.total.toLocaleString()} newsletter subscribers
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <button 
+                        onClick={() => handlePageChange(pagination.page - 1)}
+                        disabled={pagination.page <= 1}
+                        className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="w-4 h-4 text-gray-400" />
+                      </button>
+                      
+                      {/* Page Numbers */}
+                      {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                        const pageNum = Math.max(1, Math.min(pagination.total_pages - 4, pagination.page - 2)) + i;
+                        if (pageNum > pagination.total_pages) return null;
+                        
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`px-3 py-1 rounded text-sm ${
+                              pageNum === pagination.page
+                                ? 'bg-[#CF3232] text-white'
+                                : 'text-gray-600 hover:bg-gray-100 cursor-pointer'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                      
+                      <button 
+                        onClick={() => handlePageChange(pagination.page + 1)}
+                        disabled={pagination.page >= pagination.total_pages}
+                        className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
+            )}
           </div>
           
           {/* Filter Modal */}
@@ -438,7 +685,9 @@ const EmailSubscribers = () => {
                     </label>
                     <select
                       value={filters.dateRange}
-                      onChange={(e) => setFilters({...filters, dateRange: e.target.value})}
+                      onChange={(e) => {
+                        setFilters({...filters, dateRange: e.target.value, dateFrom: '', dateTo: ''});
+                      }}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
                     >
                       <option value="all" className="text-[#101117]">All Time</option>
@@ -447,8 +696,37 @@ const EmailSubscribers = () => {
                       <option value="month" className="text-[#101117]">This Month</option>
                       <option value="quarter" className="text-[#101117]">This Quarter</option>
                       <option value="year" className="text-[#101117]">This Year</option>
+                      <option value="custom" className="text-[#101117]">Custom Range</option>
                     </select>
                   </div>
+
+                  {/* Custom Date Range */}
+                  {filters.dateRange === 'custom' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-[#101117] mb-3">
+                          From Date
+                        </label>
+                        <input
+                          type="date"
+                          value={filters.dateFrom}
+                          onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-[#101117] mb-3">
+                          To Date
+                        </label>
+                        <input
+                          type="date"
+                          value={filters.dateTo}
+                          onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Search Term */}
                   <div>
@@ -469,19 +747,13 @@ const EmailSubscribers = () => {
                 {/* Modal Footer */}
                 <div className="p-6 border-t border-gray-200 flex gap-3">
                   <button
-                    onClick={() => {
-                      setFilters({
-                        status: 'all',
-                        dateRange: 'all',
-                        searchTerm: ''
-                      });
-                    }}
+                    onClick={handleResetFilters}
                     className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Reset
                   </button>
                   <button
-                    onClick={() => setFilterModalOpen(false)}
+                    onClick={handleApplyFilters}
                     className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
                   >
                     Apply Filters

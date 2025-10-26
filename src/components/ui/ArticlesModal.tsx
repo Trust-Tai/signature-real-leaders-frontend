@@ -40,7 +40,7 @@ const ArticlesModal: React.FC<ArticlesModalProps> = ({ isOpen, onClose, contentI
       const response = await getGeneratedContent(contentId, token);
       
       if (response.success && response.content) {
-        if (response.content.generated_content?.articles) {
+        if (response.content.generated_content && 'articles' in response.content.generated_content && response.content.generated_content.articles) {
           setArticles(response.content.generated_content.articles);
           console.log('[ArticlesModal] Loaded articles:', response.content.generated_content.articles.length);
         } else if (response.content.generated_content_json) {
