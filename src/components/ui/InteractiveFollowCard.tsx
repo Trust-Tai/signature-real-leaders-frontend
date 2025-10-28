@@ -1,4 +1,4 @@
-import richardBransonProfile from "../../assets/images/richard-branson-profile.png";
+import randomGuy from "../../assets/images/random-guy.png";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 interface FollowCardStyles extends React.CSSProperties {
@@ -153,7 +153,7 @@ export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = ({ na
               className="w-16 h-16 rounded-full border-2 border-gray-600 overflow-hidden bg-gray-800 shadow-xl"
               style={{ transform: "translateZ(60px)" }}
             >
-              <Image src={richardBransonProfile} alt="John Doe" className="w-full h-full object-cover" />
+              <Image src={randomGuy} alt="John Doe" className="w-full h-full object-cover" />
             </div>
             <div
               className="text-lg font-bold text-white tracking-tight"
@@ -165,7 +165,7 @@ export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = ({ na
               className="text-xs text-gray-300 leading-tight"
               style={{ transform: "translateZ(50px)" }}
             >
-              Founder Of The Virgin Group
+              Founder & CEO, NovaEdge Systems
             </div>
           </header>
 

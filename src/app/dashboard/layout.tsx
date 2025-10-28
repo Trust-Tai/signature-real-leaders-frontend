@@ -12,7 +12,7 @@ export default function UserProfileLayout({
     const { isInitialLoading } = useUser();
     
     if (isInitialLoading) {
-      return <LoadingScreen  text1="Loading your dashboard..." text2="Please wait while we fetch your profile data"/>;
+      return <LoadingScreen  text1="Loading......."/>;
     }
     
     return (

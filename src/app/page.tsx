@@ -37,7 +37,7 @@ const Home = () => {
 
   // Show loading screen while checking authentication
   if (isCheckingAuth) {
-    return <LoadingScreen text1="Checking authentication..." text2="Redirecting..." />;
+    return <LoadingScreen text1="Checking authentication..." />;
   }
 
   // This should not render as user will be redirected

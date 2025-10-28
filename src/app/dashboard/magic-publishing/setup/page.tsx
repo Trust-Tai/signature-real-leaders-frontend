@@ -277,7 +277,7 @@ const MagicPublishingSetup = () => {
         
         // Small delay to let the user see the toast before navigation
         setTimeout(() => {
-          router.push(`/dashboard/magic-publishing/content/${result.content_id}`);
+          router.push(`/dashboard/magic-publishing/content`);
         }, 1000);
       } else {
         // Fallback to general content page if no content_id

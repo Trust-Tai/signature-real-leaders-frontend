@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
@@ -65,7 +65,7 @@ const EmailSubscribers = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch newsletter stats
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const statsData = await getNewsletterStats();
       setStats(statsData);
@@ -77,10 +77,10 @@ const EmailSubscribers = () => {
         setError('Failed to load newsletter statistics');
       }
     }
-  };
+  }, []);
 
   // Fetch subscribers with filters
-  const fetchSubscribers = async (page = 1) => {
+  const fetchSubscribers = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const apiFilters: SubscriberFilters = {
@@ -134,18 +134,18 @@ const EmailSubscribers = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   // Initial data fetch
   useEffect(() => {
     fetchStats();
     fetchSubscribers();
-  }, []);
+  }, [fetchStats, fetchSubscribers]);
 
   // Refetch when filters change
   useEffect(() => {
     fetchSubscribers(1);
-  }, [filters]);
+  }, [filters, fetchSubscribers]);
 
   // Generate stats cards from API data
   const statsCards = stats ? [

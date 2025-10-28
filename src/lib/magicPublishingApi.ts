@@ -230,6 +230,61 @@ export const getAllGenerationRequests = async (
   }
 };
 
+
+
+
+
+// Get all content by type (articles, books, etc.) with search and filter options
+export const getAllContent = async (
+  type: string, 
+  token: string, 
+  options?: {
+    search?: string;
+    status?: string;
+    date_from?: string;
+    date_to?: string;
+    order?: 'ASC' | 'DESC';
+  }
+) => {
+  try {
+    const params = new URLSearchParams({ type });
+    
+    if (options?.search) {
+      params.append('search', options.search);
+    }
+    if (options?.status) {
+      params.append('status', options.status);
+    }
+    if (options?.date_from) {
+      params.append('date_from', options.date_from);
+    }
+    if (options?.date_to) {
+      params.append('date_to', options.date_to);
+    }
+    if (options?.order) {
+      params.append('order', options.order);
+    }
+
+    const response = await authFetch(`${BASE_URL}/get-all-content?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching all content:', error);
+    throw error;
+  }
+};
+
 // Delete generated content
 export const deleteGeneratedContent = async (contentId: string): Promise<DeleteContentResponse> => {
   try {

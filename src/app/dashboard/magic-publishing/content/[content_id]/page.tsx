@@ -252,38 +252,105 @@ const ContentDetailPage = () => {
 
               {/* Content Status Display */}
               {currentContent.status === 'processing' && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6 mb-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                    <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-2 border-gray-300 border-t-[#cf3232] flex-shrink-0"></div>
+                // <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6 mb-6">
+                //   <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                //     <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-2 border-gray-300 border-t-[#cf3232] flex-shrink-0"></div>
                     
-                    <div className="flex-1 w-full">
-                      <h3 className="text-sm sm:text-base font-medium text-[#333333] mb-2">
-                        Processing {currentContent.requested_count} articles...
-                      </h3>
+                //     <div className="flex-1 w-full">
+                //       <h3 className="text-sm sm:text-base font-medium text-[#333333] mb-2">
+                //         Processing {currentContent.requested_count} articles...
+                //       </h3>
                       
-                      {/* Progress Bar */}
-                      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                        <div
-                          className="bg-[#cf3232] h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${Math.max(5, currentContent.completion_percentage || 5)}%` }}
-                        ></div>
-                      </div>
+                //       {/* Progress Bar */}
+                //       <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                //         <div
+                //           className="bg-[#cf3232] h-2 rounded-full transition-all duration-500"
+                //           style={{ width: `${Math.max(5, currentContent.completion_percentage || 5)}%` }}
+                //         ></div>
+                //       </div>
                       
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm text-gray-500 gap-1">
-                        <span>
-                          {currentContent.completion_percentage > 0 
+                //       <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm text-gray-500 gap-1">
+                //         <span>
+                //           {currentContent.completion_percentage > 0 
+                //             ? `${currentContent.completion_percentage}% complete` 
+                //             : 'Starting...'
+                //           }
+                //         </span>
+                //         <span>Duration: {currentContent.duration}</span>
+                //       </div>
+                //     </div>
+                //   </div>
+                // </div>
+
+                   <div className="mb-4 p-6 bg-gradient-to-br from-[#f9efef] via-[#fee3e3] to-gray-50 rounded-xl border-2 border-gray-300 shadow-lg relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 via-gray-300/10 to-gray-200/10 animate-pulse"></div>
+
+                          <div className="absolute inset-0 rounded-xl">
+                            <div className="absolute inset-0 rounded-xl border-2 border-gray-400 opacity-30 animate-ping"></div>
+                          </div>
+
+                          <div className="flex items-center space-x-5 relative z-10">
+                            <div className="relative flex-shrink-0">
+                              <div className="animate-spin rounded-full h-14 w-14 border-4 border-gray-200 border-t-[#cf3232] shadow-lg"></div>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="animate-ping w-4 h-4 bg-[#cf3232] rounded-full opacity-75"></div>
+                              </div>
+                              <div className="absolute -inset-2 rounded-full border-2 border-gray-300 opacity-30 animate-pulse"></div>
+                            </div>
+
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-4">
+                                <p className="text-[#333333] font-bold text-lg">🚀 Processing Your Article...</p>
+                                <div className="flex space-x-1">
+                                  <span className="animate-bounce inline-block w-2 h-2 bg-[#cf3232] rounded-full shadow-lg" style={{ animationDelay: '0ms' }}></span>
+                                  <span className="animate-bounce inline-block w-2 h-2 bg-gray-500 rounded-full shadow-lg" style={{ animationDelay: '150ms' }}></span>
+                                  <span className="animate-bounce inline-block w-2 h-2 bg-gray-400 rounded-full shadow-lg" style={{ animationDelay: '300ms' }}></span>
+                                </div>
+                              </div>
+
+                              <div className="relative w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner mb-4">
+                                <div
+                                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#cf3232] via-gray-500 to-gray-600 rounded-full transition-all duration-1000 ease-out shadow-lg"
+                                  style={{ width: `${Math.max(15, currentContent?.completion_percentage || 15)}%` }}
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-40 animate-shimmer"></div>
+                                  <div className="absolute inset-0 blur-sm bg-gradient-to-r from-[#cf3232] via-gray-400 to-gray-500 opacity-50"></div>
+                                </div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-30 animate-pulse"></div>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <p className="text-base font-bold text-[#333333]">
+                                  {currentContent.completion_percentage > 0 
                             ? `${currentContent.completion_percentage}% complete` 
-                            : 'Starting...'
+                            : 'Initializing...'
                           }
-                        </span>
-                        <span>Duration: {currentContent.duration}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                                    </p>
+                                  <div className="flex space-x-1">
+                                    <div className="w-1.5 h-1.5 bg-[#cf3232] rounded-full animate-pulse"></div>
+                                    <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
+                                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-2 bg-gradient-to-r from-[#f9efef] to-[#fee3e3] px-4 py-2 rounded-full shadow-md">
+                                  <span className="text-lg">⏱️</span>
+                                  <p className="text-sm font-bold text-[#333333]">
+                                    {currentContent.duration}
+                                  </p>
+                                </div>
+                              </div>
+
+                             
+                            </div>
+                          </div>
+                        </div>
+
               )}
 
             
+
+          
 
               {currentContent.status === 'failed' && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6 mb-6">
@@ -305,7 +372,7 @@ const ContentDetailPage = () => {
             {/* Articles Display - Only show if completed */}
             {currentContent.status === 'completed' && (
               <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-                <ArticlesList contentId={contentId} />
+                <ArticlesList />
               </div>
             )}
 

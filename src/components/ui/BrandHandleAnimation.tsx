@@ -31,7 +31,7 @@ const accordionData: AccordionItem[] = [
     title: "Conservation Work",
     links: [
       { text: "Gombe Research", href: "#" },
-      { text: "Jane Goodall Institute", href: "#" },
+      { text: "Jane Doe Institute", href: "#" },
     ],
   },
   {
@@ -214,7 +214,7 @@ const InteractiveMagazineCard: React.FC = () => {
         >
           <Image 
             src={images.janeGoodallRealLeaders}
-            alt="Jane Goodall"
+            alt="Jane Doe"
             style={{
               width: '100%',
               height: '100%',
@@ -233,7 +233,7 @@ const InteractiveMagazineCard: React.FC = () => {
               lineHeight: 1.1,
             }}
           >
-            Jane Goodall
+            Jane Doe
           </div>
           <div 
             className="pc-tag"
@@ -621,7 +621,7 @@ const BrandHandle: React.FC = () => {
             fontSize: '10px',
           }}
         >
-          @janegoodall
+          @janedoe
         </strong>
         <span
           style={{
@@ -724,7 +724,7 @@ const MediaTile: React.FC = () => {
     >
       <Image 
         src={images.janeGoodallHero}
-        alt="Jane Goodall in conservation work"
+        alt="Jane doe in conservation work"
         style={{
           width: '100%',
           height: '100%',
@@ -784,7 +784,7 @@ const CTABar: React.FC = () => {
           target.style.boxShadow = '0 8px 18px rgba(198,31,39,.45)';
         }}
       >
-        @janegoodall
+        @janedoe
       </a>
     </div>
   );

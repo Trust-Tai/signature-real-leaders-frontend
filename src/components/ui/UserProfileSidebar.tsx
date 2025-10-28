@@ -88,7 +88,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                 className="hover:opacity-80 transition-opacity cursor-pointer"
                 title="Go to Real Leaders Website"
               >
-                <Image src={images.realLeaders} alt='Real Leaders Logo' />
+                <Image src="https://real-leaders.com/wp-content/uploads/2023/08/cropped-Red-White.png" width={200} height={60} alt='Real Leaders Logo' />
               </button>
             </div>
             <div className="lg:hidden">

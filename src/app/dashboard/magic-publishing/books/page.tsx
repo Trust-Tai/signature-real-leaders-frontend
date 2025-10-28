@@ -17,12 +17,9 @@ const MagicPublishingBooks = () => {
   const router = useRouter();
   
   const {
-    generatedContents: books,
     isGenerating,
     error,
-    processingContentIds,
     handleGenerateBook,
-    handleDeleteContent,
     fetchAllGenerationRequests,
     clearError,
   } = useMagicPublishing('book');
@@ -115,7 +112,7 @@ const MagicPublishingBooks = () => {
               <input 
                 type="text" 
                 placeholder="Search here..." 
-                className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
+                className="pl-10  pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
                 style={{ color: '#949494' }}
               />
             </div>
@@ -221,11 +218,7 @@ const MagicPublishingBooks = () => {
                   </div>
                 </div>
               ) : (
-                <BooksList 
-                  books={books}
-                  onDelete={handleDeleteContent}
-                  processingContentIds={processingContentIds}
-                />
+                <BooksList />
               )}
             </div>
 

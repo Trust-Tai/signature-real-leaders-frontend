@@ -242,7 +242,7 @@ export default function DynamicUserProfile() {
 
   // Loading state
   if (loading) {
-    return <LoadingScreen text1="Loading profile..." text2={`Fetching data for @${username}`} />
+    return <LoadingScreen text1="Loading profile..." />
   }
 
   // Error state
@@ -506,11 +506,12 @@ export default function DynamicUserProfile() {
 
             {/* Signature Box */}
             <div
-              className="w-full backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-center mb-8"
+              className="w-full profilesignimagediv backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-center mb-8"
               style={{
                 height: '126px',
                 borderRadius: '10px',
-                opacity: 1
+                opacity: 1,
+               
               }}
             >
               {profileData.signature_url ? (
@@ -519,7 +520,7 @@ export default function DynamicUserProfile() {
                   alt={`${profileData.full_name} Signature`}
                   width={300}
                   height={100}
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-full max-h-full  signimage"
                   onError={(e) => {
                     console.log('[Profile] Signature image load error, using fallback');
                     e.currentTarget.src = images.profileSinature.src;

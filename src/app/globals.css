@@ -517,3 +517,18 @@ div#tg-dialog-title , div#tg-dialog-body,button#tg-dialog-prev-btn, .tg-dialog-f
 .tg-dialog-spinner{
   display: none;
 }
+/* 
+.profilesignimagediv {
+    height: 126px;
+    border-radius: 10px;
+    opacity: 1;
+    padding: 0px !important;
+    width: 98%;
+}
+.signimage {
+    color: transparent;
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+} */

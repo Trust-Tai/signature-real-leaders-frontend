@@ -107,29 +107,14 @@ console.log("remoteTemplates",remoteTemplates)
                     </div>
                   </div>
 
-                  <Image src={t?.image_url} alt={t?.title} width={200} height={160} className="w-full h-40 object-cover rounded-md" style={{height:'100%'}}/>
+                  <Image src={t?.image_url} alt={t?.title} width={200} height={160} unoptimized className="w-full h-40 object-cover rounded-md" style={{height:'100%'}}/>
                   <p className="text-white mt-2 text-sm">{t?.title}</p>
                 </button>
               );
             })}
           </div>
 
-          {/* Large preview below */}
-          {/* {selectedTemplate && (
-            <div className="mt-4 w-full rounded-xl border border-white/10 bg-black/30 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-white/90 text-sm">Preview: {selectedTemplate.title}</p>
-                <ChevronRight className="w-4 h-4 text-gray-300" />
-              </div>
-              <div className="w-full rounded-lg overflow-hidden border border-white/10 bg-black">
-                <img
-                  src={selectedTemplate.image_url}
-                  alt={selectedTemplate.title}
-                  className="w-full h-[360px] md:h-[420px] object-contain bg-black"
-                />
-              </div>
-            </div>
-          )} */}
+        
 
           <div className="flex justify-center pt-4">
             <button
