@@ -14,7 +14,6 @@ import {
   NewsletterSetupSection,
   ProfileTemplateSection,
   AudienceDescriptionSection,
-  SuccessMetricsSection,
   LinksSection,
   SignSection,
   VerificationReviewSection,
@@ -27,7 +26,6 @@ import { images } from "../../assets/index";
 import { toast } from '@/components/ui/toast';
 import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
 // import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
-import UptrendCanvas from '@/components/ui/UptrendCanvas';
 import { NewsletterConnections } from '@/components/ui/NewsletterConnections';
 import SignatureAnimation from '@/components/ui/SignatureAnimation';
 import { AnimatedAudience } from '@/components/ui/AnimatedAudience';
@@ -70,10 +68,9 @@ const InnerProfileVerificationPage = () => {
     { id: 4, title: 'Newsletter Setup', status: currentStep === 4 ? 'current' : currentStep > 4 ? 'completed' : 'pending' },
     { id: 5, title: 'Profile Template', status: currentStep === 5 ? 'current' : currentStep > 5 ? 'completed' : 'pending' },
     { id: 6, title: 'Your Audience', status: currentStep === 6 ? 'current' : currentStep > 6 ? 'completed' : 'pending' },
-    { id: 7, title: 'Your Success Metrics', status: currentStep === 7 ? 'current' : currentStep > 7 ? 'completed' : 'pending' },
-    { id: 8, title: 'Your Links', status: currentStep === 8 ? 'current' : currentStep > 8 ? 'completed' : 'pending' },
-    { id: 9, title: 'Sign', status: currentStep === 9 ? 'current' : currentStep > 9 ? 'completed' : 'pending' },
-    { id: 10, title: 'Review in Progress', status: currentStep === 10 ? 'current' : 'pending' }
+    { id: 7, title: 'Your Links', status: currentStep === 7 ? 'current' : currentStep > 7 ? 'completed' : 'pending' },
+    { id: 8, title: 'Sign', status: currentStep === 8 ? 'current' : currentStep > 8 ? 'completed' : 'pending' },
+    { id: 9, title: 'Review in Progress', status: currentStep === 9 ? 'current' : 'pending' }
   ];
 
   const handleStepClick = (stepId: number) => {
@@ -105,7 +102,7 @@ const InnerProfileVerificationPage = () => {
 
   const nextStep = () => {
     console.log('nextStep called, current step:', currentStep);
-    if (currentStep < 10) {
+    if (currentStep < 9) {
       const newStep = currentStep + 1;
       console.log('Setting new step to:', newStep);
       setCurrentStep(newStep);
@@ -331,27 +328,16 @@ const InnerProfileVerificationPage = () => {
       
       case 7:
         return (
-          <SuccessMetricsSection
-            onSubmit={(data: { numberOfBookings: string; emailListSize: string; amountInSales: string; amountInDonations: string }) => {
-              setState(prev => ({ ...prev, success_metrics: data }));
-              console.log('[Step 8] Saved success metrics', { data });
+          <LinksSection
+            onSubmit={(links) => {
+              setState(prev => ({ ...prev, links }));
+              console.log('[Step 7] Saved links', { links });
               nextStep();
             }}
           />
         );
       
       case 8:
-        return (
-          <LinksSection
-            onSubmit={(links) => {
-              setState(prev => ({ ...prev, links }));
-              console.log('[Step 9] Saved links', { links });
-              nextStep();
-            }}
-          />
-        );
-      
-      case 9:
         return (
           <SignSection
             isSubmitting={loading}
@@ -372,7 +358,6 @@ const InnerProfileVerificationPage = () => {
                   newsletterService: state.newsletter?.service,
                   apiKey: state.newsletter?.api_key,
                   targetAudience: state.target_audience,
-                  metrics: state.success_metrics,
                   profileTemplate: state.profile_template_id,
                   links: state.links || [],
                   consentFeatureName: signData.giveConsent,
@@ -402,7 +387,7 @@ const InnerProfileVerificationPage = () => {
                 if (submitRes?.success) {
                   const successMsg = submitRes.message || 'Your application has been submitted for review. You will be notified once it is approved.';
                   toast.success(successMsg, { id: 'submit-user-info-success' });
-                  console.log('[Step 10] Submission complete. Moving to Review');
+                  console.log('[Step 9] Submission complete. Moving to Review');
                   nextStep();
                   setLoading(false);
                   return;
@@ -424,7 +409,7 @@ const InnerProfileVerificationPage = () => {
           />
         );
       
-      case 10:
+      case 9:
         return (
           <VerificationReviewSection
           />
@@ -455,7 +440,7 @@ const InnerProfileVerificationPage = () => {
         return <InteractiveFollowCard name={formData.name} />;
       case 3:
         return <AudienceAnimation />
-      case 8:
+      case 7:
         return <InteractiveFollowCard name={state.first_name || formData.name} />;
       //  return <InteractiveMagazineCards />;
       case 6:
@@ -464,11 +449,9 @@ const InnerProfileVerificationPage = () => {
         return <NewsletterConnections />;
       case 5:
         return <InteractiveFollowCard name={state.first_name || formData.name} />;
-      case 7:
-        return <UptrendCanvas />;
-      case 9:
+      case 8:
         return <SignatureAnimation />;
-      case 10:
+      case 9:
         return <InteractiveFollowCard name={state.first_name || formData.name} />;
       default:
         return <InteractiveFollowCard name={state.first_name || formData.name} />;
@@ -488,7 +471,6 @@ const InnerProfileVerificationPage = () => {
       case 6:
       case 7:
       case 8:
-      case 9:
         return {
         background: 'radial-gradient(800px 600px at 15% 20%, rgba(229, 9, 20, 0.22), transparent 60%), radial-gradient(700px 500px at 85% 10%, rgba(229, 9, 20, 0.16), transparent 60%), linear-gradient(rgb(11, 11, 15) 0%, rgb(5, 5, 7) 100%)'
       };
@@ -525,15 +507,15 @@ const InnerProfileVerificationPage = () => {
           <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
 
             <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] ${
-              currentStep === 3 || currentStep === 7 || currentStep === 5? 'max-w-[870px]' : 'max-w-2xl'
+              currentStep === 3 || currentStep === 5? 'max-w-[870px]' : 'max-w-2xl'
             }`}>
               {/* Header */}
-             {currentStep !== 10 && (
+             {currentStep !== 9 && (
     <PageHeader
       title="MAKE YOUR MARK"
       subtitle="with RealLeaders signature"
       highlightWord="MARK"
-      className={`lg:mb-[${currentStep === 1 ? '150px' : currentStep === 3 ? '80px' : currentStep === 5 ? '60px' : currentStep === 6 ? '100px' : currentStep === 7 ? '130px' : '90px'}]`}
+      className={`lg:mb-[${currentStep === 1 ? '150px' : currentStep === 3 ? '80px' : currentStep === 5 ? '60px' : currentStep === 6 ? '100px' : '90px'}]`}
     />
 )}
 

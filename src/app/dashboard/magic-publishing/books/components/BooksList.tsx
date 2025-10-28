@@ -9,6 +9,7 @@ interface Chapter {
   chapter_number: number;
   title: string;
   content: string;
+  chapter_cover?: string; // New field for chapter cover image
   key_points?: string[];
   exercises?: unknown[];
   case_study?: string;
@@ -18,6 +19,7 @@ interface Chapter {
 interface Book {
   title: string;
   summary?: string;
+  book_cover?: string; // New field for book cover image
   target_audience?: string;
   chapters: Chapter[];
   conclusion?: string;
@@ -222,16 +224,192 @@ const BooksList: React.FC<BooksListProps> = ({ refreshTrigger }) => {
     toast.success('Book copied to clipboard!');
   };
 
-  const handleDownloadBook = (book: Book, index: number) => {
-    const fullText = `${book.title}\n\n${book.summary || ''}\n\nTarget Audience: ${book.target_audience || ''}\n\n${book.chapters.map(chapter => `Chapter ${chapter.chapter_number}: ${chapter.title}\n${chapter.content}`).join('\n\n')}\n\n${book.conclusion || ''}\n\nAbout Author: ${book.about_author || ''}`;
-    const element = document.createElement('a');
-    const file = new Blob([fullText], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `book_${index + 1}_${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    toast.success('Book downloaded!');
+  const handleDownloadBook = async (book: Book) => {
+    try {
+      toast.info('Generating PDF... Please wait');
+      
+      // Dynamic import for jsPDF to avoid SSR issues
+      const { jsPDF } = await import('jspdf');
+      const pdf = new jsPDF();
+      
+      let yPosition = 20;
+      const pageHeight = pdf.internal.pageSize.height;
+      const pageWidth = pdf.internal.pageSize.width;
+      const margin = 20;
+      const maxWidth = pageWidth - (margin * 2);
+      
+      // Helper function to add new page if needed
+      const checkPageBreak = (requiredHeight: number) => {
+        if (yPosition + requiredHeight > pageHeight - margin) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      };
+      
+      // Helper function to add image from URL
+      const addImageToPDF = async (imageUrl: string, x: number, y: number, width: number, height: number) => {
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          
+          return new Promise((resolve) => {
+            reader.onload = () => {
+              try {
+                pdf.addImage(reader.result as string, 'JPEG', x, y, width, height);
+                resolve(true);
+              } catch (error) {
+                console.warn('Failed to add image:', error);
+                resolve(false);
+              }
+            };
+            reader.readAsDataURL(blob);
+          });
+        } catch (error) {
+          console.warn('Failed to fetch image:', error);
+          return false;
+        }
+      };
+      
+      // Add book cover if available
+      if (book.book_cover) {
+        await addImageToPDF(book.book_cover, margin, yPosition, 60, 80);
+        yPosition += 90;
+      }
+      
+      // Title
+      pdf.setFontSize(24);
+      pdf.setFont('helvetica', 'bold');
+      const titleLines = pdf.splitTextToSize(book.title, maxWidth);
+      pdf.text(titleLines, margin, yPosition);
+      yPosition += titleLines.length * 12 + 10;
+      
+      // Summary
+      if (book.summary) {
+        checkPageBreak(30);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Summary:', margin, yPosition);
+        yPosition += 8;
+        
+        pdf.setFont('helvetica', 'normal');
+        const summaryLines = pdf.splitTextToSize(book.summary, maxWidth);
+        pdf.text(summaryLines, margin, yPosition);
+        yPosition += summaryLines.length * 6 + 15;
+      }
+      
+      // Target Audience
+      if (book.target_audience) {
+        checkPageBreak(20);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Target Audience:', margin, yPosition);
+        yPosition += 8;
+        
+        pdf.setFont('helvetica', 'normal');
+        const audienceLines = pdf.splitTextToSize(book.target_audience, maxWidth);
+        pdf.text(audienceLines, margin, yPosition);
+        yPosition += audienceLines.length * 6 + 15;
+      }
+      
+      // Chapters
+      for (const chapter of book.chapters) {
+        checkPageBreak(100);
+        
+        // Chapter cover image
+        if (chapter.chapter_cover) {
+          await addImageToPDF(chapter.chapter_cover, margin, yPosition, 40, 30);
+          yPosition += 40;
+        }
+        
+        // Chapter title
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`Chapter ${chapter.chapter_number}: ${chapter.title}`, margin, yPosition);
+        yPosition += 15;
+        
+        // Chapter content
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'normal');
+        const contentLines = pdf.splitTextToSize(chapter.content, maxWidth);
+        
+        for (let i = 0; i < contentLines.length; i += 10) {
+          checkPageBreak(60);
+          const chunk = contentLines.slice(i, i + 10);
+          pdf.text(chunk, margin, yPosition);
+          yPosition += chunk.length * 5;
+        }
+        
+        // Key points
+        if (chapter.key_points && chapter.key_points.length > 0) {
+          checkPageBreak(30);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('Key Points:', margin, yPosition);
+          yPosition += 8;
+          
+          pdf.setFont('helvetica', 'normal');
+          chapter.key_points.forEach(point => {
+            checkPageBreak(10);
+            const pointLines = pdf.splitTextToSize(`• ${point}`, maxWidth - 10);
+            pdf.text(pointLines, margin + 5, yPosition);
+            yPosition += pointLines.length * 5 + 3;
+          });
+        }
+        
+        // Case study
+        if (chapter.case_study) {
+          checkPageBreak(30);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('Case Study:', margin, yPosition);
+          yPosition += 8;
+          
+          pdf.setFont('helvetica', 'normal');
+          const caseStudyLines = pdf.splitTextToSize(chapter.case_study, maxWidth);
+          pdf.text(caseStudyLines, margin, yPosition);
+          yPosition += caseStudyLines.length * 5;
+        }
+        
+        yPosition += 20; // Space between chapters
+      }
+      
+      // Conclusion
+      if (book.conclusion) {
+        checkPageBreak(50);
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Conclusion', margin, yPosition);
+        yPosition += 15;
+        
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'normal');
+        const conclusionLines = pdf.splitTextToSize(book.conclusion, maxWidth);
+        pdf.text(conclusionLines, margin, yPosition);
+        yPosition += conclusionLines.length * 5 + 15;
+      }
+      
+      // About Author
+      if (book.about_author) {
+        checkPageBreak(50);
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('About Author', margin, yPosition);
+        yPosition += 15;
+        
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'normal');
+        const authorLines = pdf.splitTextToSize(book.about_author, maxWidth);
+        pdf.text(authorLines, margin, yPosition);
+      }
+      
+      // Save PDF
+      const fileName = `${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      pdf.save(fileName);
+      
+      toast.success('PDF downloaded successfully!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    }
   };
 
   const toggleBookExpansion = (index: number) => {
@@ -343,9 +521,22 @@ const BooksList: React.FC<BooksListProps> = ({ refreshTrigger }) => {
           </button>
 
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{selectedBook.title}</h1>
-          <p className="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">
-            Chapter {selectedChapter.chapter_number}: {selectedChapter.title}
-          </p>
+          <div className="flex items-center space-x-4 mb-6 sm:mb-8">
+            {selectedChapter.chapter_cover && (
+              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                <img 
+                  src={selectedChapter.chapter_cover} 
+                  alt={`Chapter ${selectedChapter.chapter_number} cover`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <div>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Chapter {selectedChapter.chapter_number}: {selectedChapter.title}
+              </p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Chapter Content Editor */}
@@ -881,8 +1072,16 @@ const BooksList: React.FC<BooksListProps> = ({ refreshTrigger }) => {
                     <div className="p-6">
                       {/* Book Header - Same as BookDetail */}
                       <div className="flex flex-col sm:flex-row gap-4 items-start space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
-                        <div className="w-20 h-28 bg-[#fee3e3] rounded-lg flex items-center justify-center shadow-md mx-auto sm:mx-0 flex-shrink-0">
-                          <BookOpen className="w-10 h-10 text-[#cf3232]" />
+                        <div className="w-20 h-28 bg-[#fee3e3] rounded-lg flex items-center justify-center shadow-md mx-auto sm:mx-0 flex-shrink-0 overflow-hidden">
+                          {book.book_cover ? (
+                            <img 
+                              src={book.book_cover} 
+                              alt={`Cover for ${book.title}`}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          ) : (
+                            <BookOpen className="w-10 h-10 text-[#cf3232]" />
+                          )}
                         </div>
                         <div className="flex-1 text-center sm:text-left w-full">
                           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-2">
@@ -915,7 +1114,7 @@ const BooksList: React.FC<BooksListProps> = ({ refreshTrigger }) => {
                             <Copy className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDownloadBook(book, index)}
+                            onClick={() => handleDownloadBook(book)}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                             title="Download book"
                           >
@@ -959,7 +1158,17 @@ const BooksList: React.FC<BooksListProps> = ({ refreshTrigger }) => {
                               onClick={() => handleChapterClick(book, chapter)}
                               className="w-full flex items-center space-x-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left group"
                             >
-                              <FileText className="w-4 h-4 text-gray-400 group-hover:text-[#cf3232] flex-shrink-0" />
+                              {chapter.chapter_cover ? (
+                                <div className="w-8 h-8 rounded overflow-hidden flex-shrink-0">
+                                  <img 
+                                    src={chapter.chapter_cover} 
+                                    alt={`Chapter ${chapter.chapter_number} cover`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <FileText className="w-4 h-4 text-gray-400 group-hover:text-[#cf3232] flex-shrink-0" />
+                              )}
                               <span className="text-gray-900 font-medium text-sm">
                                 Chapter {chapter.chapter_number}: {chapter.title}
                               </span>

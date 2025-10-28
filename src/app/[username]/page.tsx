@@ -10,6 +10,10 @@ import { toast } from '@/components/ui/toast';
 import { LoadingScreen } from '@/components';
 import { useUser } from '@/components/UserContext';
 import { recordProfileVisit, recordLinkClick } from '@/lib/statisticsApi';
+import { 
+  FaInstagram, FaTiktok, FaYoutube, FaSpotify, FaLinkedin, FaFacebook, FaPodcast, FaBlog, FaHandshake, FaHeart, FaXTwitter
+} from 'react-icons/fa6';
+import { FaMapMarkedAlt } from 'react-icons/fa';
 
 interface ProfileData {
   user_id: number;
@@ -44,6 +48,33 @@ interface ProfileData {
   };
   profile_privacy: string;
 }
+
+// Icon mapping based on link names
+const getIconForLink = (linkName: string) => {
+  const suggestedItems = [
+    { label: 'Work With Me', icon: <FaHandshake style={{ color: '#1CA235' }} /> },
+    { label: 'Donations', icon: <FaHeart style={{ color: '#e74c3c' }} /> },
+    { label: 'Podcast', icon: <FaPodcast style={{ color: '#8e44ad' }} /> },
+    { label: 'Instagram', icon: <FaInstagram style={{ color: '#E4405F' }} /> },
+    { label: 'TikTok', icon: <FaTiktok style={{ color: '#000000' }} /> },
+    { label: 'YouTube', icon: <FaYoutube style={{ color: '#FF0000' }} /> },
+    { label: 'Spotify', icon: <FaSpotify style={{ color: '#1DB954' }} /> },
+    { label: 'LinkedIn', icon: <FaLinkedin style={{ color: '#0077B5' }} /> },
+    { label: 'Twitter/X', icon: <FaXTwitter style={{ color: '#000000' }} /> },
+    { label: 'Facebook', icon: <FaFacebook style={{ color: '#1877F2' }} /> },
+    { label: 'Blog', icon: <FaBlog style={{ color: '#FF6B35' }} /> },
+    { label: 'Maps', icon: <FaMapMarkedAlt style={{ color: '#34A853' }} /> },
+  ];
+
+  // Find matching icon based on link name (case insensitive)
+  const matchedItem = suggestedItems.find(item => 
+    item.label.toLowerCase() === linkName.toLowerCase() ||
+    linkName.toLowerCase().includes(item.label.toLowerCase()) ||
+    item.label.toLowerCase().includes(linkName.toLowerCase())
+  );
+
+  return matchedItem ? matchedItem.icon : '🔗';
+};
 
 export default function DynamicUserProfile() {
   const router = useRouter();
@@ -478,7 +509,9 @@ export default function DynamicUserProfile() {
                 }}
               >
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{link.icon || '🔗'}</span>
+                  <div className="text-2xl flex items-center justify-center w-8 h-8">
+                    {getIconForLink(link.name)}
+                  </div>
                   <div className="text-left">
                     <span className="text-white font-outfit block" style={{ fontSize: 18, fontWeight: 500 }}>
                       {link.display_name || link.name || 'Link'}

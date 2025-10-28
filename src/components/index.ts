@@ -13,7 +13,6 @@ export { default as EmailVerificationSection } from './ui/EmailVerificationSecti
 export { default as CodeVerificationSection } from './ui/CodeVerificationSection';
 export { default as InformationFormSection } from './ui/InformationFormSection';
 export { default as AudienceDescriptionSection } from './ui/AudienceDescriptionSection';
-export { default as SuccessMetricsSection } from './ui/SuccessMetricsSection';
 export { default as LinksSection } from './ui/LinksSection';
 export { default as NewsletterSetupSection } from './ui/NewsletterSetupSection';
 export { default as ProfileTemplateSection } from './ui/ProfileTemplateSection';
