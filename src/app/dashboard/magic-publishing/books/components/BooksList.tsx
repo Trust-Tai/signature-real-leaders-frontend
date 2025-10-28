@@ -768,11 +768,22 @@ const BooksList: React.FC<BooksListProps> = ({ refreshTrigger }) => {
                       className="w-full h-full object-cover"
                     />
                   </div>
+                ) : selectedBook.book_cover ? (
+                  <div className="aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden shadow-lg">
+                    <img 
+                      src={selectedBook.book_cover} 
+                      alt={`Existing cover for ${selectedBook.title}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="mt-2 text-center">
+                      <p className="text-sm text-gray-600">Current Book Cover</p>
+                    </div>
+                  </div>
                 ) : (
                   <div className="aspect-[2/3] bg-gradient-to-br from-[#fee3e3] to-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
                     <div className="text-center p-6">
                       <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 font-medium mb-2">No Cover Generated</p>
+                      <p className="text-gray-600 font-medium mb-2">No Cover Available</p>
                       <p className="text-sm text-gray-500">Click &quot;Generate Cover&quot; to create a book cover</p>
                     </div>
                   </div>
