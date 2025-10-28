@@ -110,15 +110,15 @@ const BookContentPage = () => {
                                 <div className="flex items-center space-x-4">
                                     <div className="relative">
                                         <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                                        <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                                        {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                                             3
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <div className="relative">
                                         <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                                        <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                                        {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                                             16
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <UserProfileDropdown />
                                 </div>
@@ -178,15 +178,15 @@ const BookContentPage = () => {
                             <div className="flex items-center space-x-4">
                                 <div className="relative">
                                     <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                                    <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                                    {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                                         3
-                                    </span>
+                                    </span> */}
                                 </div>
                                 <div className="relative">
                                     <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                                    <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                                    {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                                         16
-                                    </span>
+                                    </span> */}
                                 </div>
                                 <UserProfileDropdown />
                             </div>

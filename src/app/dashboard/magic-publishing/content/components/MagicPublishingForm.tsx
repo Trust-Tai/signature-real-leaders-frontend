@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useMagicPublishing } from '@/hooks/useMagicPublishing';
 import { X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
 
 interface MagicPublishingFormProps {
   onClose?: () => void;
@@ -13,8 +13,8 @@ interface MagicPublishingFormProps {
 }
 
 const MagicPublishingForm: React.FC<MagicPublishingFormProps> = ({ onClose, contentId }) => {
-  const { handleGenerateArticles, isGenerating, error } = useMagicPublishing();
-  const router = useRouter();
+  const { handleGenerateArticles, isGenerating, error, fetchAllGenerationRequests } = useMagicPublishing();
+
   
   const [formData, setFormData] = useState({
     articleCount: 200,
@@ -48,8 +48,9 @@ const MagicPublishingForm: React.FC<MagicPublishingFormProps> = ({ onClose, cont
       
       // Navigate to article detail page if generation started successfully
       if (response && response.content_id) {
-        console.log('[Form] Navigating to article detail page:', response.content_id);
-        router.push(`/dashboard/magic-publishing/content/${response.content_id}`);
+        console.log('[Form] Generation started successfully, refreshing content list...');
+        // Refresh the content list to show the new processing item
+        await fetchAllGenerationRequests();
       }
       
       // Close the form after successful submission

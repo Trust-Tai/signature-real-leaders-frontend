@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Bell, Menu, Users, Globe, BookOpen, Mic, Info, ArrowLeft } from 'lucide-react';
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
@@ -15,7 +15,19 @@ const ContentDetailPage = () => {
   const router = useRouter();
   const contentId = params.content_id as string;
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { generatedContents, refreshContent, fetchAllGenerationRequests } = useMagicPublishing();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Function to trigger ArticlesList refresh - will be called when polling completes
+  const triggerArticlesListRefresh = useCallback(() => {
+    console.log('[Content Detail] Polling completion callback triggered! Refreshing ArticlesList...');
+    setRefreshTrigger(prev => {
+      const newValue = prev + 1;
+      console.log('[Content Detail] Setting refreshTrigger to:', newValue);
+      return newValue;
+    });
+  }, []);
+
+  const { generatedContents, refreshContent, fetchAllGenerationRequests } = useMagicPublishing('articles', triggerArticlesListRefresh);
   const [currentContent, setCurrentContent] = useState<GenerationRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -168,15 +180,15 @@ const ContentDetailPage = () => {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                     3
-                  </span>
+                  </span> */}
                 </div>
                 <div className="relative">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                     16
-                  </span>
+                  </span> */}
                 </div>
                 <UserProfileDropdown />
               </div>
@@ -322,7 +334,7 @@ const ContentDetailPage = () => {
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                   <p className="text-base font-bold text-[#333333]">
-                                  {currentContent.completion_percentage > 0 
+                                  {(currentContent.completion_percentage ?? 0) > 0 
                             ? `${currentContent.completion_percentage}% complete` 
                             : 'Initializing...'
                           }
@@ -372,7 +384,7 @@ const ContentDetailPage = () => {
             {/* Articles Display - Only show if completed */}
             {currentContent.status === 'completed' && (
               <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-                <ArticlesList />
+                <ArticlesList refreshTrigger={refreshTrigger} />
               </div>
             )}
 

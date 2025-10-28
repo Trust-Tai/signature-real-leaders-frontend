@@ -28,7 +28,7 @@ const MagicPublishingSetup = () => {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, loading: userLoading, error: userError } = useUser();
-  const { handleGenerateArticles, isGenerating, error: magicError } = useMagicPublishing();
+  const { handleGenerateArticles, isGenerating, error: magicError, fetchAllGenerationRequests } = useMagicPublishing();
   
   // State for magic generation
   const [isUpdatingUser, setIsUpdatingUser] = useState(false);
@@ -272,6 +272,10 @@ const MagicPublishingSetup = () => {
       
       // Navigate to specific content page with content_id
       if (result && result.content_id) {
+        console.log('[Setup] Generation started successfully, refreshing content list...');
+        // Refresh the content list to show the new processing item
+        await fetchAllGenerationRequests();
+        
         console.log('[Setup] Generation started, navigating to content detail page with ID:', result.content_id);
         toast.info('Redirecting to track generation progress...', { autoClose: 2000 });
         
@@ -320,6 +324,10 @@ const MagicPublishingSetup = () => {
       
       // Navigate to specific content page with content_id
       if (result && result.content_id) {
+        console.log('[Setup] Regeneration started successfully, refreshing content list...');
+        // Refresh the content list to show the new processing item
+        await fetchAllGenerationRequests();
+        
         console.log('[Setup] Regeneration started, navigating to content detail page with ID:', result.content_id);
         toast.info('Redirecting to track regeneration progress...', { autoClose: 2000 });
         
@@ -422,15 +430,15 @@ const MagicPublishingSetup = () => {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                     3
-                  </span>
+                  </span> */}
                 </div>
                 <div className="relative">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                     16
-                  </span>
+                  </span> */}
                 </div>
                 <UserProfileDropdown />
               </div>

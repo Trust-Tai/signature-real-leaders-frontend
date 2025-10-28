@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Bell, Menu, Users, Globe, BookOpen, Mic, Plus, Info } from 'lucide-react';
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
@@ -14,7 +14,18 @@ import { GenerateBookRequest } from '@/lib/magicPublishingApi';
 const MagicPublishingBooks = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const router = useRouter();
+
+  // Function to trigger BooksList refresh - will be called when polling completes
+  const triggerBooksListRefresh = useCallback(() => {
+    console.log('[Books Page] Polling completion callback triggered! Refreshing BooksList...');
+    setRefreshTrigger(prev => {
+      const newValue = prev + 1;
+      console.log('[Books Page] Setting refreshTrigger to:', newValue);
+      return newValue;
+    });
+  }, []);
   
   const {
     isGenerating,
@@ -22,7 +33,7 @@ const MagicPublishingBooks = () => {
     handleGenerateBook,
     fetchAllGenerationRequests,
     clearError,
-  } = useMagicPublishing('book');
+  } = useMagicPublishing('book', triggerBooksListRefresh);
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -36,11 +47,22 @@ const MagicPublishingBooks = () => {
   }, [fetchAllGenerationRequests]);
 
   const handleCreateBook = async (params: GenerateBookRequest) => {
+    console.log('[Books Page] Starting book creation with params:', params);
     const response = await handleGenerateBook(params);
+    console.log('[Books Page] Book generation response:', response);
+    
     if (response) {
+      console.log('[Books Page] Generation started successfully, refreshing content list...');
+      // Refresh the content list to show the new processing item
+      await fetchAllGenerationRequests();
+      
+      // Trigger BooksList refresh
+      setRefreshTrigger(prev => prev + 1);
+      console.log('[Books Page] Content list refreshed, closing modal...');
+      
       setIsCreateModalOpen(false);
-      // Navigate to the book detail page to show processing state
-      router.push(`/dashboard/magic-publishing/books/${response.content_id}`);
+    } else {
+      console.log('[Books Page] No response received from book generation');
     }
   };
   return (
@@ -90,15 +112,15 @@ const MagicPublishingBooks = () => {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                     3
-                  </span>
+                  </span> */}
                 </div>
                 <div className="relative">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                     16
-                  </span>
+                  </span> */}
                 </div>
                 <UserProfileDropdown />
               </div>
@@ -130,7 +152,10 @@ const MagicPublishingBooks = () => {
                   <h2 className="text-xl sm:text-2xl font-bold text-[#101117]">Magic Publishing</h2>
                   <Info className="w-5 h-5 text-gray-400" />
                 </div>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base w-full sm:w-auto">
+                <button 
+                  onClick={() => router.push('/dashboard/magic-publishing/setup')}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base w-full sm:w-auto"
+                >
                   Edit Details
                 </button>
               </div>
@@ -218,7 +243,7 @@ const MagicPublishingBooks = () => {
                   </div>
                 </div>
               ) : (
-                <BooksList />
+                <BooksList refreshTrigger={refreshTrigger} />
               )}
             </div>
 

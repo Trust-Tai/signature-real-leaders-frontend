@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useMagicPublishing } from '@/hooks/useMagicPublishing';
 import ArticlesList from './ArticlesList';
@@ -12,19 +12,31 @@ interface GenerationRequest {
   status: 'processing' | 'completed' | 'failed';
   created_at: string;
   completed_at?: string;
-  duration: string;
+  duration?: string;
   request_id: string;
-  requested_count: number;
-  generated_count: number;
-  items_with_images: number;
-  completion_percentage: number;
-  generation_params: Record<string, unknown> | null;
+  requested_count?: number;
+  generated_count?: number;
+  items_with_images?: number;
+  completion_percentage?: number;
+  generation_params?: Record<string, unknown> | null;
   error_message: string;
-  preview: string;
+  preview?: string;
 }
 
 const GeneratedArticlesList: React.FC = () => {
-  const { generatedContents, refreshContent, fetchAllGenerationRequests } = useMagicPublishing();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Function to trigger ArticlesList refresh - will be called when polling completes
+  const triggerArticlesListRefresh = useCallback(() => {
+    console.log('[GeneratedArticlesList] Polling completion callback triggered! Refreshing ArticlesList...');
+    setRefreshTrigger(prev => {
+      const newValue = prev + 1;
+      console.log('[GeneratedArticlesList] Setting refreshTrigger to:', newValue);
+      return newValue;
+    });
+  }, []);
+
+  const { generatedContents, refreshContent, fetchAllGenerationRequests } = useMagicPublishing('articles', triggerArticlesListRefresh);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -141,7 +153,7 @@ const GeneratedArticlesList: React.FC = () => {
               </p>
             </div>
           ) : (
-          <ArticlesList />
+          <ArticlesList refreshTrigger={refreshTrigger} />
           )}
 
          

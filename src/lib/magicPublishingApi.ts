@@ -95,19 +95,29 @@ export interface DeleteContentResponse {
 export interface GenerationRequest {
   id: number;
   title: string;
+  slug: string;
   content_type: string;
   status: 'processing' | 'completed' | 'failed';
   created_at: string;
   completed_at?: string;
-  duration: string;
+  updated_at: string;
   request_id: string;
-  requested_count: number;
-  generated_count: number;
-  items_with_images: number;
-  completion_percentage: number;
-  generation_params: Record<string, unknown> | null;
+  generated_content: BookContent | ArticleContent | { articles?: Article[]; book?: Book } | boolean | null;
+  generated_content_json: string;
+  content_preview: string;
+  content_summary: string;
+  word_count: number;
   error_message: string;
-  preview: string;
+  tags: string[];
+  categories: string[];
+  // Legacy fields for backward compatibility
+  duration?: string;
+  requested_count?: number;
+  generated_count?: number;
+  items_with_images?: number;
+  completion_percentage?: number;
+  generation_params?: Record<string, unknown> | null;
+  preview?: string;
 }
 
 export interface GetAllContentResponse {
@@ -186,49 +196,7 @@ export const getGeneratedContent = async (contentId: string, token: string): Pro
   }
 };
 
-// Get all generation requests
-export const getAllGenerationRequests = async (
-  token: string,
-  page: number = 1,
-  per_page: number = 10,
-  type: string = 'article',
-  status?: string
-): Promise<GetAllContentResponse> => {
-  try {
-    console.log('Calling getAllGenerationRequests API...', new Date().toLocaleTimeString());
 
-    // Build query parameters
-    const params = new URLSearchParams({
-      page: page.toString(),
-      per_page: per_page.toString(),
-      type:type
-    });
-    
-
-    if (status) {
-      params.append('status', status);
-    }
-
-    const response = await authFetch(`${BASE_URL}/get-generation-requests?${params.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('getAllGenerationRequests API response:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching all generation requests:', error);
-    throw error;
-  }
-};
 
 
 
@@ -244,6 +212,8 @@ export const getAllContent = async (
     date_from?: string;
     date_to?: string;
     order?: 'ASC' | 'DESC';
+    page?: number;
+    per_page?: number;
   }
 ) => {
   try {
@@ -263,6 +233,12 @@ export const getAllContent = async (
     }
     if (options?.order) {
       params.append('order', options.order);
+    }
+    if (options?.page) {
+      params.append('page', options.page.toString());
+    }
+    if (options?.per_page) {
+      params.append('per_page', options.per_page.toString());
     }
 
     const response = await authFetch(`${BASE_URL}/get-all-content?${params.toString()}`, {
@@ -316,6 +292,7 @@ export const pollForCompletion = async (
   onComplete: (content: GeneratedContent) => void,
   onError: (error: string) => void,
   onRefreshAll: () => Promise<void>,
+  onPollingComplete?: () => void,
   interval: number = 10000 // Changed to 10 seconds as requested
 ): Promise<void> => {
   console.log(`[Polling] Starting polling for content ID: ${contentId}`);
@@ -341,6 +318,10 @@ export const pollForCompletion = async (
           onComplete(response.content);
           // Refresh all data when content is completed
           await onRefreshAll();
+          // Call the polling complete callback if provided
+          if (onPollingComplete) {
+            onPollingComplete();
+          }
           return;
         } else if (response.content.status === 'failed') {
           console.log(`[Polling] Content failed: ${response.content.error_message}`);

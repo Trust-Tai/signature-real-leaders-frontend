@@ -26,7 +26,7 @@ interface ContentItem {
   completed_at: string;
   updated_at: string;
   request_id: string;
-  generated_content: Article | null;
+  generated_content: { articles: Article[] } | Article | boolean | null;
   generated_content_json: string;
   content_preview: string;
   content_summary: string;
@@ -38,9 +38,10 @@ interface ContentItem {
 
 interface ArticlesListProps {
   onArticleSelect?: (article: Article) => void;
+  refreshTrigger?: number; // Add a refresh trigger prop
 }
 
-const ArticlesList: React.FC<ArticlesListProps> = () => {
+const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +63,12 @@ const ArticlesList: React.FC<ArticlesListProps> = () => {
   const [tempStatusFilter, setTempStatusFilter] = useState('');
   const [tempDateFrom, setTempDateFrom] = useState('');
   const [tempDateTo, setTempDateTo] = useState('');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [, setHasMore] = useState(false);
 
   const fetchArticles = useCallback(async () => {
     try {
@@ -78,26 +85,45 @@ const ArticlesList: React.FC<ArticlesListProps> = () => {
         date_from: appliedDateFrom || undefined,
         date_to: appliedDateTo || undefined,
         order: sortOrder,
+        page: currentPage,
+        per_page: 10,
       };
 
       const response = await getAllContent('articles', token, options);
 
       if (response.success && response.data && response.data.content) {
+        console.log('[ArticlesList] Received content items:', response.data.content.length);
         const allArticles: Article[] = [];
         const allContentItems: ContentItem[] = response.data.content;
         
         // Process each content item - only get articles from completed ones
         response.data.content.forEach((contentItem: ContentItem) => {
+          console.log('Processing content item:', contentItem.id, 'Status:', contentItem.status, 'Generated content:', contentItem.generated_content);
+          
           if (contentItem.status === 'completed') {
             // Try to get articles from generated_content first
-            if (contentItem.generated_content) {
-              allArticles.push(contentItem.generated_content);
+            if (contentItem.generated_content && typeof contentItem.generated_content === 'object') {
+              console.log('Generated content type:', typeof contentItem.generated_content, 'Content:', contentItem.generated_content);
+              
+              // Check if generated_content has articles array
+              if ('articles' in contentItem.generated_content && Array.isArray(contentItem.generated_content.articles)) {
+                console.log('Found articles array with', contentItem.generated_content.articles.length, 'articles');
+                allArticles.push(...contentItem.generated_content.articles);
+              }
+              // If generated_content is directly an article object
+              else if ('title' in contentItem.generated_content && 'content' in contentItem.generated_content) {
+                console.log('Found direct article object');
+                allArticles.push(contentItem.generated_content as Article);
+              }
             } 
             // Fallback to generated_content_json
             else if (contentItem.generated_content_json) {
+              console.log('Trying to parse generated_content_json');
               try {
                 const parsedContent = JSON.parse(contentItem.generated_content_json);
-                if (parsedContent.articles) {
+                console.log('Parsed content:', parsedContent);
+                if (parsedContent.articles && Array.isArray(parsedContent.articles)) {
+                  console.log('Found articles in JSON with', parsedContent.articles.length, 'articles');
                   allArticles.push(...parsedContent.articles);
                 }
               } catch (parseError) {
@@ -107,8 +133,18 @@ const ArticlesList: React.FC<ArticlesListProps> = () => {
           }
         });
 
+        console.log('[ArticlesList] Processed articles:', allArticles.length, 'Content items:', allContentItems.length);
         setArticles(allArticles);
         setContentItems(allContentItems);
+        
+        // Extract pagination info
+        if (response.data.pagination) {
+          setCurrentPage(response.data.pagination.current_page);
+          setTotalPages(response.data.pagination.total_pages);
+          setTotalItems(response.data.pagination.total_items);
+          setHasMore(response.data.pagination.has_more);
+          console.log('[ArticlesList] Pagination info:', response.data.pagination);
+        }
       } else {
         setError('Failed to fetch articles');
       }
@@ -118,7 +154,12 @@ const ArticlesList: React.FC<ArticlesListProps> = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, appliedStatusFilter, appliedDateFrom, appliedDateTo, sortOrder]);
+  }, [searchTerm, appliedStatusFilter, appliedDateFrom, appliedDateTo, sortOrder, currentPage]);
+
+  // Reset pagination when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Debounced search effect
   useEffect(() => {
@@ -134,11 +175,20 @@ const ArticlesList: React.FC<ArticlesListProps> = () => {
     fetchArticles();
   }, [appliedStatusFilter, appliedDateFrom, appliedDateTo, sortOrder, fetchArticles]);
 
+  // Effect for refresh trigger
+  useEffect(() => {
+    if (refreshTrigger) {
+      console.log('[ArticlesList] Refresh trigger changed to:', refreshTrigger, '- fetching articles...');
+      fetchArticles();
+    }
+  }, [refreshTrigger, fetchArticles]);
+
   // Handle apply filters
   const handleApplyFilters = () => {
     setAppliedStatusFilter(tempStatusFilter);
     setAppliedDateFrom(tempDateFrom);
     setAppliedDateTo(tempDateTo);
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   // Handle clear filters
@@ -150,6 +200,7 @@ const ArticlesList: React.FC<ArticlesListProps> = () => {
     setAppliedStatusFilter('');
     setAppliedDateFrom('');
     setAppliedDateTo('');
+    setCurrentPage(1); // Reset to first page when filters are cleared
   };
 
   const handleCopyArticle = (article: Article) => {
@@ -467,7 +518,7 @@ const ArticlesList: React.FC<ArticlesListProps> = () => {
                             {article.meta_description}
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {article.hashtags.split(' ').filter(tag => tag.trim()).map((tag, tagIndex) => (
+                            {article?.hashtags?.split(' ').filter(tag => tag.trim()).map((tag, tagIndex) => (
                               <span key={tagIndex} className="px-2 py-1 bg-[#fee3e3] text-[#333333] text-xs rounded-full">
                                 {tag}
                               </span>
@@ -535,6 +586,115 @@ const ArticlesList: React.FC<ArticlesListProps> = () => {
             </>
           )}
         </>
+      )}
+
+      {/* Pagination Controls */}
+      {!isLoading && !error && totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing page {currentPage} of {totalPages} ({totalItems} total items)
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            
+            {/* Page numbers */}
+            <div className="flex items-center space-x-1">
+              {(() => {
+                const pages = [];
+                
+                // Always show first page
+                if (totalPages > 0) {
+                  pages.push(
+                    <button
+                      key={1}
+                      onClick={() => setCurrentPage(1)}
+                      className={`px-3 py-2 text-sm font-medium rounded-md ${
+                        currentPage === 1
+                          ? 'bg-[#CF3232] text-white'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      1
+                    </button>
+                  );
+                }
+                
+                // Add ellipsis if there's a gap after first page
+                if (currentPage > 3) {
+                  pages.push(
+                    <span key="ellipsis1" className="px-2 py-2 text-sm text-gray-500">
+                      ...
+                    </span>
+                  );
+                }
+                
+                // Add pages around current page
+                const start = Math.max(2, currentPage - 1);
+                const end = Math.min(totalPages - 1, currentPage + 1);
+                
+                for (let i = start; i <= end; i++) {
+                  if (i !== 1 && i !== totalPages) {
+                    pages.push(
+                      <button
+                        key={i}
+                        onClick={() => setCurrentPage(i)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md ${
+                          currentPage === i
+                            ? 'bg-[#CF3232] text-white'
+                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {i}
+                      </button>
+                    );
+                  }
+                }
+                
+                // Add ellipsis if there's a gap before last page
+                if (currentPage < totalPages - 2) {
+                  pages.push(
+                    <span key="ellipsis2" className="px-2 py-2 text-sm text-gray-500">
+                      ...
+                    </span>
+                  );
+                }
+                
+                // Always show last page (if more than 1 page)
+                if (totalPages > 1) {
+                  pages.push(
+                    <button
+                      key={totalPages}
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={`px-3 py-2 text-sm font-medium rounded-md ${
+                        currentPage === totalPages
+                          ? 'bg-[#CF3232] text-white'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {totalPages}
+                    </button>
+                  );
+                }
+                
+                return pages;
+              })()}
+            </div>
+            
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

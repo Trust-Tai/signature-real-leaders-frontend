@@ -34,7 +34,7 @@ interface ContentItem {
   completed_at: string;
   updated_at: string;
   request_id: string;
-  generated_content: Book | null;
+  generated_content: Book | { book: Book } | boolean | null;
   generated_content_json: string;
   content_preview: string;
   content_summary: string;
@@ -46,9 +46,10 @@ interface ContentItem {
 
 interface BooksListProps {
   onBookSelect?: (book: Book) => void;
+  refreshTrigger?: number; // Add a refresh trigger prop
 }
 
-const BooksList: React.FC<BooksListProps> = () => {
+const BooksList: React.FC<BooksListProps> = ({ refreshTrigger }) => {
   const [books, setBooks] = useState<Book[]>([]);
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,6 +79,12 @@ const BooksList: React.FC<BooksListProps> = () => {
   const [appliedDateFrom, setAppliedDateFrom] = useState('');
   const [appliedDateTo, setAppliedDateTo] = useState('');
   
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [, setHasMore] = useState(false);
+  
   // Temporary filter states (used for UI inputs)
   const [tempStatusFilter, setTempStatusFilter] = useState('');
   const [tempDateFrom, setTempDateFrom] = useState('');
@@ -98,11 +105,14 @@ const BooksList: React.FC<BooksListProps> = () => {
         date_from: appliedDateFrom || undefined,
         date_to: appliedDateTo || undefined,
         order: sortOrder,
+        page: currentPage,
+        per_page: 10,
       };
 
       const response = await getAllContent('book', token, options);
 
       if (response.success && response.data && response.data.content) {
+        console.log('[BooksList] Received content items:', response.data.content.length);
         const allBooks: Book[] = [];
         const allContentItems: ContentItem[] = response.data.content;
         
@@ -110,14 +120,25 @@ const BooksList: React.FC<BooksListProps> = () => {
         response.data.content.forEach((contentItem: ContentItem) => {
           if (contentItem.status === 'completed') {
             // Try to get books from generated_content first
-            if (contentItem.generated_content) {
-              allBooks.push(contentItem.generated_content);
+            if (contentItem.generated_content && typeof contentItem.generated_content === 'object') {
+              // Check if generated_content has book property
+              if ('book' in contentItem.generated_content && contentItem.generated_content.book) {
+                allBooks.push(contentItem.generated_content.book);
+              }
+              // If generated_content is directly a book object
+              else if ('title' in contentItem.generated_content && 'chapters' in contentItem.generated_content) {
+                allBooks.push(contentItem.generated_content as Book);
+              }
             } 
             // Fallback to generated_content_json
             else if (contentItem.generated_content_json) {
               try {
                 const parsedContent = JSON.parse(contentItem.generated_content_json);
-                allBooks.push(parsedContent);
+                if (parsedContent.book) {
+                  allBooks.push(parsedContent.book);
+                } else if (parsedContent.title && parsedContent.chapters) {
+                  allBooks.push(parsedContent);
+                }
               } catch (parseError) {
                 console.error('Error parsing generated content JSON:', parseError);
               }
@@ -125,8 +146,18 @@ const BooksList: React.FC<BooksListProps> = () => {
           }
         });
 
+        console.log('[BooksList] Processed books:', allBooks.length, 'Content items:', allContentItems.length);
         setBooks(allBooks);
         setContentItems(allContentItems);
+        
+        // Extract pagination info
+        if (response.data.pagination) {
+          setCurrentPage(response.data.pagination.current_page);
+          setTotalPages(response.data.pagination.total_pages);
+          setTotalItems(response.data.pagination.total_items);
+          setHasMore(response.data.pagination.has_more);
+          console.log('[BooksList] Pagination info:', response.data.pagination);
+        }
       } else {
         setError('Failed to fetch books');
       }
@@ -136,7 +167,12 @@ const BooksList: React.FC<BooksListProps> = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, appliedStatusFilter, appliedDateFrom, appliedDateTo, sortOrder]);
+  }, [searchTerm, appliedStatusFilter, appliedDateFrom, appliedDateTo, sortOrder, currentPage]);
+
+  // Reset pagination when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Debounced search effect
   useEffect(() => {
@@ -152,11 +188,20 @@ const BooksList: React.FC<BooksListProps> = () => {
     fetchBooks();
   }, [appliedStatusFilter, appliedDateFrom, appliedDateTo, sortOrder, fetchBooks]);
 
+  // Effect for refresh trigger
+  useEffect(() => {
+    if (refreshTrigger) {
+      console.log('[BooksList] Refresh trigger changed to:', refreshTrigger, '- fetching books...');
+      fetchBooks();
+    }
+  }, [refreshTrigger, fetchBooks]);
+
   // Handle apply filters
   const handleApplyFilters = () => {
     setAppliedStatusFilter(tempStatusFilter);
     setAppliedDateFrom(tempDateFrom);
     setAppliedDateTo(tempDateTo);
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   // Handle clear filters
@@ -168,6 +213,7 @@ const BooksList: React.FC<BooksListProps> = () => {
     setAppliedStatusFilter('');
     setAppliedDateFrom('');
     setAppliedDateTo('');
+    setCurrentPage(1); // Reset to first page when filters are cleared
   };
 
   const handleCopyBook = (book: Book) => {
@@ -969,6 +1015,115 @@ const BooksList: React.FC<BooksListProps> = () => {
             </>
           )}
         </>
+      )}
+
+      {/* Pagination Controls */}
+      {!isLoading && !error && totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing page {currentPage} of {totalPages} ({totalItems} total items)
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            
+            {/* Page numbers */}
+            <div className="flex items-center space-x-1">
+              {(() => {
+                const pages = [];
+                
+                // Always show first page
+                if (totalPages > 0) {
+                  pages.push(
+                    <button
+                      key={1}
+                      onClick={() => setCurrentPage(1)}
+                      className={`px-3 py-2 text-sm font-medium rounded-md ${
+                        currentPage === 1
+                          ? 'bg-[#CF3232] text-white'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      1
+                    </button>
+                  );
+                }
+                
+                // Add ellipsis if there's a gap after first page
+                if (currentPage > 3) {
+                  pages.push(
+                    <span key="ellipsis1" className="px-2 py-2 text-sm text-gray-500">
+                      ...
+                    </span>
+                  );
+                }
+                
+                // Add pages around current page
+                const start = Math.max(2, currentPage - 1);
+                const end = Math.min(totalPages - 1, currentPage + 1);
+                
+                for (let i = start; i <= end; i++) {
+                  if (i !== 1 && i !== totalPages) {
+                    pages.push(
+                      <button
+                        key={i}
+                        onClick={() => setCurrentPage(i)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md ${
+                          currentPage === i
+                            ? 'bg-[#CF3232] text-white'
+                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {i}
+                      </button>
+                    );
+                  }
+                }
+                
+                // Add ellipsis if there's a gap before last page
+                if (currentPage < totalPages - 2) {
+                  pages.push(
+                    <span key="ellipsis2" className="px-2 py-2 text-sm text-gray-500">
+                      ...
+                    </span>
+                  );
+                }
+                
+                // Always show last page (if more than 1 page)
+                if (totalPages > 1) {
+                  pages.push(
+                    <button
+                      key={totalPages}
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={`px-3 py-2 text-sm font-medium rounded-md ${
+                        currentPage === totalPages
+                          ? 'bg-[#CF3232] text-white'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {totalPages}
+                    </button>
+                  );
+                }
+                
+                return pages;
+              })()}
+            </div>
+            
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

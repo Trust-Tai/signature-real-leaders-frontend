@@ -62,6 +62,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
               className="w-8 h-8 rounded-full object-cover"
               width={32}
               height={32}
+              unoptimized
             />
           ) : (
             <div className="w-8 h-8 bg-[#CF3232] rounded-full flex items-center justify-center">
