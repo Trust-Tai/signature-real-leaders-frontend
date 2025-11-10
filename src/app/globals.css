@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@sjmc11/tourguidejs/dist/css/tour.min.css";
 
 /* Font Face Declarations */
 @font-face {
@@ -492,30 +493,274 @@ align-items: center;
   display: none; /* Chrome, Safari, Edge */
 }
 
+/* Profile Completion Card Animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Tour Guide Custom Styles - Real Leaders Theme */
 .tg-dialog {
     background: white;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(207, 50, 50, 0.15);
+    border: 2px solid #FEE3E3;
+    font-family: 'Outfit', sans-serif;
+    max-width: 400px;
+    width: 90vw;
 }
-div#tg-dialog-title , div#tg-dialog-body,button#tg-dialog-prev-btn, .tg-dialog-footer-sup, button#tg-dialog-next-btn{
-  color: #333333;
+
+@media (max-width: 640px) {
+  .tg-dialog {
+    padding: 16px;
+    max-width: 340px;
+    width: 85vw;
+  }
 }
+
+div#tg-dialog-title {
+  color: #101117;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+div#tg-dialog-body {
+  color: #414141;
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: 'Outfit', sans-serif;
+}
+
+@media (max-width: 640px) {
+  div#tg-dialog-title {
+    font-size: 16px;
+  }
+  
+  div#tg-dialog-body {
+    font-size: 13px;
+  }
+}
+
 .tg-dialog-footer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    margin-top: 10px;
+    align-items: center;
+    margin-top: 20px;
+    gap: 12px;
 }
-.tg-dialog-close-btn{
- 
-    position: relative;
-    right: -15px;
-    top: -40px;
-    /* border: 1px solid red; */
-    text-align: -webkit-right;
 
+@media (max-width: 640px) {
+  .tg-dialog-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
-.tg-dialog-spinner{
+
+/* Tour Guide Buttons */
+.tg-dialog-btn,
+button#tg-dialog-next-btn,
+button#tg-dialog-prev-btn {
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-family: 'Outfit', sans-serif !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-size: 14px !important;
+  white-space: nowrap !important;
+  min-width: 100px !important;
+}
+
+button#tg-dialog-next-btn {
+  background: #CF3232 !important;
+  color: white !important;
+  border: none !important;
+}
+
+button#tg-dialog-next-btn:hover {
+  background: #B82828 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(207, 50, 50, 0.3);
+}
+
+button#tg-dialog-prev-btn {
+  background: white !important;
+  color: #101117 !important;
+  border: 2px solid #E5E5E5 !important;
+}
+
+button#tg-dialog-prev-btn:hover {
+  border-color: #CF3232 !important;
+  color: #CF3232 !important;
+}
+
+button#tg-dialog-prev-btn.disabled,
+button#tg-dialog-prev-btn[disabled] {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 640px) {
+  .tg-dialog-btn,
+  button#tg-dialog-next-btn,
+  button#tg-dialog-prev-btn {
+    width: 100% !important;
+    min-width: auto !important;
+    padding: 12px 16px !important;
+  }
+}
+
+.tg-dialog-footer-sup {
+  color: #949494;
+  font-size: 13px;
+  font-family: 'Outfit', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .tg-dialog-footer-sup {
+    width: 100%;
+    justify-content: center;
+    order: -1;
+    margin-bottom: 8px;
+  }
+}
+
+/* Step Progress */
+.tg-step-progress {
+  color: #CF3232 !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 640px) {
+  .tg-step-progress {
+    font-size: 12px !important;
+  }
+}
+
+/* Progress Bar */
+.tg-dialog-progress-bar {
+  height: 4px;
+  background: #FEE3E3;
+  border-radius: 2px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.tg-bar {
+  background: #CF3232 !important;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Step Dots */
+.tg-dialog-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+}
+
+.tg-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #E5E5E5;
+  transition: all 0.3s ease;
+}
+
+.tg-dot-active {
+  background: #CF3232 !important;
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* Close Button */
+.tg-dialog-close-btn {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.tg-dialog-close-btn:hover {
+  background: #FEE3E3;
+}
+
+.tg-dialog-close-btn svg {
+  fill: #949494;
+  transition: fill 0.2s ease;
+}
+
+.tg-dialog-close-btn:hover svg {
+  fill: #CF3232;
+}
+
+.tg-dialog-spinner {
   display: none;
+}
+
+/* Backdrop */
+.tg-backdrop {
+  box-shadow: rgba(16, 17, 23, 0.85) 0 0 1px 2px, rgba(16, 17, 23, 0.85) 0 0 0 1000vh !important;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+/* Arrow */
+.tg-arrow {
+  background: white !important;
+  border: 2px solid #FEE3E3 !important;
+}
+
+/* Active Element Highlight */
+.tg-active-element {
+  position: relative;
+  z-index: 9999;
+}
+
+/* Animation for dialog */
+.tg-dialog.animate-position {
+  animation: dialogSlide 0.3s ease-out;
+}
+
+@keyframes dialogSlide {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 /* 
 .profilesignimagediv {

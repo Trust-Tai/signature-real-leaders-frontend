@@ -36,13 +36,13 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   };
 
   const sidebarItems = [
-    { icon: LayoutDashboardIcon, label: 'Dashboard', path: '/dashboard', page: 'dashboard' },
-    { icon: Calendar, label: 'Bookings This Month', path: '/dashboard/booking-this-month', page: 'booking-this-month' },
-    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers' },
-    { icon: Users, label: 'Followers', path: '/dashboard/followers', page: 'followers' },
-    { icon: Eye, label: 'Page Views', path: '/dashboard/page-views', page: 'page-views' },
-    { icon: Send, label: 'Total Link Clicks', path: '/dashboard/total-link-clicks', page: 'total-link-clicks' },
-    { icon: SquarePlus, label: 'Audience Demographics', path: '/dashboard/audience-demographics', page: 'audience-demographics' }
+    { icon: LayoutDashboardIcon, label: 'Dashboard', path: '/dashboard', page: 'dashboard', tourId: 'dashboard' },
+    { icon: Calendar, label: 'Bookings This Month', path: '/dashboard/booking-this-month', page: 'booking-this-month', tourId: 'bookings' },
+    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
+    { icon: Users, label: 'Followers', path: '/dashboard/followers', page: 'followers', tourId: 'followers' },
+    { icon: Eye, label: 'Page Views', path: '/dashboard/page-views', page: 'page-views', tourId: 'page-views' },
+    { icon: Send, label: 'Total Link Clicks', path: '/dashboard/total-link-clicks', page: 'total-link-clicks', tourId: 'link-clicks' },
+    { icon: SquarePlus, label: 'Audience Demographics', path: '/dashboard/audience-demographics', page: 'audience-demographics', tourId: 'demographics' }
   ];
 
   const magicPublishingItems = [
@@ -103,7 +103,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
             {sidebarItems.map((item, index) => (
               <div 
                 key={index}
-                // href={item.path}
+                data-tour={item.tourId}
                 className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
                   currentPage === item.page ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
                 }`}
@@ -121,6 +121,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
             {/* Magic Publishing Section */}
             <div className="mt-6">
               <button
+                data-tour="magic-publishing"
                 onClick={() => setMagicPublishingOpen(!magicPublishingOpen)}
                 className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
                   currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'

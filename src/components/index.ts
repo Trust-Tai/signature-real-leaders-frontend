@@ -18,11 +18,18 @@ export { default as NewsletterSetupSection } from './ui/NewsletterSetupSection';
 export { default as ProfileTemplateSection } from './ui/ProfileTemplateSection';
 export { default as SignSection } from './ui/SignSection';
 export { default as VerificationReviewSection } from './ui/VerificationReviewSection';
+export { default as PendingReviewSection } from './ui/PendingReviewSection';
+export { default as SimplifiedEmailVerificationSection } from './ui/SimplifiedEmailVerificationSection';
+export { default as SocialLoginButtons } from './ui/SocialLoginButtons';
+export { default as ForgotEmailSection } from './ui/ForgotEmailSection';
 export { default as MobileMenuToggle } from './ui/MobileSidebarToggle';
 export { default as MobileSidebarToggle } from './ui/MobileSidebarToggle';
 export { default as StatsCards } from './ui/StatsCards';
 export { default as ArticlesModal } from './ui/ArticlesModal';
 export { default as AutoLoginButton } from './ui/AutoLoginButton';
+export { DashboardTour } from './ui/DashboardTour';
+export { ProfileCompletionCard } from './ui/ProfileCompletionCard';
+export { WelcomeModal } from './ui/WelcomeModal';
 
 // Layout Components
 export { default as Sidebar } from './ui/Sidebar';

@@ -1,29 +1,24 @@
 'use client'
 import React, { useState, useCallback, useMemo } from 'react';
-import { Eye, EyeOff, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { images } from '@/assets';
-import ForgotPasswordSection from '@/components/ui/ForgotPasswordSection';
 import OtpVerificationSection from '@/components/ui/OtpVerificationSection';
-import UpdatePasswordSection from '@/components/ui/UpdatePasswordSection';
+import SocialLoginButtons from '@/components/ui/SocialLoginButtons';
+import ForgotEmailSection from '@/components/ui/ForgotEmailSection';
 import { toast } from '@/components/ui/toast';
 import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
+import { LoadingScreen } from '@/components';
 
 const LoginPage = () => {
   const router = useRouter();
-  const [currentScreen, setCurrentScreen] = useState<'signin' | 'forgot-password' | 'verify-otp' | 'update-password'>('signin');
+  const [currentScreen, setCurrentScreen] = useState<'signin' | 'verify-otp' | 'forgot-email'>('signin');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    newPassword: '',
-    confirmPassword: '',
     rememberMe: false,
   });
 
@@ -32,8 +27,22 @@ const LoginPage = () => {
     const checkExistingAuth = () => {
       try {
         const token = localStorage.getItem('auth_token');
-        if (token) {
-          // User is already logged in, redirect to dashboard
+        const userDataStr = localStorage.getItem('user_data');
+        
+        if (token && userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          
+          // Check if account is pending review
+          if (userData.account_status === 'pending_review') {
+            console.log('[Auth Check] Account pending review, staying on login page');
+            toast.info('Your account is under review. You will be notified once approved.', {
+              id: 'pending-review-check'
+            });
+            setIsCheckingAuth(false);
+            return;
+          }
+          
+          // User is logged in and approved, redirect to dashboard
           router.replace('/dashboard');
           return;
         }
@@ -69,63 +78,278 @@ const LoginPage = () => {
     }
   }, [otpValues]);
 
-  const handleLogin = useCallback(async () => {
-    if (!formData.email || !formData.password) {
-      toast.error('Please enter both email and password');
+  const handleOtpPaste = useCallback((pastedData: string) => {
+    // Check if pasted data is numeric and has 6 digits
+    if (/^\d{6}$/.test(pastedData)) {
+      const newOtp = pastedData.split('');
+      setOtpValues(newOtp);
+      
+      // Focus on the last input
+      const lastInput = document.getElementById('otp-5');
+      lastInput?.focus();
+    }
+  }, []);
+
+  const handleOtpKeyDown = useCallback((index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+      // If current box is empty and backspace is pressed, move to previous box
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    }
+  }, [otpValues]);
+
+  const handleSendOTP = useCallback(async () => {
+    if (!formData.email) {
+      toast.error('Please enter your email address');
       return;
     }
     try {
       setIsSubmitting(true);
-      const res = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/user/user-login', {
+      // API call to send verification code to email
+      const res = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: formData.email, password: formData.password })
+        body: JSON.stringify({ email: formData.email })
       });
       const data = await res.json();
-      if (res.ok && data?.success) {
-        toast.success(data?.message || 'Login successful.');
-        // Store token in localStorage
-        if (data?.token) {
-          try { 
-            localStorage.setItem('auth_token', data.token);
-            // Navigate to dashboard after successful login
-            router.push('/dashboard');
-          } catch {}
-        }
+      
+      // Show response in toast
+      if (data?.success) {
+        toast.success(data?.message || 'Verification code sent to your email');
+        setCurrentScreen('verify-otp');
       } else {
-        const msg = data?.message || 'Login failed. Please check your credentials.';
-        toast.error(msg);
+        toast.error(data?.message || 'Failed to send verification code. Please try again.');
       }
-    } catch {
+    } catch (error) {
       toast.error('Network error. Please try again.');
+      console.error('Send OTP error:', error);
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData.email, formData.password, router]);
+  }, [formData.email]);
+
+  const handleVerifyOTP = useCallback(async () => {
+    const otpCode = otpValues.join('');
+    if (otpCode.length !== 6) {
+      toast.error('Please enter the complete 6-digit OTP');
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const res = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/login/verify-code-and-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: formData.email, 
+          code: parseInt(otpCode, 10)
+        })
+      });
+      const data = await res.json();
+      
+      // Show response in toast
+      if (data?.success) {
+        // Store token and user data
+        if (data?.token) {
+          try { 
+            localStorage.setItem('auth_token', data.token);
+            if (data?.user) {
+              localStorage.setItem('user_data', JSON.stringify(data.user));
+            }
+            if (data?.user_id) {
+              localStorage.setItem('user_id', data.user_id.toString());
+            }
+            
+            // Check account status before redirecting
+            if (data?.user?.account_status === 'pending_review') {
+              console.log('[OTP Verify] Account pending review');
+              toast.info('Your account is under review. You will be notified once approved.', {
+                id: 'pending-review-otp'
+              });
+              // Stay on login page
+              return;
+            }
+            
+            toast.success(data?.message || 'Login successful!');
+            router.push('/dashboard');
+          } catch (error) {
+            console.error('Error storing auth data:', error);
+          }
+        }
+      } else {
+        toast.error(data?.message || 'Invalid verification code. Please try again.');
+      }
+    } catch (error) {
+      toast.error('Network error. Please try again.');
+      console.error('Verify OTP error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [otpValues, formData.email, router]);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (currentScreen === 'signin') {
-      void handleLogin();
-      return;
-    }
-    if (currentScreen === 'forgot-password') {
-      setCurrentScreen('verify-otp');
+      void handleSendOTP();
     } else if (currentScreen === 'verify-otp') {
-      setCurrentScreen('update-password');
-    } else if (currentScreen === 'update-password') {
-      setCurrentScreen('signin');
+      void handleVerifyOTP();
     }
-  }, [currentScreen, handleLogin]);
+  }, [currentScreen, handleSendOTP, handleVerifyOTP]);
+
+  // Handle Google/LinkedIn OAuth callback
+  React.useEffect(() => {
+    const handleSocialCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const status = urlParams.get('status');
+      const tempToken = urlParams.get('token');
+      const message = urlParams.get('message');
+      const accountStatus = urlParams.get('account_status');
+      const isLoggedIn = urlParams.get('is_logged_in');
+      const userId = urlParams.get('user_id');
+
+      console.log('[Social Callback] URL Params:', {
+        status,
+        tempToken: tempToken ? 'present' : 'missing',
+        message,
+        accountStatus,
+        isLoggedIn,
+        userId
+      });
+
+      if (status === 'success' && tempToken) {
+        try {
+          setIsSubmitting(true);
+          setIsCheckingAuth(false);
+          
+          console.log('[Social Callback] Processing successful auth...');
+          console.log('[Social Callback] is_logged_in:', isLoggedIn);
+          console.log('[Social Callback] account_status:', accountStatus);
+          
+          // Check if user is already logged in (existing user)
+          if (isLoggedIn === '1') {
+            console.log('[Social Callback] User is logged in, fetching permanent token...');
+            
+            // Get permanent token
+            const { api } = await import('@/lib/api');
+            const response = await api.getUserDetailsWithToken(tempToken);
+            
+            console.log('[Social Callback] API Response:', {
+              success: response.success,
+              hasToken: !!response.token,
+              hasUser: !!response.user,
+              accountStatus: response.user?.account_status
+            });
+            
+            if (response.success && response.token) {
+              localStorage.setItem('auth_token', response.token);
+              localStorage.setItem('user_data', JSON.stringify(response.user));
+              localStorage.setItem('user_id', response.user.id.toString());
+              
+              // Check account status
+              if (response.user.account_status === 'pending_review') {
+                console.log('[Social Callback] Account pending review');
+                toast.info('Your account is under review. You will be notified once approved.', {
+                  id: 'pending-review-social'
+                });
+                window.history.replaceState({}, document.title, '/login');
+                return;
+              }
+              
+              console.log('[Social Callback] Token stored, redirecting to dashboard...');
+              toast.success(message || 'Login successful!');
+              
+              // Use replace instead of push to avoid back button issues
+              router.replace('/dashboard');
+            } else {
+              console.error('[Social Callback] Invalid response from API');
+              toast.error('Failed to complete login. Please try again.');
+            }
+          } else if (accountStatus === 'pending_review') {
+            // New signup - account pending review
+            console.log('[Social Callback] New signup - pending review');
+            toast.info('Account created successfully! Your account is pending admin approval. You will be notified once approved.', {
+              id: 'pending-review'
+            });
+            
+            // Clean up URL
+            window.history.replaceState({}, document.title, '/login');
+          } else if (accountStatus === 'approved') {
+            // Account approved but not logged in yet - fetch token
+            console.log('[Social Callback] Account approved, fetching token...');
+            
+            const { api } = await import('@/lib/api');
+            const response = await api.getUserDetailsWithToken(tempToken);
+            
+            if (response.success && response.token) {
+              localStorage.setItem('auth_token', response.token);
+              localStorage.setItem('user_data', JSON.stringify(response.user));
+              localStorage.setItem('user_id', response.user.id.toString());
+              
+              toast.success(message || 'Login successful!');
+              router.replace('/dashboard');
+            }
+          } else {
+            console.log('[Social Callback] Account not approved');
+            toast.error('Account not approved yet. Please wait for admin approval.');
+            window.history.replaceState({}, document.title, '/login');
+          }
+        } catch (error) {
+          console.error('[Social Callback] Error:', error);
+          toast.error('Failed to complete authentication');
+          window.history.replaceState({}, document.title, '/login');
+        } finally {
+          setIsSubmitting(false);
+        }
+      } else if (status === 'failed') {
+        console.log('[Social Callback] Auth failed:', message);
+        toast.error(message || 'Authentication failed');
+        window.history.replaceState({}, document.title, '/login');
+      }
+    };
+
+    void handleSocialCallback();
+  }, [router]);
+
+  // Social login handlers
+  const handleGoogleLogin = useCallback(async () => {
+    try {
+      const { api } = await import('@/lib/api');
+      const redirectUrl = `${window.location.origin}/login`;
+      api.initiateGoogleAuth(redirectUrl);
+    } catch (error) {
+      console.error('Google login error:', error);
+      toast.error('Google login failed');
+    }
+  }, []);
+
+  const handleAppleLogin = useCallback(async () => {
+    try {
+      // Implement Apple OAuth login
+      toast.info('Apple login coming soon...');
+    } catch {
+      toast.error('Apple login failed');
+    }
+  }, []);
+
+  const handleLinkedInLogin = useCallback(async () => {
+    try {
+      const { api } = await import('@/lib/api');
+      const redirectUrl = `${window.location.origin}/login`;
+      api.initiateLinkedInAuth(redirectUrl);
+    } catch (error) {
+      console.error('LinkedIn login error:', error);
+      toast.error('LinkedIn login failed');
+    }
+  }, []);
 
   const SignInScreen = useMemo(() => (
     <>
       <div className="text-center mb-8">
         <h1 className="section-title text-white mb-4">Welcome back to RealLeaders</h1>
-        <p className="subtitleheader- text-white">Sign in to continue your RealLeaders configurations and quotes.</p>
       </div>
 
       <div className="space-y-6">
+    
+        {/* Email Input */}
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Mail className="text-white" size={16} />
@@ -144,30 +368,7 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <div>
-          <span className="block text-sm font-medium text-white mb-2 font-outfit">Password</span>
-          <div className="relative firstVerifyScreen mx-auto group">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className="px-4 py-3 w-full text-gray-700 rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput pr-12 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-              placeholder="Your password"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-3 my-auto text-gray-500 hover:text-gray-700"
-              aria-label="Toggle password visibility"
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
+ <div className="flex items-center justify-between">
           <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -180,106 +381,106 @@ const LoginPage = () => {
           </label>
           <button
             type="button"
-            onClick={() => setCurrentScreen('forgot-password')}
+            onClick={() => setCurrentScreen('forgot-email')}
             className="text-sm text-custom-red hover:text-red-600 transition-colors font-outfit"
           >
-            Forgot password?
+            Forgot email?
           </button>
         </div>
 
         <button
-  onClick={handleSubmit}
-  disabled={isSubmitting}
-  className="w-full h-12 sm:h-14 bg-custom-red hover:bg-custom-red/90 disabled:bg-custom-red/70 text-white text-[24px] font-normal rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-abolition flex items-center justify-center gap-3"
->
-  {isSubmitting ? (
-    <>
-      <svg
-        className="animate-spin h-6 w-6 text-white"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-        ></path>
-      </svg>
-      Logging in...
-    </>
-  ) : (
-    'Login'
-  )}
-</button>
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="w-full h-12 sm:h-14 bg-custom-red hover:bg-custom-red/90 disabled:bg-custom-red/70 text-white text-[24px] font-normal rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-abolition flex items-center justify-center gap-3"
+        >
+          {isSubmitting ? (
+            <>
+              <svg
+                className="animate-spin h-6 w-6 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              Sending OTP...
+            </>
+          ) : (
+            'Send OTP'
+          )}
+        </button>
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-black text-white font-outfit">Or continue with Social Login</span>
+          </div>
+        </div>
 
+            {/* Social Login Buttons */}
+<div className="space-y-4">
+          <SocialLoginButtons
+            onGoogleLogin={handleGoogleLogin}
+            onAppleLogin={handleAppleLogin}
+            onLinkedInLogin={handleLinkedInLogin}
+            isLoading={isSubmitting}
+            variant="login"
+          />
+        </div>
+       
       </div>
     </>
-  ), [formData, handleInputChange, handleSubmit, isSubmitting, showPassword]);
-
-  const ForgotPasswordScreen = useMemo(() => (
-    <ForgotPasswordSection
-      formData={formData}
-      handleInputChange={handleInputChange}
-      handleSubmit={handleSubmit}
-      onBack={() => setCurrentScreen('signin')}
-    />
-  ), [formData, handleInputChange, handleSubmit]);
+  ), [formData, handleInputChange, handleSubmit, isSubmitting, handleGoogleLogin, handleAppleLogin, handleLinkedInLogin]);
 
   const VerifyOtpScreen = useMemo(() => (
     <OtpVerificationSection
       otpValues={otpValues}
       handleOtpChange={handleOtpChange}
+      handleOtpPaste={handleOtpPaste}
+      handleOtpKeyDown={handleOtpKeyDown}
       handleSubmit={handleSubmit}
-      onBack={() => setCurrentScreen('forgot-password')}
+      onBack={() => setCurrentScreen('signin')}
+      isSubmitting={isSubmitting}
     />
-  ), [otpValues, handleOtpChange, handleSubmit]);
+  ), [otpValues, handleOtpChange, handleOtpPaste, handleOtpKeyDown, handleSubmit, isSubmitting]);
 
-  const UpdatePasswordScreen = useMemo(() => (
-    <UpdatePasswordSection
-      formData={formData}
-      handleInputChange={handleInputChange}
-      handleSubmit={handleSubmit}
-      showNewPassword={showNewPassword}
-      showConfirmPassword={showConfirmPassword}
-      setShowNewPassword={setShowNewPassword}
-      setShowConfirmPassword={setShowConfirmPassword}
-      onBack={() => setCurrentScreen('verify-otp')}
+  const ForgotEmailScreen = useMemo(() => (
+    <ForgotEmailSection
+      onBack={() => setCurrentScreen('signin')}
     />
-  ), [formData, handleInputChange, handleSubmit, showNewPassword, showConfirmPassword]);
+  ), []);
 
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case 'signin':
         return SignInScreen;
-      case 'forgot-password':
-        return ForgotPasswordScreen;
       case 'verify-otp':
         return VerifyOtpScreen;
-      case 'update-password':
-        return UpdatePasswordScreen;
+      case 'forgot-email':
+        return ForgotEmailScreen;
       default:
         return SignInScreen;
     }
   };
 
-  // Show loading while checking authentication
+  // Show loading only while checking authentication (not for isSubmitting)
   if (isCheckingAuth) {
     return (
-      <div className="h-screen flex items-center justify-center" style={{background:"#f9efef"}}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
+      <LoadingScreen text1='Checking authentication...'/>
     );
   }
 

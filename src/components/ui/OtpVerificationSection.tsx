@@ -5,16 +5,28 @@ import { ArrowLeft } from 'lucide-react';
 interface OtpVerificationSectionProps {
   otpValues: string[];
   handleOtpChange: (index: number, value: string) => void;
+  handleOtpPaste: (pastedData: string) => void;
+  handleOtpKeyDown: (index: number, e: React.KeyboardEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent) => void;
   onBack: () => void;
+  isSubmitting?: boolean;
 }
 
 const OtpVerificationSection: React.FC<OtpVerificationSectionProps> = ({
   otpValues,
   handleOtpChange,
+  handleOtpPaste,
+  handleOtpKeyDown,
   handleSubmit,
-  onBack
+  onBack,
+  isSubmitting = false
 }) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').trim();
+    handleOtpPaste(pastedData);
+  };
+
   return (
     <>
       {/* Back Button */}
@@ -31,7 +43,7 @@ const OtpVerificationSection: React.FC<OtpVerificationSectionProps> = ({
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-[28px] lg:text-[35px] font-abolition text-white mb-4">Enter verification code</h1>
-        <p className="text-white text-sm font-outfit">We&apos;ve sent a 6-digit verification code to your email address. Please enter it below.</p>
+        <p className="text-white text-sm font-outfit">We&apos;ve sent a 6-digit verification code to your email address. Enter it below to sign in.</p>
       </div>
 
       {/* Form */}
@@ -47,9 +59,13 @@ const OtpVerificationSection: React.FC<OtpVerificationSectionProps> = ({
                 key={index}
                 id={`otp-${index}`}
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength={1}
                 value={value}
                 onChange={(e) => handleOtpChange(index, e.target.value)}
+                onPaste={handlePaste}
+                onKeyDown={(e) => handleOtpKeyDown(index, e)}
                 className="w-10 h-10 sm:w-12 sm:h-12 text-center text-xl font-bold border-2 border-[#efc0c0] rounded-lg focus:border-[#efc0c0] focus:outline-none focus:shadow-lg focus:shadow-red-100 transition-all font-outfit text-[#333333] bg-white"
               />
             ))}
@@ -67,9 +83,36 @@ const OtpVerificationSection: React.FC<OtpVerificationSectionProps> = ({
         {/* Verify Button */}
         <button
           onClick={handleSubmit}
-          className="w-full h-12 sm:h-14 bg-red-600 hover:bg-red-700 text-white text-[24px] font-normal rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-abolition"
+          disabled={isSubmitting}
+          className="w-full h-12 sm:h-14 bg-red-600 hover:bg-red-700 disabled:bg-red-600/70 text-white text-[24px] font-normal rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-abolition flex items-center justify-center gap-3"
         >
-          Verify & Continue
+          {isSubmitting ? (
+            <>
+              <svg
+                className="animate-spin h-6 w-6 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              Verifying...
+            </>
+          ) : (
+            'Verify & Sign In'
+          )}
         </button>
       </div>
     </>

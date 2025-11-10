@@ -7,16 +7,54 @@ import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { getDashboardStats, DashboardStatistics } from '@/lib/statisticsApi';
 import { toast } from '@/components/ui/toast';
+import { DashboardTour } from '@/components/ui/DashboardTour';
+import { ProfileCompletionCard } from '@/components/ui/ProfileCompletionCard';
+import { WelcomeModal } from '@/components/ui/WelcomeModal';
+import { api } from '@/lib/api';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [statistics, setStatistics] = useState<DashboardStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [showProfileCard, setShowProfileCard] = useState(false);
+  const [profileCompletion, setProfileCompletion] = useState<{
+    percentage: number;
+    incomplete_fields: string[];
+  } | null>(null);
 
-  // Fetch dashboard statistics
+  // Check account status on mount - FIRST PRIORITY
   useEffect(() => {
-    const fetchDashboardStats = async () => {
+    const checkAccountStatus = () => {
+      try {
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          if (userData.account_status === 'pending_review') {
+            console.log('[Dashboard] Account pending review, redirecting to login');
+            toast.info('Your account is under review. You will be notified once approved.');
+            window.location.href = '/login';
+            return; // Don't set isCheckingAuth to false, keep showing loading
+          }
+        }
+        setIsCheckingAuth(false);
+      } catch (error) {
+        console.error('[Dashboard] Error checking account status:', error);
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAccountStatus();
+  }, []);
+
+  // Fetch dashboard statistics and profile completion - only after auth check passes
+  useEffect(() => {
+    if (isCheckingAuth) return; // Don't fetch if still checking auth
+    
+    const fetchDashboardData = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -27,14 +65,49 @@ const Dashboard = () => {
           return;
         }
 
-        const response = await getDashboardStats(token);
+        // Fetch dashboard statistics
+        const statsResponse = await getDashboardStats(token);
         
-        if (response.success) {
-          setStatistics(response.statistics);
-          console.log('[Dashboard] Statistics loaded:', response.statistics);
+        if (statsResponse.success) {
+          setStatistics(statsResponse.statistics);
+          console.log('[Dashboard] Statistics loaded:', statsResponse.statistics);
         } else {
           setError('Failed to fetch statistics');
           toast.error('Failed to load dashboard statistics');
+        }
+
+        // Fetch user details to get profile completion status
+        try {
+          const userResponse = await api.getUserDetails(token);
+          console.log('[Dashboard] User details response:', userResponse);
+          
+          if (userResponse.success && userResponse.profile_completion) {
+            const completion = userResponse.profile_completion;
+            setProfileCompletion({
+              percentage: completion.percentage,
+              incomplete_fields: completion.missing_fields,
+            });
+            
+            console.log('[Dashboard] Profile completion:', completion);
+            
+            // Show welcome modal for first-time users
+            const tourCompleted = localStorage.getItem('dashboard_tour_completed');
+            const welcomeShown = localStorage.getItem('welcome_modal_shown');
+            
+            if (tourCompleted !== 'true' && welcomeShown !== 'true') {
+              console.log('[Dashboard] Showing welcome modal for first-time user');
+              setShowWelcomeModal(true);
+            } else if (completion.percentage < 100) {
+              // Show profile completion card if tour is already done but profile incomplete
+              console.log('[Dashboard] Showing profile completion card');
+              setShowProfileCard(true);
+            }
+          } else {
+            console.log('[Dashboard] No profile completion data in response');
+          }
+        } catch (err) {
+          console.error('[Dashboard] Error fetching user details for profile completion:', err);
+          // Don't show error toast for profile completion - it's not critical
         }
       } catch (err) {
         console.error('[Dashboard] Error fetching statistics:', err);
@@ -46,8 +119,8 @@ const Dashboard = () => {
       }
     };
 
-    fetchDashboardStats();
-  }, []);
+    fetchDashboardData();
+  }, [isCheckingAuth]);
 
   // Memoize dynamic stats cards based on API data
   const statsCards = useMemo(() => {
@@ -109,8 +182,71 @@ const Dashboard = () => {
     setSidebarOpen(prev => !prev);
   }, []);
 
+  const handleStartTour = useCallback(() => {
+    setShowTour(true);
+  }, []);
+
+  const handleWelcomeModalClose = useCallback(() => {
+    setShowWelcomeModal(false);
+    localStorage.setItem('welcome_modal_shown', 'true');
+    
+    // Show profile card if profile is incomplete and tour not started
+    if (profileCompletion && profileCompletion.percentage < 100 && !showTour) {
+      setTimeout(() => {
+        setShowProfileCard(true);
+      }, 500);
+    }
+  }, [profileCompletion, showTour]);
+
+  const handleTourComplete = useCallback(() => {
+    setShowTour(false);
+    // Show profile completion card after tour if profile is incomplete
+    if (profileCompletion && profileCompletion.percentage < 100) {
+      setTimeout(() => {
+        setShowProfileCard(true);
+      }, 500);
+    }
+  }, [profileCompletion]);
+
+  const handleProfileCardClose = useCallback(() => {
+    setShowProfileCard(false);
+    localStorage.setItem('profile_card_dismissed', 'true');
+  }, []);
+
+  // Show loading screen while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#FFF9F9]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-[#CF3232] mb-4 mx-auto" />
+          <p className="text-gray-600 font-outfit">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+      {/* Welcome Modal */}
+      {showWelcomeModal && (
+        <WelcomeModal 
+          onStartTour={handleStartTour}
+          onClose={handleWelcomeModalClose}
+        />
+      )}
+
+      {/* Tour Guide */}
+      {showTour && <DashboardTour onComplete={handleTourComplete} />}
+      
+      {/* Profile Completion Card */}
+      {showProfileCard && profileCompletion && (
+        <ProfileCompletionCard
+          incompleteFields={profileCompletion.incomplete_fields}
+          completionPercentage={profileCompletion.percentage}
+          onClose={handleProfileCardClose}
+        />
+      )}
+
       <UserProfileSidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}

@@ -142,6 +142,12 @@ export const api = {
         occupation: string;
         profile_privacy: boolean;
       };
+      profile_completion?: {
+        percentage: number;
+        steps: number;
+        total_steps: number;
+        missing_fields: string[];
+      };
     }>(
       '/user/user-details',
       {
@@ -484,6 +490,77 @@ export const api = {
       success: boolean;
       is_following: boolean;
       follow_id?: number;
+    };
+  },
+
+  // Google Authentication
+  initiateGoogleAuth(redirectUrl: string) {
+    const url = `${API_BASE_URL}/user/google-auth?redirect_url=${encodeURIComponent(redirectUrl)}`;
+    window.location.href = url;
+  },
+
+  // LinkedIn Authentication
+  initiateLinkedInAuth(redirectUrl: string) {
+    const url = `${API_BASE_URL}/user/linkedin-auth?redirect_url=${encodeURIComponent(redirectUrl)}`;
+    window.location.href = url;
+  },
+
+  async getUserDetailsWithToken(tempToken: string) {
+    const url = `${API_BASE_URL}/user/user-details?generate_token=true`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tempToken}`,
+      },
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to get user details');
+    }
+    
+    return data as {
+      success: boolean;
+      user: {
+        id: number;
+        username: string;
+        email: string;
+        display_name: string;
+        registered_date: string;
+        signature_url: string;
+        profile_picture_url: string;
+        first_name: string;
+        last_name: string;
+        company_name: string;
+        company_website: string;
+        industry: string;
+        num_employees: string;
+        email_list_size: string;
+        newsletter_service: string;
+        audience_description: string;
+        success_metrics: unknown[];
+        links: unknown[];
+        account_status: string;
+        profile_template: string;
+        hubspot_data: string;
+        billing_address_1: string;
+        billing_address_2: string;
+        billing_city: string;
+        billing_postcode: string;
+        billing_country: string;
+        billing_phone: string;
+        content_preference_industry: unknown[];
+        top_pain_points: string;
+        brand_voice: string;
+        unique_differentiation: string;
+        primary_call_to_action: string;
+        target_audience: unknown[];
+        date_of_birth: string;
+        occupation: string;
+        profile_privacy: boolean;
+      };
+      token: string;
     };
   },
 };
