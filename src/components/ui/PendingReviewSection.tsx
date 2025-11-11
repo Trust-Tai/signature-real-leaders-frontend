@@ -1,5 +1,7 @@
 "use client"
 
+import { images } from '@/assets';
+import Image from 'next/image';
 import React from 'react';
 
 interface PendingReviewSectionProps {
@@ -16,12 +18,12 @@ const PendingReviewSection: React.FC<PendingReviewSectionProps> = ({
         
         {/* Success Icon */}
         <div className="flex justify-center mb-8 sm:mb-12 animate-fade-in-down">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-        </div>
+                  <Image
+                           src={images.reviewVerified}
+                           alt="Review verified"
+                           className="w-16 h-16 sm:w-20 sm:h-20 lg:w-[144px] lg:h-[134px] animate-pulse"
+                         />
+               </div>
 
         {/* Main Message */}
         <div className="space-y-4 sm:space-y-6">

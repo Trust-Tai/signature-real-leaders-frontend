@@ -20,10 +20,40 @@ import { toast } from '@/components/ui/toast';
 import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
 
 const InnerProfileVerificationPage = () => {
- 
   const [currentStep, setCurrentStep] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showCodeVerification, setShowCodeVerification] = useState(false);
+  
+  // Check localStorage for redirect step on mount and when page becomes visible
+  React.useEffect(() => {
+    const checkRedirectStep = () => {
+      if (typeof window !== 'undefined') {
+        const redirectStep = localStorage.getItem('redirect_to_step');
+        if (redirectStep) {
+          console.log('[Profile Verification] Found redirect_to_step:', redirectStep);
+          const step = parseInt(redirectStep, 10);
+          setCurrentStep(step);
+          localStorage.removeItem('redirect_to_step'); // Clear after reading
+        }
+      }
+    };
+    
+    // Check immediately on mount
+    checkRedirectStep();
+    
+    // Also check when page becomes visible (in case of navigation)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkRedirectStep();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
   
   // Form data state for simplified flow
   const { state, setState } = useOnboarding();

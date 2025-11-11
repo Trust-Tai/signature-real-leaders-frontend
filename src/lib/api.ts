@@ -563,6 +563,63 @@ export const api = {
       token: string;
     };
   },
+
+  async getPageViewStats(authToken: string) {
+    return request<{
+      success: boolean;
+      data: {
+        total_page_views: number;
+        unique_visitors: number;
+        pages_per_session: number;
+        monthly_growth_rate: {
+          percentage: string;
+          trend: 'up' | 'down';
+        };
+      };
+    }>(
+      '/user/page-view-stats',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
+
+  async getLinkStats(authToken: string) {
+    return request<{
+      success: boolean;
+      data: {
+        total_clicks: number;
+        average_click_through_rate: number;
+        active_links: number;
+        monthly_click_growth_rate: {
+          percentage: string;
+          trend: 'up' | 'down';
+        };
+        top_performing_links: Array<{
+          link_id: number;
+          name: string;
+          url: string;
+          total_clicks: number;
+          click_through_rate: number;
+          monthly_growth_rate: {
+            percentage: string;
+            trend: 'up' | 'down';
+          };
+        }>;
+      };
+    }>(
+      '/user/link-stats',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
 };
 
 

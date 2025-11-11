@@ -9,27 +9,19 @@ interface SocialLoginButtonsProps {
   onLinkedInLogin?: () => void;
   className?: string;
   isLoading?: boolean;
-  variant?: 'default' | 'login'; // login variant for different Apple button styling
 }
 
 const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
   onGoogleLogin,
-  onAppleLogin,
   onLinkedInLogin,
   className,
   isLoading = false,
-  variant = 'default'
 }) => {
   const [loadingButton, setLoadingButton] = useState<'google' | 'apple' | 'linkedin' | null>(null);
 
   const handleGoogleClick = () => {
     setLoadingButton('google');
     onGoogleLogin?.();
-  };
-
-  const handleAppleClick = () => {
-    // setLoadingButton('apple');
-    onAppleLogin?.();
   };
 
   const handleLinkedInClick = () => {
@@ -104,7 +96,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
       </button>
 
        {/* Apple Login */}
-      <button
+      {/* <button
         onClick={handleAppleClick}
         disabled={isLoading || loadingButton !== null}
         className={cn(
@@ -124,7 +116,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         <span className="font-outfit font-medium">
           {loadingButton === 'apple' ? 'Redirecting...' : 'Continue with Apple'}
         </span>
-      </button>
+      </button> */}
     </div>
   );
 };

@@ -1,37 +1,110 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, User, Menu, X, Calendar, ExternalLink, Plus, Download } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
+import { api } from '@/lib/api';
+import { toast } from '@/components/ui/toast';
 
 const TotalLinkClicks = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [addLinkModalOpen, setAddLinkModalOpen] = useState(false);
   const [allLinksModalOpen, setAllLinksModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newLink, setNewLink] = useState({
     name: '',
     url: '',
     category: 'general'
   });
-  const [links, setLinks] = useState([
-    { id: 1, link: 'Book Consultation', url: '/book-consultation', clicks: 456, ctr: '8.2%', change: '+15.3%', trend: 'up', category: 'consultation' },
-    { id: 2, link: 'Download Guide', url: '/download-guide', clicks: 389, ctr: '6.8%', change: '+22.1%', trend: 'up', category: 'resource' },
-    { id: 3, link: 'Contact Us', url: '/contact', clicks: 312, ctr: '5.4%', change: '+8.7%', trend: 'up', category: 'contact' },
-    { id: 4, link: 'LinkedIn Profile', url: 'https://linkedin.com/in/richard-branson', clicks: 298, ctr: '12.3%', change: '+18.9%', trend: 'up', category: 'social' },
-    { id: 5, link: 'Email Newsletter', url: '/newsletter-signup', clicks: 245, ctr: '4.1%', change: '-2.3%', trend: 'down', category: 'newsletter' },
-    { id: 6, link: 'Portfolio', url: '/portfolio', clicks: 198, ctr: '3.2%', change: '+11.4%', trend: 'up', category: 'portfolio' },
-    { id: 7, link: 'Testimonials', url: '/testimonials', clicks: 167, ctr: '2.8%', change: '+7.6%', trend: 'up', category: 'testimonial' },
-    { id: 8, link: 'FAQ', url: '/faq', clicks: 134, ctr: '2.1%', change: '-1.8%', trend: 'down', category: 'faq' }
-  ]);
+  
+  const [statsData, setStatsData] = useState({
+    total_clicks: 0,
+    average_click_through_rate: 0,
+    active_links: 0,
+    monthly_click_growth_rate: {
+      percentage: '0%',
+      trend: 'up' as 'up' | 'down'
+    }
+  });
+  
+  const [links, setLinks] = useState<Array<{
+    id: number;
+    link: string;
+    url: string;
+    clicks: number;
+    ctr: string;
+    change: string;
+    trend: 'up' | 'down';
+    category: string;
+  }>>([]);
+
+  useEffect(() => {
+    const fetchLinkStats = async () => {
+      try {
+        const authToken = localStorage.getItem('auth_token');
+        if (!authToken) {
+          toast.error('Please login to view stats');
+          return;
+        }
+
+        const response = await api.getLinkStats(authToken);
+        if (response.success) {
+          setStatsData(response.data);
+          
+          // Transform top_performing_links to match the links state structure
+          const transformedLinks = response.data.top_performing_links.map((link) => ({
+            id: link.link_id,
+            link: link.name,
+            url: link.url,
+            clicks: link.total_clicks,
+            ctr: `${link.click_through_rate.toFixed(1)}%`,
+            change: link.monthly_growth_rate.percentage,
+            trend: link.monthly_growth_rate.trend as 'up' | 'down',
+            category: 'general' // API doesn't provide category, using default
+          }));
+          
+          setLinks(transformedLinks);
+        }
+      } catch (error) {
+        console.error('Error fetching link stats:', error);
+        toast.error('Failed to load link statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLinkStats();
+  }, []);
 
   const statsCards = [
-    { number: '2,183', label: 'TOTAL LINK CLICKS', description: 'Combined total of clicks across all links', color: '#CF3232' },
-    { number: '5.8%', label: 'AVERAGE CTR', description: 'Click-through rate across all links', color: '#CF3232' },
-    { number: '18', label: 'ACTIVE LINKS', description: 'Number of tracked links', color: '#CF3232' },
-    { number: '24.7%', label: 'GROWTH RATE', description: 'Monthly click increase', color: '#CF3232' }
+    { 
+      number: loading ? '...' : statsData.total_clicks.toLocaleString(), 
+      label: 'TOTAL LINK CLICKS', 
+      description: 'Combined total of clicks across all links', 
+      color: '#CF3232' 
+    },
+    { 
+      number: loading ? '...' : `${statsData.average_click_through_rate.toFixed(1)}%`, 
+      label: 'AVERAGE CTR', 
+      description: 'Click-through rate across all links', 
+      color: '#CF3232' 
+    },
+    { 
+      number: loading ? '...' : statsData.active_links.toString(), 
+      label: 'ACTIVE LINKS', 
+      description: 'Number of tracked links', 
+      color: '#CF3232' 
+    },
+    { 
+      number: loading ? '...' : statsData.monthly_click_growth_rate.percentage, 
+      label: 'MONTHLY GROWTH RATE', 
+      description: 'Monthly click increase', 
+      color: '#CF3232',
+      trend: statsData.monthly_click_growth_rate.trend
+    }
   ];
 
   const clickTrends = [
@@ -53,7 +126,7 @@ const TotalLinkClicks = () => {
         clicks: 0,
         ctr: '0%',
         change: '0%',
-        trend: 'up',
+        trend: 'up' as 'up' | 'down',
         category: newLink.category
       };
       setLinks([...links, newLinkItem]);
@@ -180,9 +253,20 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
                   Top Performing Links
                 </h2>
                 
-                {/* Mobile View - Cards */}
-                <div className="block lg:hidden space-y-3">
-                  {links.slice(0, 4).map((link) => (
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#CF3232]"></div>
+                    <p className="mt-2 text-gray-600">Loading links...</p>
+                  </div>
+                ) : links.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600">No links found</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Mobile View - Cards */}
+                    <div className="block lg:hidden space-y-3">
+                      {links.slice(0, 4).map((link) => (
                     <div key={link.id} className="bg-gray-50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-medium text-[#101117] text-sm">{link.link}</h3>
@@ -197,12 +281,12 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
                         <span className="text-sm text-gray-600">CTR: {link.ctr}</span>
                       </div>
                       <p className="text-xs text-gray-500 truncate">{link.url}</p>
-                    </div>
-                  ))}
-                </div>
+                      </div>
+                    ))}
+                  </div>
 
-                {/* Desktop View - Table */}
-                <div className="hidden lg:block overflow-x-auto">
+                  {/* Desktop View - Table */}
+                  <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-100" style={{ backgroundColor: '#FEE3E3CC' }}>
@@ -238,9 +322,11 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
                           </td>
                         </tr>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+                )}
               </div>
 
               {/* Daily Click Trends */}

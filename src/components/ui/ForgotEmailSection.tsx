@@ -50,7 +50,7 @@ const ForgotEmailSection: React.FC<ForgotEmailSectionProps> = ({ onBack }) => {
           <div className="flex items-center gap-2 mb-2">
             <Mail className="text-white" size={16} />
             <span className="text-sm font-medium text-white font-outfit">
-              Phone Number or Partial Email
+              Enter Your Email
             </span>
           </div>
           <div className="firstVerifyScreen mx-auto group">
@@ -59,7 +59,7 @@ const ForgotEmailSection: React.FC<ForgotEmailSectionProps> = ({ onBack }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="px-4 py-3 w-full text-gray-700 rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-              placeholder="Enter phone number or partial email"
+              placeholder="Enter Your Email"
               required
             />
           </div>
@@ -95,7 +95,7 @@ const ForgotEmailSection: React.FC<ForgotEmailSectionProps> = ({ onBack }) => {
               Searching...
             </>
           ) : (
-            'Recover Email'
+            'Email Password Reset Link'
           )}
         </button>
       </form>

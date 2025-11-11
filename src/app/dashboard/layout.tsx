@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { UserProvider, AuthGuard, LoadingScreen, useUser, ErrorBoundary } from '@/components';
+import { DashboardProfileCompletionWrapper } from '@/components/ui/DashboardProfileCompletionWrapper';
 
 export default function UserProfileLayout({
   children,
@@ -17,7 +18,9 @@ export default function UserProfileLayout({
     
     return (
       <ErrorBoundary>
-        {children}
+        <DashboardProfileCompletionWrapper>
+          {children}
+        </DashboardProfileCompletionWrapper>
       </ErrorBoundary>
     );
   };

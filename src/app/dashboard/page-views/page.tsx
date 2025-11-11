@@ -1,14 +1,50 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, User, TrendingUp, TrendingDown, Calendar, Menu } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
+import { api } from '@/lib/api';
+import { toast } from '@/components/ui/toast';
 
 const PageViews = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [statsData, setStatsData] = useState({
+    total_page_views: 0,
+    unique_visitors: 0,
+    pages_per_session: 0,
+    monthly_growth_rate: {
+      percentage: '0%',
+      trend: 'up' as 'up' | 'down'
+    }
+  });
+
+  useEffect(() => {
+    const fetchPageViewStats = async () => {
+      try {
+        const authToken = localStorage.getItem('auth_token');
+        if (!authToken) {
+          toast.error('Please login to view stats');
+          return;
+        }
+
+        const response = await api.getPageViewStats(authToken);
+        if (response.success) {
+          setStatsData(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching page view stats:', error);
+        toast.error('Failed to load page view statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPageViewStats();
+  }, []);
 
   const pageViewsData = [
     { page: 'Homepage', views: 2450, change: '+12.5%', trend: 'up' },
@@ -22,10 +58,31 @@ const PageViews = () => {
   ];
 
   const statsCards = [
-    { number: '9,475', label: 'TOTAL PAGE VIEWS', description: 'Total number of times your pages were viewed', color: '#CF3232' },
-    { number: '2,847', label: 'UNIQUE VISITORS', description: 'Individual people who visited your site', color: '#CF3232' },
-    { number: '3.3', label: 'PAGES PER SESSION', description: 'Average pages viewed per visit', color: '#CF3232' },
-    { number: '18.5%', label: 'GROWTH RATE', description: 'Monthly page view increase', color: '#CF3232' }
+    { 
+      number: loading ? '...' : statsData.total_page_views.toLocaleString(), 
+      label: 'TOTAL PAGE VIEWS', 
+      description: 'Total number of times your pages were viewed', 
+      color: '#CF3232' 
+    },
+    { 
+      number: loading ? '...' : statsData.unique_visitors.toLocaleString(), 
+      label: 'UNIQUE VISITORS', 
+      description: 'Individual people who visited your site', 
+      color: '#CF3232' 
+    },
+    { 
+      number: loading ? '...' : statsData.pages_per_session.toString(), 
+      label: 'PAGES PER SESSION', 
+      description: 'Average pages viewed per visit', 
+      color: '#CF3232' 
+    },
+    { 
+      number: loading ? '...' : statsData.monthly_growth_rate.percentage, 
+      label: 'MONTHLY GROWTH RATE', 
+      description: 'Monthly page view change', 
+      color: '#CF3232',
+      trend: statsData.monthly_growth_rate.trend
+    }
   ];
 
   const timeData = [

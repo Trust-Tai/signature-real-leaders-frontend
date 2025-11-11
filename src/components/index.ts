@@ -30,6 +30,7 @@ export { default as AutoLoginButton } from './ui/AutoLoginButton';
 export { DashboardTour } from './ui/DashboardTour';
 export { ProfileCompletionCard } from './ui/ProfileCompletionCard';
 export { WelcomeModal } from './ui/WelcomeModal';
+export { DashboardProfileCompletionWrapper } from './ui/DashboardProfileCompletionWrapper';
 
 // Layout Components
 export { default as Sidebar } from './ui/Sidebar';

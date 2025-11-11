@@ -34,11 +34,9 @@ const LoginPage = () => {
           
           // Check if account is pending review
           if (userData.account_status === 'pending_review') {
-            console.log('[Auth Check] Account pending review, staying on login page');
-            toast.info('Your account is under review. You will be notified once approved.', {
-              id: 'pending-review-check'
-            });
-            setIsCheckingAuth(false);
+            console.log('[Auth Check] Account pending review, redirecting to profile verification step 3');
+            localStorage.setItem('redirect_to_step', '3');
+            router.replace('/profile-verification');
             return;
           }
           
@@ -161,11 +159,9 @@ const LoginPage = () => {
             
             // Check account status before redirecting
             if (data?.user?.account_status === 'pending_review') {
-              console.log('[OTP Verify] Account pending review');
-              toast.info('Your account is under review. You will be notified once approved.', {
-                id: 'pending-review-otp'
-              });
-              // Stay on login page
+              console.log('[OTP Verify] Account pending review, redirecting to profile verification step 3');
+              localStorage.setItem('redirect_to_step', '3');
+              router.replace('/profile-verification');
               return;
             }
             
@@ -246,11 +242,9 @@ const LoginPage = () => {
               
               // Check account status
               if (response.user.account_status === 'pending_review') {
-                console.log('[Social Callback] Account pending review');
-                toast.info('Your account is under review. You will be notified once approved.', {
-                  id: 'pending-review-social'
-                });
-                window.history.replaceState({}, document.title, '/login');
+                console.log('[Social Callback] Account pending review, redirecting to profile verification step 3');
+                localStorage.setItem('redirect_to_step', '3');
+                router.replace('/profile-verification');
                 return;
               }
               
@@ -265,13 +259,16 @@ const LoginPage = () => {
             }
           } else if (accountStatus === 'pending_review') {
             // New signup - account pending review
-            console.log('[Social Callback] New signup - pending review');
-            toast.info('Account created successfully! Your account is pending admin approval. You will be notified once approved.', {
-              id: 'pending-review'
-            });
+            console.log('[Social Callback] New signup - pending review, redirecting to profile verification step 3');
             
-            // Clean up URL
-            window.history.replaceState({}, document.title, '/login');
+            // Store user data
+            if (tempToken && userId) {
+              localStorage.setItem('temp_auth_token', tempToken);
+              localStorage.setItem('user_id', userId);
+            }
+            
+            localStorage.setItem('redirect_to_step', '3');
+            router.replace('/profile-verification');
           } else if (accountStatus === 'approved') {
             // Account approved but not logged in yet - fetch token
             console.log('[Social Callback] Account approved, fetching token...');
@@ -344,7 +341,7 @@ const LoginPage = () => {
   const SignInScreen = useMemo(() => (
     <>
       <div className="text-center mb-8">
-        <h1 className="section-title text-white mb-4">Welcome back to RealLeaders</h1>
+        <h1 className="section-title mb-4" style={{color:"white"}}>Welcome back to RealLeaders</h1>
       </div>
 
       <div className="space-y-6">
@@ -418,7 +415,7 @@ const LoginPage = () => {
               Sending OTP...
             </>
           ) : (
-            'Send OTP'
+            'Login'
           )}
         </button>
         {/* Divider */}
@@ -435,10 +432,8 @@ const LoginPage = () => {
 <div className="space-y-4">
           <SocialLoginButtons
             onGoogleLogin={handleGoogleLogin}
-            onAppleLogin={handleAppleLogin}
             onLinkedInLogin={handleLinkedInLogin}
             isLoading={isSubmitting}
-            variant="login"
           />
         </div>
        
