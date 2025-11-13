@@ -1,6 +1,8 @@
 'use client'
 import React from 'react';
+import Image from 'next/image';
 import { ArrowLeft, Mail } from 'lucide-react';
+import { images } from '@/assets';
 
 interface ForgotEmailSectionProps {
   onBack: () => void;
@@ -24,56 +26,63 @@ const ForgotEmailSection: React.FC<ForgotEmailSectionProps> = ({ onBack }) => {
   };
 
   return (
-    <>
-      {/* Back Button */}
+    <div className="w-full">
+      {/* Back Button - Top left */}
       <div className="mb-6">
         <button
           onClick={onBack}
-          className="flex items-center text-white hover:text-white transition-colors font-outfit"
+          className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
         >
-          <ArrowLeft size={20} className="mr-2" />
-          Back to Login
+          <ArrowLeft size={20} />
+          <span>Back to login</span>
         </button>
       </div>
 
-      {/* Header */}
+      {/* Logo - Centered */}
       <div className="text-center mb-8">
-        <h1 className="text-[28px] lg:text-[35px] font-abolition text-white mb-4">Forgot your email?</h1>
-        <p className="text-white text-sm font-outfit">
-          Enter any information you remember about your account, and we&apos;ll help you recover your email address.
+        <div className="inline-block bg-zinc-800 px-4 py-3 rounded-lg">
+          <Image
+            src={images.realLeaders}
+            alt="Real Leaders"
+            className="h-8 w-auto"
+          />
+        </div>
+      </div>
+
+      {/* Header - Centered */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Forgot your email?</h1>
+        <p className="text-zinc-400 text-sm">
+          Enter your recovery email to reset your password
         </p>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Mail className="text-white" size={16} />
-            <span className="text-sm font-medium text-white font-outfit">
-              Enter Your Email
-            </span>
-          </div>
-          <div className="firstVerifyScreen mx-auto group">
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="px-4 py-3 w-full text-gray-700 rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-              placeholder="Enter Your Email"
-              required
-            />
-          </div>
+          <label className="flex items-center gap-2 mb-2 text-white text-sm">
+            <Mail size={16} />
+            Recovery Email Address
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="recovery@example.com"
+            className="w-full h-12 px-4 rounded-lg bg-white text-zinc-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+            required
+          />
         </div>
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full h-12 sm:h-14 bg-custom-red hover:bg-custom-red/90 disabled:bg-custom-red/70 text-white text-[24px] font-normal rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-abolition flex items-center justify-center gap-3"
+          disabled={isSubmitting || !email}
+          className="w-full h-12 rounded-full bg-red-600 text-white font-bold hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>
               <svg
-                className="animate-spin h-6 w-6 text-white"
+                className="animate-spin h-5 w-5 text-white"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -92,14 +101,14 @@ const ForgotEmailSection: React.FC<ForgotEmailSectionProps> = ({ onBack }) => {
                   d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                 ></path>
               </svg>
-              Searching...
+              Sending...
             </>
           ) : (
-            'Email Password Reset Link'
+            'Send Reset Link'
           )}
         </button>
       </form>
-    </>
+    </div>
   );
 };
 

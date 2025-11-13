@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/toast';
 import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { UserProfileSidebar, UserProfileDropdown, useUser } from '@/components';
+import { UserProfileSidebar, UserProfileDropdown, useUser, ProfileReadyModal } from '@/components';
 import Image from 'next/image';
 import { OnboardingProvider } from '@/components/OnboardingContext';
 import { api } from '@/lib/api';
@@ -23,6 +23,20 @@ const ProfilePage = () => {
   // Multi-Step State
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6;
+
+  // Check URL for step parameter
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const stepParam = urlParams.get('step');
+      if (stepParam) {
+        const stepNumber = parseInt(stepParam, 10);
+        if (stepNumber >= 1 && stepNumber <= totalSteps) {
+          setCurrentStep(stepNumber);
+        }
+      }
+    }
+  }, []);
   
   // Existing state
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -93,10 +107,21 @@ const ProfilePage = () => {
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef<boolean>(false);
   const [hasDrawn, setHasDrawn] = useState(false);
-  
+    const [customContentPreference, setCustomContentPreference] = useState('');
+  const [customIndustries, setCustomIndustries] = useState<string[]>([]);
   // Signature consent checkboxes
   const [consentFeatureName, setConsentFeatureName] = useState(true);
   const [agreeTerms, setAgreeTerms] = useState(true);
+
+  // Profile Ready Modal state
+  const [showProfileReadyModal, setShowProfileReadyModal] = useState(false);
+  const [savedProfileData, setSavedProfileData] = useState<{
+    full_name?: string;
+    username?: string;
+    profile_picture_url?: string;
+    profile_template?: { id?: number };
+    [key: string]: unknown;
+  } | null>(null);
   const [confirmInfoAccurate, setConfirmInfoAccurate] = useState(true);
 
   // Template section state
@@ -533,7 +558,7 @@ const ProfilePage = () => {
         updateData.industry = informationData.industry;
         updateData.numEmployees = informationData.numberOfEmployees;
         updateData.emailListSize = informationData.contactEmailListSize;
-        updateData.about = informationData.about;
+        updateData.audienceDescription = informationData.about;
         updateData.billing_address_1 = informationData.billing_address_1;
         updateData.billing_address_2 = informationData.billing_address_2;
         updateData.billing_city = informationData.billing_city;
@@ -545,7 +570,7 @@ const ProfilePage = () => {
         updateData.top_pain_points = informationData.top_pain_points;
         updateData.primary_call_to_action = informationData.primary_call_to_action;
         if (informationData.content_preference_industry && informationData.content_preference_industry.length > 0) {
-          updateData.content_preference_industry = JSON.stringify(informationData.content_preference_industry);
+          updateData.content_preference_industry = informationData.content_preference_industry;
         }
       }
 
@@ -580,7 +605,7 @@ const ProfilePage = () => {
       // Template - save if selected
       const currentTemplateId = user?.profile_template?.id;
       if (selectedTemplate !== null && selectedTemplate !== currentTemplateId) {
-        updateData.template_id = selectedTemplate;
+        updateData.profileTemplate = selectedTemplate;
       }
 
       // Newsletter settings - include API keys if provider is selected and verified
@@ -607,6 +632,10 @@ const ProfilePage = () => {
           if (userDetailsResponse.success && userDetailsResponse.user) {
             console.log('[Profile] Fresh user details fetched after update:', userDetailsResponse.user);
             updateUser(userDetailsResponse.user);
+            
+            // Show congratulations modal with updated profile data
+            setSavedProfileData(userDetailsResponse.user);
+            setShowProfileReadyModal(true);
           }
         } catch (error) {
           console.error('[Profile] Error fetching fresh user details:', error);
@@ -662,6 +691,39 @@ const ProfilePage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+
+  const addCustomIndustry = () => {
+  if (
+    informationData?.content_preference_industry &&
+    customContentPreference.trim() &&
+    !informationData.content_preference_industry.includes(customContentPreference.trim())
+  ) {
+    const newIndustry = customContentPreference.trim();
+    // Add the new industry and remove "Other" from content_preference_industry
+    const updatedIndustries = informationData.content_preference_industry
+      .filter((industry) => industry !== "Other") // Remove "Other"
+      .concat(newIndustry); // Add the new custom industry
+    handleArrayInputChange("content_preference_industry", updatedIndustries);
+    setCustomIndustries((prev) => [...prev, newIndustry]);
+    setCustomContentPreference("");
+  }
+};
+const handleArrayInputChange = (field: string, value: string[]) => {
+    setInformationData(prev => prev ? ({
+      ...prev,
+      [field]: value
+    }) : prev);
+  };
+
+  const removeCustomIndustry = (industryToRemove: string) => {
+    if (informationData?.content_preference_industry) {
+      handleArrayInputChange('content_preference_industry', 
+        informationData.content_preference_industry.filter(industry => industry !== industryToRemove)
+      );
+    }
+    setCustomIndustries(prev => prev.filter(industry => industry !== industryToRemove));
   };
 
   // Multi-Step Navigation Functions
@@ -758,9 +820,7 @@ const ProfilePage = () => {
                 <span className="text-sm text-gray-600 font-outfit">
                   Step {currentStep} of {totalSteps}
                 </span>
-                <span className="text-sm text-gray-600 font-outfit">
-                  {Math.round((currentStep / totalSteps) * 100)}% Complete
-                </span>
+                
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
                 <div
@@ -867,11 +927,17 @@ const ProfilePage = () => {
 
                   {/* Row 2: Date of Birth & Occupation */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-                    <div className='firstVerifyScreen group'>
+                    <div className='firstVerifyScreen group relative'>
                       <input
-                        type="date"
+                        type="text"
                         value={informationData?.date_of_birth || ''}
                         onChange={(e) => setInformationData(prev => prev ? { ...prev, date_of_birth: e.target.value } : null)}
+                        onFocus={(e) => e.target.type = 'date'}
+                        onBlur={(e) => {
+                          if (!e.target.value) {
+                            e.target.type = 'text';
+                          }
+                        }}
                         className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
                         style={{ color: '#949494' }}
                         placeholder="Date of Birth"
@@ -1175,6 +1241,296 @@ const ProfilePage = () => {
                 </button>
               </div>
 
+
+<div className="firstVerifyScreen group" style={{ height: "auto", flexDirection: "column" }}>
+  {/* Content Preference Industry - Multi-select with improved UI */}
+  <div className="space-y-4">
+    <div className='flex' style={{alignItems:"center",marginTop:"20px",flexDirection:"column"}}>
+    <label className="block text-lg font-semibold text-gray-800 mb-4">
+      Content Preference Industry
+    </label>
+    <p className="text-sm text-gray-600 mb-4">
+      Select all industries that interest you (select multiple)
+    </p>
+</div>
+    {/* Grid of industry options - larger and more spacious */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      {[
+        "Technology",
+        "Healthcare",
+        "Finance",
+        "Education",
+        "Retail",
+        "Manufacturing",
+        "Consulting",
+        "Marketing",
+        "Real Estate",
+        "Food & Beverage",
+        "Travel",
+        "Fashion",
+        "Other",
+      ].map((industry) => (
+        <label
+          key={industry}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            cursor: "pointer",
+            padding: "16px",
+            borderRadius: "8px",
+            border: informationData?.content_preference_industry?.includes(industry)
+              ? "2px solid #CF3232"
+              : "2px solid #CF323240",
+            backgroundColor: informationData?.content_preference_industry?.includes(industry)
+              ? "#FEF2F2"
+              : "#ffffff",
+            boxShadow: informationData?.content_preference_industry?.includes(industry)
+              ? "0 4px 6px -1px rgba(207, 50, 50, 0.1), 0 2px 4px -1px rgba(207, 50, 50, 0.06)"
+              : "none",
+            transform: informationData?.content_preference_industry?.includes(industry)
+              ? "scale(1.02)"
+              : "scale(1)",
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+          onMouseEnter={(e) => {
+            if (!informationData?.content_preference_industry?.includes(industry)) {
+              e.currentTarget.style.borderColor = "#CF3232";
+              e.currentTarget.style.backgroundColor = "#FEF2F2";
+              e.currentTarget.style.boxShadow = "0 1px 3px 0 rgba(207, 50, 50, 0.1)";
+              e.currentTarget.style.transform = "scale(1.02) translateY(-2px)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!informationData?.content_preference_industry?.includes(industry)) {
+              e.currentTarget.style.borderColor = "#CF323240";
+              e.currentTarget.style.backgroundColor = "#ffffff";
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.transform = "scale(1)";
+            }
+          }}
+        >
+          <div className="relative flex items-center justify-center">
+            <input
+              type="checkbox"
+              checked={informationData?.content_preference_industry?.includes(industry) || false}
+              onChange={(e) => {
+                if (informationData?.content_preference_industry) {
+                  const newValue = e.target.checked
+                    ? [...informationData.content_preference_industry, industry]
+                    : informationData.content_preference_industry.filter((item) => item !== industry);
+                  handleArrayInputChange("content_preference_industry", newValue);
+                }
+              }}
+              className="w-5 h-5 rounded border-2 border-gray-300 text-[#CF3232] focus:ring-[#CF3232] focus:ring-2 cursor-pointer"
+            />
+          </div>
+          <span
+            style={{
+              fontSize: "16px",
+              fontWeight: "500",
+              color: informationData?.content_preference_industry?.includes(industry)
+                ? "#CF3232"
+                : "#333333",
+              transition: "color 0.3s ease",
+            }}
+          >
+            {industry}
+          </span>
+        </label>
+      ))}
+    </div>
+
+    {/* Display selected custom industries */}
+    {customIndustries.length > 0 && (
+      <div
+        className="mb-6"
+        style={{
+          animation: "fadeInUp 0.4s ease-out",
+        }}
+      >
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Your Custom Industries:
+        </label>
+        <div className="flex flex-wrap gap-3">
+          {customIndustries.map((industry, index) => (
+            <span
+              key={index}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "500",
+                backgroundColor: "#FEF2F2",
+                color: "#CF3232",
+                border: "2px solid #CF3232",
+                boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                transition: "all 0.3s ease",
+                animation: `fadeInScale 0.3s ease-out ${index * 0.1}s both`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow =
+                  "0 4px 6px -1px rgba(207, 50, 50, 0.2), 0 2px 4px -1px rgba(207, 50, 50, 0.1)";
+                e.currentTarget.style.transform = "translateY(-2px) scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
+                e.currentTarget.style.transform = "translateY(0) scale(1)";
+              }}
+            >
+              {industry}
+              <button
+                type="button"
+                onClick={() => removeCustomIndustry(industry)}
+                style={{
+                  marginLeft: "8px",
+                  color: "#CF3232",
+                  fontWeight: "bold",
+                  fontSize: "18px",
+                  border: "none",
+                  background: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  lineHeight: "1",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#b82d2d";
+                  e.currentTarget.style.transform = "rotate(90deg) scale(1.2)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#CF3232";
+                  e.currentTarget.style.transform = "rotate(0deg) scale(1)";
+                }}
+                aria-label={`Remove ${industry}`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Conditional custom industry input - only shows when "Other" is selected */}
+    {informationData?.content_preference_industry?.includes("Other") && (
+      <div
+        style={{
+          backgroundColor: "#FEF2F2",
+          padding: "24px",
+          marginBottom:"20px",
+          borderRadius: "8px",
+          border: "2px solid #CF323240",
+          animation: "slideInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <label className="block text-base font-semibold text-gray-800 mb-3">
+          Add Your Custom Industry
+        </label>
+        <p className="text-sm text-[#949494] mb-4">
+          Enter the name of your industry and press Tab, Enter, or click away to add
+        </p>
+        <div className="flex gap-3">
+          <input
+            type="text"
+            value={customContentPreference}
+            onChange={(e) => setCustomContentPreference(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addCustomIndustry();
+              }
+            }}
+            onBlur={() => {
+              if (
+                informationData?.content_preference_industry &&
+                customContentPreference.trim() &&
+                !informationData.content_preference_industry.includes(customContentPreference.trim())
+              ) {
+                addCustomIndustry();
+              }
+            }}
+            style={{
+              flex: 1,
+              padding: "12px 16px",
+              backgroundColor: "#ffffff",
+              borderRadius: "8px",
+              border: "2px solid #CF323240",
+              outline: "none",
+              color: "#333333",
+              transition: "all 0.3s ease",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "#CF3232";
+              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(207, 50, 50, 0.1)";
+              e.currentTarget.style.transform = "scale(1.01)";
+            }}
+           
+            placeholder="e.g., Entertainment, Sports, etc."
+          />
+          <button
+            type="button"
+            onClick={addCustomIndustry}
+            disabled={
+              !customContentPreference.trim() ||
+              informationData?.content_preference_industry?.includes(customContentPreference.trim())
+            }
+            style={{
+              padding: "12px 24px",
+              backgroundColor:
+                !customContentPreference.trim() ||
+                informationData?.content_preference_industry?.includes(customContentPreference.trim())
+                  ? "#d1d5db"
+                  : "#CF3232",
+              color: "#ffffff",
+              fontWeight: "600",
+              borderRadius: "8px",
+              border: "none",
+              cursor:
+                !customContentPreference.trim() ||
+                informationData?.content_preference_industry?.includes(customContentPreference.trim())
+                  ? "not-allowed"
+                  : "pointer",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              boxShadow:
+                !customContentPreference.trim() ||
+                informationData?.content_preference_industry?.includes(customContentPreference.trim())
+                  ? "none"
+                  : "0 4px 6px -1px rgba(207, 50, 50, 0.3)",
+            }}
+            onMouseEnter={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.backgroundColor = "#b82d2d";
+                e.currentTarget.style.transform = "translateY(-2px) scale(1.05)";
+                e.currentTarget.style.boxShadow = "0 6px 8px -1px rgba(207, 50, 50, 0.4)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.backgroundColor = "#CF3232";
+                e.currentTarget.style.transform = "translateY(0) scale(1)";
+                e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(207, 50, 50, 0.3)";
+              }
+            }}
+            onMouseDown={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.transform = "translateY(0) scale(0.95)";
+              }
+            }}
+            onMouseUp={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.transform = "translateY(-2px) scale(1.05)";
+              }
+            }}
+          >
+            Add
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+</div>
               </>
               )}
 
@@ -1583,7 +1939,7 @@ const ProfilePage = () => {
                                 : 'border-gray-200 hover:border-[#CF3232]/50'
                             }`}
                           >
-                            <div className="aspect-video bg-white rounded-lg mb-3 overflow-hidden border border-gray-200">
+                            <div className="bg-white rounded-lg mb-3 overflow-hidden border border-gray-200" style={{ height: '350px' }}>
                               {template.image_url ? (
                                 <Image
                                   src={template.image_url}
@@ -1591,6 +1947,11 @@ const ProfilePage = () => {
                                   width={400}
                                   height={225}
                                   className="w-full h-full object-cover"
+                                  style={{
+                                    width: '-webkit-fill-available',
+                                    height: '100%',
+                                    objectFit: 'cover'
+                                  }}
                                   unoptimized
                                 />
                               ) : (
@@ -2057,6 +2418,14 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Profile Ready Congratulations Modal */}
+      <ProfileReadyModal
+        isOpen={showProfileReadyModal}
+        onClose={() => setShowProfileReadyModal(false)}
+        profileData={savedProfileData}
+        user={user}
+      />
     </OnboardingProvider>
   );
 };

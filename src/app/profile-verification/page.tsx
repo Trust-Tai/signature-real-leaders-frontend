@@ -403,16 +403,9 @@ const InnerProfileVerificationPage = () => {
                 num_employees: data.numberOfEmployees,
                 email_list_size: data.contactEmailListSize,
                 about: data.about,
-                billing_address_1: data.billing_address_1,
-                billing_address_2: data.billing_address_2,
-                billing_city: data.billing_city,
-                billing_postcode: data.billing_postcode,
-                billing_country: data.billing_country,
-                billing_phone: data.billing_phone,
                 brand_voice: data.brand_voice,
                 unique_differentiation: data.unique_differentiation,
                 top_pain_points: data.top_pain_points,
-                content_preference_industry: data.content_preference_industry,
                 primary_call_to_action: data.primary_call_to_action,
                 date_of_birth: data.date_of_birth,
                 occupation: data.occupation,
@@ -465,14 +458,6 @@ const InnerProfileVerificationPage = () => {
                 if (state.num_employees) formData.append('numEmployees', state.num_employees);
                 if (state.email_list_size) formData.append('emailListSize', state.email_list_size);
                 
-                // Billing address fields
-                if (state.billing_address_1) formData.append('billing_address_1', state.billing_address_1);
-                if (state.billing_address_2) formData.append('billing_address_2', state.billing_address_2);
-                if (state.billing_city) formData.append('billing_city', state.billing_city);
-                if (state.billing_postcode) formData.append('billing_postcode', state.billing_postcode);
-                if (state.billing_country) formData.append('billing_country', state.billing_country);
-                if (state.billing_phone) formData.append('billing_phone', state.billing_phone);
-                
                 // Additional fields
                 if (state.brand_voice) formData.append('brand_voice', state.brand_voice);
                 if (state.unique_differentiation) formData.append('unique_differentiation', state.unique_differentiation);
@@ -480,11 +465,6 @@ const InnerProfileVerificationPage = () => {
                 if (state.primary_call_to_action) formData.append('primary_call_to_action', state.primary_call_to_action);
                 if (state.date_of_birth) formData.append('date_of_birth', state.date_of_birth);
                 if (state.occupation) formData.append('occupation', state.occupation);
-                
-                // Content preference industry as JSON array
-                if (state.content_preference_industry && state.content_preference_industry.length > 0) {
-                  formData.append('content_preference_industry', JSON.stringify(state.content_preference_industry));
-                }
                 
                 // Links as JSON array
                 if (state.links && state.links.length > 0) {

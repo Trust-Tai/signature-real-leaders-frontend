@@ -32,6 +32,7 @@ export { DashboardTour } from './ui/DashboardTour';
 export { ProfileCompletionCard } from './ui/ProfileCompletionCard';
 export { WelcomeModal } from './ui/WelcomeModal';
 export { DashboardProfileCompletionWrapper } from './ui/DashboardProfileCompletionWrapper';
+export { default as ProfileReadyModal } from './ui/ProfileReadyModal';
 
 // Layout Components
 export { default as Sidebar } from './ui/Sidebar';

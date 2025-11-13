@@ -656,6 +656,48 @@ export const api = {
       }
     );
   },
+
+  async getBookingStats(authToken: string) {
+    return request<{
+      success: boolean;
+      data: {
+        speaker_id: number;
+        months_type: string | null;
+        date_range: {
+          start_date: string;
+          end_date: string;
+          previous_start: string;
+          previous_end: string;
+        };
+        stats: {
+          total_bookings: number;
+          new_bookings: number;
+          returning_bookings: number;
+          growth_rate: number;
+          trend: 'up' | 'down' | 'same';
+        };
+        booking_by_type: Array<{
+          type: string;
+          count: number;
+          growth_rate: number;
+          trend: 'up' | 'down' | 'same';
+        }>;
+        weekly_booking_trend: Array<{
+          week_label: string;
+          count: number;
+          average_weekly_bookings?: number;
+        }>;
+      };
+    }>(
+      '/user/bookings',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
 };
 
 

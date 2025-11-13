@@ -1,37 +1,115 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Bell, User, TrendingUp, TrendingDown, Calendar, Menu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bell, User, TrendingUp, TrendingDown, Calendar, Menu, Loader2 } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
+import { api } from '@/lib/api';
+import { toast } from '@/components/ui/toast';
 
 const BookingThisMonth = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [bookingData, setBookingData] = useState<Array<{
+    type: string;
+    count: number;
+    change: string;
+    trend: 'up' | 'down' | 'same';
+  }>>([]);
+  const [statsCards, setStatsCards] = useState<Array<{
+    number: string;
+    label: string;
+    description: string;
+    color: string;
+  }>>([]);
+  const [weeklyData, setWeeklyData] = useState<Array<{
+    week: string;
+    bookings: number;
+  }>>([]);
+  const [averageWeeklyBookings, setAverageWeeklyBookings] = useState(0);
 
-  const bookingData = [
-    { type: 'New Bookings', count: 82, change: '+12.5%', trend: 'up' },
-    { type: 'Returning Bookings', count: 46, change: '+8.2%', trend: 'up' },
-    { type: 'Consultations', count: 35, change: '+15.3%', trend: 'up' },
-    { type: 'Events', count: 28, change: '-2.1%', trend: 'down' },
-    { type: 'Meetings', count: 54, change: '+22.7%', trend: 'up' },
-    { type: 'Workshops', count: 19, change: '+5.8%', trend: 'up' }
-  ];
+  useEffect(() => {
+    const fetchBookingStats = async () => {
+      try {
+        setLoading(true);
+        const authToken = localStorage.getItem('auth_token');
+        if (!authToken) {
+          toast.error('Please login to view booking stats');
+          return;
+        }
 
-  const statsCards = [
-    { number: '128', label: 'TOTAL BOOKINGS', description: 'Total number of bookings this month', color: '#CF3232' },
-    { number: '82', label: 'NEW BOOKINGS', description: 'First-time bookings received', color: '#CF3232' },
-    { number: '46', label: 'RETURNING BOOKINGS', description: 'Repeat customer bookings', color: '#CF3232' },
-    { number: '+12%', label: 'GROWTH RATE', description: 'Monthly booking increase', color: '#CF3232' }
-  ];
+        const response = await api.getBookingStats(authToken);
+        
+        if (response.success && response.data) {
+          const { stats, booking_by_type, weekly_booking_trend } = response.data;
 
-  const weeklyData = [
-    { week: 'Week 1', bookings: 28 },
-    { week: 'Week 2', bookings: 32 },
-    { week: 'Week 3', bookings: 35 },
-    { week: 'Week 4', bookings: 33 }
-  ];
+          // Set stats cards
+          const growthSign = stats.growth_rate > 0 ? '+' : stats.growth_rate < 0 ? '-' : '';
+          setStatsCards([
+            { 
+              number: stats.total_bookings.toString(), 
+              label: 'TOTAL BOOKINGS', 
+              description: 'Total number of bookings this month', 
+              color: '#CF3232' 
+            },
+            { 
+              number: stats.new_bookings.toString(), 
+              label: 'NEW BOOKINGS', 
+              description: 'First-time bookings received', 
+              color: '#CF3232' 
+            },
+            { 
+              number: stats.returning_bookings.toString(), 
+              label: 'RETURNING BOOKINGS', 
+              description: 'Repeat customer bookings', 
+              color: '#CF3232' 
+            },
+            { 
+              number: `${growthSign}${Math.abs(stats.growth_rate)}%`, 
+              label: 'GROWTH RATE', 
+              description: 'Monthly booking increase', 
+              color: '#CF3232' 
+            }
+          ]);
+
+          // Set booking by type data
+          const formattedBookingData = booking_by_type.map(item => {
+            const changeSign = item.growth_rate > 0 ? '+' : item.growth_rate < 0 ? '-' : '';
+            return {
+              type: item.type,
+              count: item.count,
+              change: `${changeSign}${Math.abs(item.growth_rate)}%`,
+              trend: item.trend
+            };
+          });
+          setBookingData(formattedBookingData);
+
+          // Set weekly trend data
+          const avgBookings = weekly_booking_trend.find(item => item.average_weekly_bookings !== undefined);
+          if (avgBookings) {
+            setAverageWeeklyBookings(avgBookings.average_weekly_bookings || 0);
+          }
+
+          const formattedWeeklyData = weekly_booking_trend
+            .filter(item => item.week_label)
+            .map(item => ({
+              week: item.week_label,
+              bookings: item.count
+            }));
+          setWeeklyData(formattedWeeklyData);
+        }
+      } catch (error) {
+        console.error('Error fetching booking stats:', error);
+        toast.error('Failed to load booking statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookingStats();
+  }, []);
 
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
@@ -107,8 +185,14 @@ const BookingThisMonth = () => {
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             
-            {/* Stats Cards */}
-            <StatsCards stats={statsCards} columns={4} />
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-[#CF3232]" />
+              </div>
+            ) : (
+              <>
+                {/* Stats Cards */}
+                <StatsCards stats={statsCards} columns={4} />
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -186,55 +270,34 @@ const BookingThisMonth = () => {
                 </h2>
                 
                 <div className="space-y-3">
-                  {weeklyData.map((data, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <span className="text-sm text-gray-600 w-16">{data.week}</span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-3">
-                        <div 
-                          className="bg-[#CF3232] h-3 rounded-full transition-all duration-300"
-                          style={{ width: `${(data.bookings / 35) * 100}%` }}
-                        ></div>
+                  {weeklyData.map((data, index) => {
+                    const maxBookings = Math.max(...weeklyData.map(d => d.bookings), 1);
+                    return (
+                      <div key={index} className="flex items-center space-x-3">
+                        <span className="text-sm text-gray-600 w-16">{data.week}</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-3">
+                          <div 
+                            className="bg-[#CF3232] h-3 rounded-full transition-all duration-300"
+                            style={{ width: `${(data.bookings / maxBookings) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-[#101117] w-12 text-right">
+                          {data.bookings}
+                        </span>
                       </div>
-                      <span className="text-sm font-medium text-[#101117] w-12 text-right">
-                        {data.bookings}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 
                 <div className="mt-4 text-center">
                   <p className="text-xs text-gray-500">
-                    Average weekly bookings: 32
+                    Average weekly bookings: {averageWeeklyBookings}
                   </p>
                 </div>
               </div>
             </div>
-
-            {/* Additional Analytics */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-[#101117] mb-4">
-                Booking Sources
-              </h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-2xl font-bold text-[#101117] mb-1">45%</h3>
-                  <p className="text-sm text-gray-600">Direct Contact</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-2xl font-bold text-[#101117] mb-1">32%</h3>
-                  <p className="text-sm text-gray-600">Website Form</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-2xl font-bold text-[#101117] mb-1">18%</h3>
-                  <p className="text-sm text-gray-600">Referral</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-2xl font-bold text-[#101117] mb-1">5%</h3>
-                  <p className="text-sm text-gray-600">Social Media</p>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </main>
         

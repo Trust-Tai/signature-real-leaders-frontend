@@ -1,0 +1,325 @@
+import React from 'react';
+import Image from 'next/image';
+import { ChevronRight } from 'lucide-react';
+import { images } from '@/assets';
+
+interface DefaultTemplateProps {
+  profileData: {
+    full_name: string;
+    username: string;
+    occupation?: string;
+    company_name?: string;
+    company_website?: string;
+    industry?: string;
+    location?: string;
+    audience_description?: string;
+    profile_picture_url?: string;
+    profile_image?: string;
+    signature_url?: string;
+    newsletter_service?: string;
+    links?: Array<{
+      id: number;
+      name: string;
+      url: string;
+      display_name: string;
+      icon: string;
+    }>;
+  };
+  optIn: boolean;
+  setOptIn: (value: boolean) => void;
+  isFollowing: boolean;
+  followLoading: boolean;
+  handleFollowToggle: () => void;
+  handleGoToDashboard: () => void;
+  handleLinkClick: (link: { url: string; display_name: string; name: string }) => void;
+  getIconForLink: (linkName: string) => React.ReactNode;
+  user: { username?: string } | null;
+}
+
+export default function DefaultTemplate({
+  profileData,
+  optIn,
+  setOptIn,
+  isFollowing,
+  followLoading,
+  handleFollowToggle,
+  handleGoToDashboard,
+  handleLinkClick,
+  getIconForLink,
+  user
+}: DefaultTemplateProps) {
+  return (
+    <div className="min-h-screen text-white relative overflow-x-hidden overflow-y-auto">
+      <div className="absolute inset-0">
+        <div className="w-full h-full bg-cover bg-center bg-no-repeat">
+          <Image src={images.profileBgImage} alt='' className='w-full' style={{ height: "1440px" }} />
+        </div>
+        <div className="absolute inset-0 bg-black/92 h-[1440px]"></div>
+      </div>
+
+      {/* Main Content Container */}
+      <div className="relative z-20 pb-20 mt-[100px] lg:mt-[30px]">
+        <div
+          className="relative mx-auto"
+          style={{
+            width: '504px',
+            maxWidth: '90vw',
+            minHeight: '1250px',
+            marginTop: '25px',
+            opacity: 1
+          }}
+        >
+          {/* Profile Image */}
+          <div
+            className="relative mx-auto bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center border border-white overflow-hidden mb-8"
+            style={{
+              width: '180px',
+              height: '180px',
+              borderRadius: '200px',
+              borderWidth: '1px',
+              opacity: 1
+            }}
+          >
+            <Image
+              src={(profileData.profile_picture_url || profileData.profile_image) || images.userProfileImage}
+              alt={`${profileData.full_name} Profile`}
+              width={180}
+              height={180}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = images.userProfileImage.src;
+              }}
+            />
+          </div>
+
+          {/* Name */}
+          <h1
+            className="text-white text-center font-outfit font-medium w-full mb-4"
+            style={{
+              fontSize: '43px',
+            }}
+          >
+            {profileData.full_name}
+          </h1>
+
+          {/* Company/Title */}
+          {(profileData.occupation || profileData.company_name) && (
+            <p
+              className="text-white text-center w-full font-outfit mb-2"
+              style={{
+                fontFamily: 'Outfit',
+                fontWeight: 400,
+                fontSize: '18px',
+              }}
+            >
+              {profileData.occupation && profileData.company_name
+                ? `${profileData.occupation} at ${profileData.company_name}`
+                : profileData.company_name || profileData.occupation
+              }
+            </p>
+          )}
+
+          {/* Industry */}
+          {profileData.industry && (
+            <p
+              className="text-white text-center w-full font-outfit mb-2"
+              style={{
+                fontFamily: 'Outfit',
+                fontWeight: 400,
+                fontSize: '16px',
+                opacity: 0.9
+              }}
+            >
+              {profileData.industry}
+            </p>
+          )}
+
+          {/* Location */}
+          {profileData.location && (
+            <p
+              className="text-white text-center w-full font-outfit mb-2"
+              style={{
+                fontFamily: 'Outfit',
+                fontWeight: 400,
+                fontSize: '16px',
+                opacity: 0.8
+              }}
+            >
+              📍 {profileData.location}
+            </p>
+          )}
+
+          {/* Company Website */}
+          {profileData.company_website && (
+            <p
+              className="text-white text-center w-full font-outfit mb-4"
+              style={{
+                fontFamily: 'Outfit',
+                fontWeight: 400,
+                fontSize: '16px',
+                opacity: 0.8
+              }}
+            >
+              🌐 {profileData.company_website.replace(/^https?:\/\//, '')}
+            </p>
+          )}
+
+          {/* Audience Description */}
+          {profileData.audience_description && (
+            <p
+              className="text-center text-white px-4 py-2 rounded mb-8 mx-auto max-w-md"
+              style={{
+                fontFamily: 'Outfit',
+                fontWeight: 400,
+                fontSize: '15px',
+              }}
+            >
+              {profileData.audience_description}
+            </p>
+          )}
+
+          {/* Profile Stats */}
+          <div className="w-full mb-6 px-4">
+            <div className="backdrop-blur-[20px] bg-white/10 rounded-lg p-4">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <p className="text-white text-sm opacity-80">Username</p>
+                  <p className="text-white font-semibold">@{profileData.username}</p>
+                </div>
+                <div>
+                  <p className="text-white text-sm opacity-80">Links</p>
+                  <p className="text-white font-semibold">{profileData.links?.length || 0}</p>
+                </div>
+              </div>
+              {profileData.newsletter_service && (
+                <div className="mt-3 text-center">
+                  <p className="text-white text-sm opacity-80">Newsletter Service</p>
+                  <p className="text-white font-semibold capitalize">{profileData.newsletter_service}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Links Container */}
+          <div className="w-full space-y-4 mb-8">
+            {/* Dynamic Links from API */}
+            {profileData.links && profileData.links.length > 0 ? (
+              profileData.links.map((link, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleLinkClick(link)}
+                  className="w-full backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-between group px-4 hover:bg-white/30 transition-colors"
+                  style={{
+                    height: '70px',
+                    borderRadius: '10px',
+                    opacity: 1
+                  }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl flex items-center justify-center w-8 h-8">
+                      {getIconForLink(link.name)}
+                    </div>
+                    <div className="text-left">
+                      <span className="text-white font-outfit block" style={{ fontSize: 18, fontWeight: 500 }}>
+                        {link.display_name || link.name || 'Link'}
+                      </span>
+                      {link.url && (
+                        <span className="text-white/70 font-outfit text-sm block">
+                          {link.url.length > 30 ? link.url.substring(0, 30) + '...' : link.url}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                </button>
+              ))
+            ) : (
+              <div className="w-full backdrop-blur-[20px] bg-white/10 rounded-lg flex items-center justify-center px-4 py-8">
+                <div className="text-center">
+                  <span className="text-4xl mb-2 block">🔗</span>
+                  <span className="text-white/70 font-outfit">No links available</span>
+                </div>
+              </div>
+            )}
+
+            {/* Signature Box */}
+            <div
+              className="w-full profilesignimagediv backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-center mb-8"
+              style={{
+                height: '126px',
+                borderRadius: '10px',
+                opacity: 1,
+              }}
+            >
+              <Image
+                src={profileData.signature_url || images.profileSinature}
+                alt={`${profileData.full_name} Signature`}
+                width={300}
+                height={100}
+                className="w-full max-h-full signimage"
+                onError={(e) => {
+                  e.currentTarget.src = images.profileSinature.src;
+                }}
+              />
+            </div>
+
+            {/* Newsletter Opt-in - Only show if viewing someone else's profile */}
+            {user && user.username !== profileData.username && (
+              <div className="flex items-start justify-center space-x-3 mb-6 px-4">
+                <input
+                  type="checkbox"
+                  id="newsletter-default"
+                  checked={optIn}
+                  onChange={(e) => setOptIn(e.target.checked)}
+                  className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded mt-[5px] focus:ring-red-500 flex-shrink-0"
+                />
+                <label
+                  htmlFor="newsletter-default"
+                  className="text-start cursor-pointer"
+                  style={{
+                    fontFamily: 'Outfit, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '16px',
+                    lineHeight: '22.2px',
+                    letterSpacing: '1%',
+                    color: 'rgba(255, 255, 255, 0.8)'
+                  }}
+                >
+                  Join {profileData.full_name}&apos;s Newsletter - Get insights and updates delivered to your inbox
+                </label>
+              </div>
+            )}
+
+            {/* Follow/Dashboard Button */}
+            {user && user.username === profileData.username ? (
+              <button
+                onClick={handleGoToDashboard}
+                className="w-full transition-colors duration-200 text-white rounded-lg mb-4 bg-[#CF3232] hover:bg-red-600 cursor-pointer"
+                style={{
+                  height: '60px',
+                  fontSize: "25px",
+                  fontFamily: "Abolition Test"
+                }}
+              >
+                GO TO DASHBOARD
+              </button>
+            ) : (
+              <button
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+                className="w-full transition-colors duration-200 text-white rounded-lg mb-4 bg-[#CF3232] hover:bg-red-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  height: '60px',
+                  fontSize: "25px",
+                  fontFamily: "Abolition Test"
+                }}
+              >
+                {followLoading ? 'LOADING...' : (isFollowing ? 'UNFOLLOW' : 'FOLLOW')}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
