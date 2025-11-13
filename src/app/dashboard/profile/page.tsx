@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/toast';
-import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { UserProfileSidebar, UserProfileDropdown, useUser } from '@/components';
 import Image from 'next/image';
@@ -14,10 +14,17 @@ import {
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { images } from '@/assets';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
+import { countries } from '@/default/countries';
 
 const ProfilePage = () => {
   const router = useRouter();
   const { user, updateUser } = useUser();
+  
+  // Multi-Step State
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 6;
+  
+  // Existing state
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [bio, setBio] = useState("");
   const [currentPassword, setCurrentPassword] = useState('');
@@ -27,9 +34,34 @@ const ProfilePage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [informationData, setInformationData] = useState<{ firstName: string; lastName: string; companyName: string; companyWebsite: string; industry: string; numberOfEmployees: string; contactEmailListSize: string; about: string } | null>(null);
+  const [informationData, setInformationData] = useState<{
+    firstName: string;
+    lastName: string;
+    date_of_birth: string;
+    occupation: string;
+    companyName: string;
+    companyWebsite: string;
+    industry: string;
+    numberOfEmployees: string;
+    contactEmailListSize: string;
+    about: string;
+    billing_address_1: string;
+    billing_address_2: string;
+    billing_city: string;
+    billing_postcode: string;
+    billing_country: string;
+    billing_phone: string;
+    brand_voice: string;
+    unique_differentiation: string;
+    top_pain_points: string;
+    primary_call_to_action: string;
+    content_preference_industry: string[];
+  } | null>(null);
   const [metricsData, setMetricsData] = useState<{ numberOfBookings: string; emailListSize: string; amountInSales: string; amountInDonations: string } | null>(null);
   const [links, setLinks] = useState<Array<{ name: string; url: string }> | null>(null);
+  const [targetAudience, setTargetAudience] = useState<Array<{ role: string; ageRange: string; demographics: string }>>([
+    { role: '', ageRange: '', demographics: '' }
+  ]);
 
   // Links section state
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -61,8 +93,28 @@ const ProfilePage = () => {
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef<boolean>(false);
   const [hasDrawn, setHasDrawn] = useState(false);
+  
+  // Signature consent checkboxes
+  const [consentFeatureName, setConsentFeatureName] = useState(true);
+  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [confirmInfoAccurate, setConfirmInfoAccurate] = useState(true);
+
+  // Template section state
+  const [templates, setTemplates] = useState<Array<{ id: number; title: string; slug: string; image_url: string }>>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
 
 
+
+  // Age groups for target audience
+  const ageGroups = [
+    '18-24',
+    '25-34', 
+    '35-44',
+    '45-54',
+    '55-64',
+    '65+'
+  ];
 
   // Suggested items for links
   const suggestedItems: { label: string; icon: React.ReactNode; placeholder?: string }[] = [
@@ -245,6 +297,21 @@ const ProfilePage = () => {
     setLinks(processedLinks);
   }, [itemValues]);
 
+  // Target Audience functions
+  const addAudienceRow = () => {
+    setTargetAudience(prev => [...prev, { role: '', ageRange: '', demographics: '' }]);
+  };
+
+  const removeAudienceRow = (index: number) => {
+    setTargetAudience(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateAudienceRow = (index: number, field: string, value: string) => {
+    setTargetAudience(prev => prev.map((item, i) => 
+      i === index ? { ...item, [field]: value } : item
+    ));
+  };
+
   const handleOtherSubmit = () => {
     if (otherLabel.trim() && !expandedItems.has(otherLabel.trim())) {
       const newExpanded = new Set(expandedItems);
@@ -304,6 +371,30 @@ const ProfilePage = () => {
     return () => { mounted = false; };
   }, []);
 
+  // Load profile templates
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setTemplatesLoading(true);
+        const res = await api.getProfileTemplates();
+        if (mounted && res.success && res.templates) {
+          setTemplates(res.templates);
+          // Set current user's template as selected if available
+          const templateId = user?.profile_template?.id;
+          if (templateId) {
+            setSelectedTemplate(templateId);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading templates:', error);
+      } finally {
+        if (mounted) setTemplatesLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [user?.profile_template?.id]);
+
 
 
   // Initialize form data from user context
@@ -314,12 +405,25 @@ const ProfilePage = () => {
       setInformationData({
         firstName: user.first_name || '',
         lastName: user.last_name || '',
+        date_of_birth: user.date_of_birth || '',
+        occupation: user.occupation || '',
         companyName: user.company_name || '',
         companyWebsite: user.company_website || '',
         industry: user.industry || '',
         numberOfEmployees: user.num_employees || '',
         contactEmailListSize: user.email_list_size || '',
         about: user.audience_description || '',
+        billing_address_1: user.billing_address_1 || '',
+        billing_address_2: user.billing_address_2 || '',
+        billing_city: user.billing_city || '',
+        billing_postcode: user.billing_postcode || '',
+        billing_country: user.billing_country || '',
+        billing_phone: user.billing_phone || '',
+        brand_voice: user.brand_voice || '',
+        unique_differentiation: user.unique_differentiation || '',
+        top_pain_points: user.top_pain_points || '',
+        primary_call_to_action: user.primary_call_to_action || '',
+        content_preference_industry: user.content_preference_industry || [],
       });
       setMetricsData(user.success_metrics || {
         numberOfBookings: '',
@@ -341,6 +445,16 @@ const ProfilePage = () => {
 
         setItemValues(initialItemValues);
         setExpandedItems(initialExpandedItems);
+      }
+
+      // Initialize target audience from user data
+      if (user.target_audience && user.target_audience.length > 0) {
+        const mappedAudience = user.target_audience.map(audience => ({
+          role: audience.name || '',
+          ageRange: audience.age_group || '',
+          demographics: audience.demographic_details || ''
+        }));
+        setTargetAudience(mappedAudience);
       }
 
       // Initialize signature from user data
@@ -409,14 +523,30 @@ const ProfilePage = () => {
       const updateData: Record<string, unknown> = {};
 
       if (informationData) {
-        updateData.first_name = informationData.firstName;
-        updateData.last_name = informationData.lastName;
-        updateData.company_name = informationData.companyName;
-        updateData.company_website = informationData.companyWebsite;
+        // Use exact same keys as profile-verification
+        updateData.firstName = informationData.firstName;
+        updateData.lastName = informationData.lastName;
+        updateData.date_of_birth = informationData.date_of_birth;
+        updateData.occupation = informationData.occupation;
+        updateData.companyName = informationData.companyName;
+        updateData.companyWebsite = informationData.companyWebsite;
         updateData.industry = informationData.industry;
-        updateData.num_employees = informationData.numberOfEmployees;
-        updateData.email_list_size = informationData.contactEmailListSize;
-        updateData.audience_description = informationData.about;
+        updateData.numEmployees = informationData.numberOfEmployees;
+        updateData.emailListSize = informationData.contactEmailListSize;
+        updateData.about = informationData.about;
+        updateData.billing_address_1 = informationData.billing_address_1;
+        updateData.billing_address_2 = informationData.billing_address_2;
+        updateData.billing_city = informationData.billing_city;
+        updateData.billing_postcode = informationData.billing_postcode;
+        updateData.billing_country = informationData.billing_country;
+        updateData.billing_phone = informationData.billing_phone;
+        updateData.brand_voice = informationData.brand_voice;
+        updateData.unique_differentiation = informationData.unique_differentiation;
+        updateData.top_pain_points = informationData.top_pain_points;
+        updateData.primary_call_to_action = informationData.primary_call_to_action;
+        if (informationData.content_preference_industry && informationData.content_preference_industry.length > 0) {
+          updateData.content_preference_industry = JSON.stringify(informationData.content_preference_industry);
+        }
       }
 
       if (metricsData) {
@@ -427,10 +557,30 @@ const ProfilePage = () => {
         updateData.links = links;
       }
 
+      // Target Audience - save if there's data
+      if (targetAudience && targetAudience.length > 0) {
+        updateData.target_audience = targetAudience.map(audience => ({
+          name: audience.role || '',
+          age_group: audience.ageRange || '',
+          demographic_details: audience.demographics || ''
+        }));
+      }
+
       // Signature - save if there's a new signature drawn or uploaded
       const signatureToSave = signatureFormData.signature || signatureFormData.uploadedImage;
       if (signatureToSave && signatureToSave !== user?.signature_url) {
         updateData.signature = signatureToSave;
+      }
+
+      // Consent fields (required by API)
+      updateData.consentFeatureName = consentFeatureName;
+      updateData.agreeTerms = agreeTerms;
+      updateData.confimInFoAccurate = confirmInfoAccurate;
+
+      // Template - save if selected
+      const currentTemplateId = user?.profile_template?.id;
+      if (selectedTemplate !== null && selectedTemplate !== currentTemplateId) {
+        updateData.template_id = selectedTemplate;
       }
 
       // Newsletter settings - include API keys if provider is selected and verified
@@ -514,9 +664,30 @@ const ProfilePage = () => {
     }
   };
 
+  // Multi-Step Navigation Functions
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const skipStep = () => {
+    nextStep();
+  };
+
+
+
   return (
     <OnboardingProvider>
-      <div className="min-h-screen flex bg-[#FFF9F9]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
         {/* Custom CSS for dropdown content styling */}
         <style jsx>{`
         /* Force select color with multiple selectors */
@@ -564,9 +735,9 @@ const ProfilePage = () => {
         />
 
         {/* Right Side (Header + Main Content) */}
-        <div className="flex-1 flex flex-col w-full lg:w-auto">
-          {/* Header */}
-          <header className="bg-[#FFF9F9] px-4 sm:px-6 py-4 border-b border-[#efc0c0]">
+        <div className="flex-1 flex flex-col w-full lg:w-auto overflow-hidden">
+          {/* Header - Fixed */}
+          <header className="bg-[#FFF9F9] px-4 sm:px-6 py-4 border-b border-[#efc0c0] flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div
@@ -580,12 +751,43 @@ const ProfilePage = () => {
 
               <UserProfileDropdown />
             </div>
+
+            {/* Progress Indicator */}
+            <div className="mt-4 px-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600 font-outfit">
+                  Step {currentStep} of {totalSteps}
+                </span>
+                <span className="text-sm text-gray-600 font-outfit">
+                  {Math.round((currentStep / totalSteps) * 100)}% Complete
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                <div
+                  className="bg-[#CF3232] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                />
+              </div>
+              
+              {/* Step Titles */}
+              <div className="flex justify-between text-xs text-gray-500 font-outfit">
+                <span className={currentStep === 1 ? 'text-[#CF3232] font-semibold' : ''}>Personal Info</span>
+                <span className={currentStep === 2 ? 'text-[#CF3232] font-semibold' : ''}>Links</span>
+                <span className={currentStep === 3 ? 'text-[#CF3232] font-semibold' : ''}>Signature</span>
+                <span className={currentStep === 4 ? 'text-[#CF3232] font-semibold' : ''}>Template</span>
+                <span className={currentStep === 5 ? 'text-[#CF3232] font-semibold' : ''}>Newsletter</span>
+                <span className={currentStep === 6 ? 'text-[#CF3232] font-semibold' : ''}>Metrics</span>
+              </div>
+            </div>
           </header>
 
-          {/* Main Content */}
-          <main className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-            <div className="space-y-8">
+          {/* Main Content - Scrollable */}
+          <main className="flex-1 overflow-y-auto">
+            <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
 
+              {/* Step 1: Personal Information & Profile */}
+              {currentStep === 1 && (
+                <>
               {/* Profile Image Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
                 <h2 className="font-outift font-semibold text-[#333333] mb-4">Profile Image</h2>
@@ -663,7 +865,31 @@ const ProfilePage = () => {
                     </div>
                   </div>
 
-                  {/* Row 2: Company Name & Company Website */}
+                  {/* Row 2: Date of Birth & Occupation */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+                    <div className='firstVerifyScreen group'>
+                      <input
+                        type="date"
+                        value={informationData?.date_of_birth || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, date_of_birth: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Date of Birth"
+                      />
+                    </div>
+                    <div className='firstVerifyScreen group'>
+                      <input
+                        type="text"
+                        value={informationData?.occupation || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, occupation: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Role"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 3: Company Name & Company Website */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
                     <div className='firstVerifyScreen group'>
                       <input
@@ -753,95 +979,209 @@ const ProfilePage = () => {
                       }}
                       className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
                       style={{ color: '#949494', height: "180px" }}
-                      placeholder="Tell us a little about yourself and what you do..."
+                      placeholder="Brief summary about yourself..."
+                    />
+                  </div>
+
+                  {/* Billing Address Section */}
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">Billing Address</h3>
+
+                  {/* Street Address 1 */}
+                  <div className="firstVerifyScreen group">
+                    <input
+                      type="text"
+                      value={informationData?.billing_address_1 || ''}
+                      onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_address_1: e.target.value } : null)}
+                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                      style={{ color: '#949494' }}
+                      placeholder="Street Address 1"
+                    />
+                  </div>
+
+                  {/* Street Address 2 */}
+                  <div className="firstVerifyScreen group">
+                    <input
+                      type="text"
+                      value={informationData?.billing_address_2 || ''}
+                      onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_address_2: e.target.value } : null)}
+                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                      style={{ color: '#949494' }}
+                      placeholder="Street Address 2 (Optional)"
+                    />
+                  </div>
+
+                  {/* City, Postcode, Country */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-[10]">
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="text"
+                        value={informationData?.billing_city || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_city: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="City"
+                      />
+                    </div>
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="text"
+                        value={informationData?.billing_postcode || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_postcode: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Postcode"
+                      />
+                    </div>
+                    <div className="relative firstVerifyScreen group">
+                      <select
+                        value={informationData?.billing_country || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_country: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                      >
+                        <option value="">Country</option>
+                        {countries.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                    </div>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="firstVerifyScreen group">
+                    <input
+                      type="tel"
+                      value={informationData?.billing_phone || ''}
+                      onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_phone: e.target.value } : null)}
+                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                      style={{ color: '#949494' }}
+                      placeholder="Phone Number"
+                    />
+                  </div>
+
+                  {/* Brand Voice */}
+                  <div className="firstVerifyScreen group" style={{ height: "auto" }}>
+                    <textarea
+                      value={informationData?.brand_voice || ''}
+                      onChange={(e) => setInformationData(prev => prev ? { ...prev, brand_voice: e.target.value } : null)}
+                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+                      style={{ color: '#949494' }}
+                      placeholder="Describe your brand voice and tone..."
+                    />
+                  </div>
+
+                  {/* Unique Differentiation */}
+                  <div className="firstVerifyScreen group" style={{ height: "auto" }}>
+                    <textarea
+                      value={informationData?.unique_differentiation || ''}
+                      onChange={(e) => setInformationData(prev => prev ? { ...prev, unique_differentiation: e.target.value } : null)}
+                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+                      style={{ color: '#949494' }}
+                      placeholder="What makes you unique? How do you differentiate from competitors?"
+                    />
+                  </div>
+
+                  {/* Top Pain Points */}
+                  <div className="firstVerifyScreen group" style={{ height: "auto" }}>
+                    <textarea
+                      value={informationData?.top_pain_points || ''}
+                      onChange={(e) => setInformationData(prev => prev ? { ...prev, top_pain_points: e.target.value } : null)}
+                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+                      style={{ color: '#949494' }}
+                      placeholder="What are the top pain points your audience faces?"
+                    />
+                  </div>
+
+                  {/* Primary Call to Action */}
+                  <div className="firstVerifyScreen group">
+                    <input
+                      type="text"
+                      value={informationData?.primary_call_to_action || ''}
+                      onChange={(e) => setInformationData(prev => prev ? { ...prev, primary_call_to_action: e.target.value } : null)}
+                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                      style={{ color: '#949494' }}
+                      placeholder="What is your primary call to action?"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Success Metrics Section (from verification) */}
+              {/* Target Audience Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
-                <h2 className="font-semibold font-outift text-[#333333] mb-4">Success Metrics</h2>
-
-                {/* Inline Success Metrics Form */}
-                <div className="space-y-6">
-                  {/* Row 1: Number of Bookings & Email List Size */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[10px] gap-y-[16px]">
-                    <div className="relative firstVerifyScreen group" >
-                      <select
-                        value={metricsData?.numberOfBookings || ''}
-                        onChange={(e) => setMetricsData(prev => prev ? { ...prev, numberOfBookings: e.target.value } : null)}
-                        className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      >
-                        <option value="">Number of Bookings</option>
-                        <option value="0-10">0-10</option>
-                        <option value="11-50">11-50</option>
-                        <option value="51-100">51-100</option>
-                        <option value="101-500">101-500</option>
-                        <option value="501-1000">501-1000</option>
-                        <option value="1000+">1000+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                <h2 className="font-semibold font-outift text-[#333333] mb-2">Target Audience</h2>
+                <p className="text-sm text-gray-600 mb-4">List the people/roles, age range, and demographic segments you target.</p>
+                
+                {targetAudience.map((audience, index) => (
+                  <div key={index} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="firstVerifyScreen group">
+                        <input
+                          type="text"
+                          value={audience.role}
+                          onChange={(e) => updateAudienceRow(index, 'role', e.target.value)}
+                          placeholder="People / Role (e.g., Startup founders)"
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="relative firstVerifyScreen group flex-1">
+                          <select
+                            value={audience.ageRange}
+                            onChange={(e) => updateAudienceRow(index, 'ageRange', e.target.value)}
+                            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          >
+                            <option value="">Select age group</option>
+                            {ageGroups.map((ageGroup) => (
+                              <option key={ageGroup} value={ageGroup}>
+                                {ageGroup}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                        </div>
+                        {targetAudience.length > 1 && (
+                          <button
+                            onClick={() => removeAudienceRow(index)}
+                            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Remove audience"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
-
-                    <div className="relative firstVerifyScreen group" >
-                      <select
-                        value={metricsData?.emailListSize || ''}
-                        onChange={(e) => setMetricsData(prev => prev ? { ...prev, emailListSize: e.target.value } : null)}
-                        className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      >
-                        <option value="">Email List Size</option>
-                        <option value="0-100">0-100</option>
-                        <option value="101-500">101-500</option>
-                        <option value="501-1000">501-1000</option>
-                        <option value="1001-5000">1001-5000</option>
-                        <option value="5001-10000">5001-10000</option>
-                        <option value="10000+">10000+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
-                    </div>
-                  </div>
-
-                  {/* Row 2: Amount in Sales & Amount in Donations */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[10px] gap-y-[16px]">
-                    <div className="relative firstVerifyScreen group" >
-                      <select
-                        value={metricsData?.amountInSales || ''}
-                        onChange={(e) => setMetricsData(prev => prev ? { ...prev, amountInSales: e.target.value } : null)}
-                        className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      >
-                        <option value="">Amount in Sales</option>
-                        <option value="0-10k">$0 - $10K</option>
-                        <option value="10k-50k">$10K - $50K</option>
-                        <option value="50k-100k">$50K - $100K</option>
-                        <option value="100k-500k">$100K - $500K</option>
-                        <option value="500k-1m">$500K - $1M</option>
-                        <option value="1m+">$1M+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
-                    </div>
-
-                    <div className="relative firstVerifyScreen group" >
-                      <select
-                        value={metricsData?.amountInDonations || ''}
-                        onChange={(e) => setMetricsData(prev => prev ? { ...prev, amountInDonations: e.target.value } : null)}
-                        className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      >
-                        <option value="">Amount in Donations</option>
-                        <option value="0-1k">$0 - $1K</option>
-                        <option value="1k-5k">$1K - $5K</option>
-                        <option value="5k-10k">$5K - $10K</option>
-                        <option value="10k-50k">$10K - $50K</option>
-                        <option value="50k-100k">$50K - $100K</option>
-                        <option value="100k+">$100K+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="text"
+                        value={audience.demographics}
+                        onChange={(e) => updateAudienceRow(index, 'demographics', e.target.value)}
+                        placeholder="Demographic details (e.g., location, income band, interests)"
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                      />
                     </div>
                   </div>
-                </div>
+                ))}
+                
+                <button
+                  onClick={addAudienceRow}
+                  className="flex items-center space-x-2 px-4 py-2 text-[#CF3232] hover:text-red-700 border border-[#CF3232] rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add audience row</span>
+                </button>
               </div>
 
-              {/* Links Section (from verification) */}
+              </>
+              )}
+
+              {/* Step 2: Links */}
+              {currentStep === 2 && (
+                <>
+              {/* Links Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
                 <h2 className="font-semibold font-outift text-[#333333] mb-4">Your Links</h2>
 
@@ -1032,200 +1372,12 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* Newsletter Setup */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
-                <h2 className="font-semibold font-outift text-[#333333] mb-4">Newsletter Service</h2>
+              </>
+              )}
 
-                {/* Current Status */}
-                {user?.newsletter_service && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-green-800">Newsletter Service Connected</h4>
-                        <p className="text-sm text-green-600 capitalize">
-                          Currently using: {user.newsletter_service}
-                        </p>
-                      </div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    </div>
-                  </div>
-                )}
-
-                {!user?.newsletter_service && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-yellow-800">No Newsletter Service Connected</h4>
-                        <p className="text-sm text-yellow-600">
-                          Connect a newsletter service to manage your subscribers
-                        </p>
-                      </div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Newsletter Form */}
-                <div className="space-y-6">
-                  {/* Step 1: Select Provider */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                    {/* Mailchimp Card */}
-                    <div
-                      onClick={() => {
-                        if (availableServices && !availableServices.mailchimp) return;
-                        setNewsletterProvider("Mailchimp");
-                        setVerificationStatus("idle");
-                      }}
-                      className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl relative ${newsletterProvider === "Mailchimp"
-                          ? "border-custom-red shadow-2xl -translate-y-2 bg-pink-50 scale-105"
-                          : "border-gray-200 shadow-lg hover:border-custom-red hover:bg-pink-50 hover:scale-105"
-                        }`}
-                    >
-                      {/* Info Icon - Top Right */}
-                      <div className="absolute top-4 right-4 group">
-                        <HelpCircle className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" />
-                        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                          How to find your Mailchimp API Key
-                          <div className="absolute top-full right-4 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                        </div>
-                        <a
-                          href="https://mailchimp.com/developer/marketing/guides/quick-start/#generate-your-api-key"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="absolute inset-0 z-20"
-                          onClick={(e) => e.stopPropagation()}
-                        ></a>
-                      </div>
-
-                      <Image alt="" src={images.mailchimpIcon} width={48} height={48} />
-                      <h3 className="font-outfit text-xl font-bold text-[#333333]">Mailchimp {servicesLoading ? '(...)' : ''}</h3>
-                      <p className="text-sm text-gray-600 text-center">
-                        Connect via API Key
-                      </p>
-                      {availableServices && !availableServices.mailchimp && (
-                        <p className="text-xs text-gray-500">Not available</p>
-                      )}
-                    </div>
-
-                    {/* HubSpot Card */}
-                    <div
-                      onClick={() => {
-                        if (availableServices && !availableServices.hubspot) return;
-                        setNewsletterProvider("HubSpot");
-                        setVerificationStatus("idle");
-                      }}
-                      className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl relative ${newsletterProvider === "HubSpot"
-                          ? "border-custom-red shadow-2xl -translate-y-2 bg-blue-50 scale-105"
-                          : "border-gray-200 shadow-lg hover:border-custom-red hover:bg-blue-50 hover:scale-105"
-                        }`}
-                    >
-                      {/* Info Icon - Top Right */}
-                      <div className="absolute top-4 right-4 group">
-                        <HelpCircle className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" />
-                        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                          How to find your HubSpot credentials
-                          <div className="absolute top-full right-4 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                        </div>
-                        <a
-                          href="https://developers.hubspot.com/docs/api/private-apps"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="absolute inset-0 z-20"
-                          onClick={(e) => e.stopPropagation()}
-                        ></a>
-                      </div>
-
-                      <Image src={images.hubspotIcon} alt="" width={48} height={48} />
-                      <h3 className="font-outfit text-xl font-bold text-[#333333]">HubSpot {servicesLoading ? '(...)' : ''}</h3>
-                      <p className="text-sm text-gray-600 text-center">
-                        Connect via Client ID and Client Secret
-                      </p>
-                      {availableServices && !availableServices.hubspot && (
-                        <p className="text-xs text-gray-500">Not available</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Step 2: Form (visible only after provider selection) */}
-                  {newsletterProvider && (
-                    <div className="space-y-5">
-                      {newsletterProvider === "Mailchimp" && (
-                        <div className="firstVerifyScreen group">
-                          <div className="relative w-full">
-                            <input
-                              type={showNewsletterApiKey ? "text" : "password"}
-                              value={newsletterApiKey}
-                              onChange={(e) => setNewsletterApiKey(e.target.value)}
-                              className="w-full px-4 py-3 pr-12 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                              style={{ color: "#949494" }}
-                              placeholder="Mailchimp API Key"
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowNewsletterApiKey(!showNewsletterApiKey)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
-                              {showNewsletterApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {newsletterProvider === "HubSpot" && (
-                        <>
-                          <div className="firstVerifyScreen group">
-                            <input
-                              type="text"
-                              value={newsletterClientId}
-                              onChange={(e) => setNewsletterClientId(e.target.value)}
-                              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                              style={{ color: "#949494" }}
-                              placeholder="HubSpot Client ID"
-                              required
-                            />
-                          </div>
-                          <div className="firstVerifyScreen group">
-                            <div className="relative w-full">
-                              <input
-                                type={showNewsletterClientSecret ? "text" : "password"}
-                                value={newsletterClientSecret}
-                                onChange={(e) => setNewsletterClientSecret(e.target.value)}
-                                className="w-full px-4 py-3 pr-12 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                                style={{ color: "#949494" }}
-                                placeholder="HubSpot Client Secret"
-                                required
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setShowNewsletterClientSecret(!showNewsletterClientSecret)}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                              >
-                                {showNewsletterClientSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                              </button>
-                            </div>
-                          </div>
-                        </>
-                      )}
-
-                      {/* Verify Button */}
-                      <div className="flex justify-center">
-                        <button
-                          type="button"
-                          onClick={verifyNewsletterCredentials}
-                          disabled={verificationStatus === "verifying"}
-                          className="custom-btn !px-6 !py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
-                        >
-                          {verificationStatus === "verifying" && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                          {verificationStatus === "verifying" ? "Verifying..." : "Verify Credentials"}
-                        </button>
-                      </div>
-
-                    </div>
-                  )}
-                </div>
-              </div>
-
+              {/* Step 3: Signature */}
+              {currentStep === 3 && (
+                <>
               {/* Signature Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
                 <h2 className="font-semibold font-outfit text-[#333333] mb-4">Digital Signature</h2>
@@ -1357,9 +1509,414 @@ const ProfilePage = () => {
                       Your signature will be displayed on your public profile. Click × to remove current signature and create new one.
                     </p>
                   </div>
+
+                  {/* Consent Checkboxes */}
+                  <div className="space-y-3 mt-6">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="consentFeatureName"
+                        checked={consentFeatureName}
+                        onChange={(e) => setConsentFeatureName(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-[#CF3232] border-gray-300 rounded focus:ring-[#CF3232]"
+                      />
+                      <label htmlFor="consentFeatureName" className="text-sm text-gray-700">
+                        I consent to my name being featured on the platform
+                      </label>
+                    </div>
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="agreeTerms"
+                        checked={agreeTerms}
+                        onChange={(e) => setAgreeTerms(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-[#CF3232] border-gray-300 rounded focus:ring-[#CF3232]"
+                      />
+                      <label htmlFor="agreeTerms" className="text-sm text-gray-700">
+                        I agree to the terms and conditions
+                      </label>
+                    </div>
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="confirmInfoAccurate"
+                        checked={confirmInfoAccurate}
+                        onChange={(e) => setConfirmInfoAccurate(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-[#CF3232] border-gray-300 rounded focus:ring-[#CF3232]"
+                      />
+                      <label htmlFor="confirmInfoAccurate" className="text-sm text-gray-700">
+                        I confirm that all information provided is accurate
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
+              </>
+              )}
 
+
+
+              {/* Step 4: Template */}
+              {currentStep === 4 && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Profile Template</h2>
+                  <p className="text-gray-600 mb-4">Choose a template design for your public profile page.</p>
+                  
+                  {templatesLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#CF3232]" />
+                      <span className="ml-3 text-gray-600">Loading templates...</span>
+                    </div>
+                  ) : templates.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {templates.map((template) => {
+                        const isSelected = selectedTemplate === template.id;
+                        return (
+                          <div
+                            key={template.id}
+                            onClick={() => setSelectedTemplate(template.id)}
+                            className={`border-2 rounded-xl p-4 cursor-pointer hover:shadow-lg transition-all duration-300 ${
+                              isSelected
+                                ? 'border-[#CF3232] bg-gradient-to-br from-pink-50 to-white scale-105'
+                                : 'border-gray-200 hover:border-[#CF3232]/50'
+                            }`}
+                          >
+                            <div className="aspect-video bg-white rounded-lg mb-3 overflow-hidden border border-gray-200">
+                              {template.image_url ? (
+                                <Image
+                                  src={template.image_url}
+                                  alt={template.title}
+                                  width={400}
+                                  height={225}
+                                  className="w-full h-full object-cover"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                  <div className="text-center">
+                                    <div className="w-12 h-12 bg-[#CF3232] rounded-full mx-auto mb-2"></div>
+                                    <div className="h-2 bg-gray-200 rounded w-16 mx-auto mb-1"></div>
+                                    <div className="h-2 bg-gray-200 rounded w-20 mx-auto"></div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <h3 className="font-semibold text-gray-800 mb-1 text-sm">{template.title}</h3>
+                            <p className="text-xs text-gray-500 mb-2 capitalize">{template.slug.replace(/-/g, ' ')}</p>
+                            {isSelected && (
+                              <div className="inline-block bg-[#CF3232] text-white px-2 py-1 rounded-full text-xs font-medium">
+                                Selected
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 mb-4">No templates available at the moment.</p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 inline-block">
+                        <p className="text-sm text-blue-800">
+                          Templates will be available soon. Check back later!
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {templates.length > 0 && (
+                    <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="text-sm text-blue-800">
+                        <strong>Note:</strong> Select a template and save your changes to apply it to your profile.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 5: Newsletter Integration */}
+              {currentStep === 5 && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Newsletter Service</h2>
+
+                  {/* Current Status */}
+                  {user?.newsletter_service && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-green-800">Newsletter Service Connected</h4>
+                          <p className="text-sm text-green-600 capitalize">
+                            Currently using: {user.newsletter_service}
+                          </p>
+                        </div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!user?.newsletter_service && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-yellow-800">No Newsletter Service Connected</h4>
+                          <p className="text-sm text-yellow-600">
+                            Connect a newsletter service to manage your subscribers
+                          </p>
+                        </div>
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Newsletter Form */}
+                  <div className="space-y-6">
+                    {/* Step 1: Select Provider */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                      {/* Mailchimp Card */}
+                      <div
+                        onClick={() => {
+                          if (availableServices && !availableServices.mailchimp) return;
+                          setNewsletterProvider("Mailchimp");
+                          setVerificationStatus("idle");
+                        }}
+                        className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl relative ${newsletterProvider === "Mailchimp"
+                            ? "border-[#CF3232] shadow-2xl -translate-y-2 bg-pink-50 scale-105"
+                            : "border-gray-200 shadow-lg hover:border-[#CF3232] hover:bg-pink-50 hover:scale-105"
+                          }`}
+                      >
+                        {/* Info Icon - Top Right */}
+                        <div className="absolute top-4 right-4 group">
+                          <HelpCircle className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" />
+                          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                            How to find your Mailchimp API Key
+                            <div className="absolute top-full right-4 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                          </div>
+                          <a
+                            href="https://mailchimp.com/developer/marketing/guides/quick-start/#generate-your-api-key"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute inset-0 z-20"
+                            onClick={(e) => e.stopPropagation()}
+                          ></a>
+                        </div>
+
+                        <Image alt="" src={images.mailchimpIcon} width={48} height={48} />
+                        <h3 className="font-outfit text-xl font-bold text-[#333333]">Mailchimp {servicesLoading ? '(...)' : ''}</h3>
+                        <p className="text-sm text-gray-600 text-center">
+                          Connect via API Key
+                        </p>
+                        {availableServices && !availableServices.mailchimp && (
+                          <p className="text-xs text-gray-500">Not available</p>
+                        )}
+                      </div>
+
+                      {/* HubSpot Card */}
+                      <div
+                        onClick={() => {
+                          if (availableServices && !availableServices.hubspot) return;
+                          setNewsletterProvider("HubSpot");
+                          setVerificationStatus("idle");
+                        }}
+                        className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl relative ${newsletterProvider === "HubSpot"
+                            ? "border-[#CF3232] shadow-2xl -translate-y-2 bg-blue-50 scale-105"
+                            : "border-gray-200 shadow-lg hover:border-[#CF3232] hover:bg-blue-50 hover:scale-105"
+                          }`}
+                      >
+                        {/* Info Icon - Top Right */}
+                        <div className="absolute top-4 right-4 group">
+                          <HelpCircle className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" />
+                          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                            How to find your HubSpot credentials
+                            <div className="absolute top-full right-4 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                          </div>
+                          <a
+                            href="https://developers.hubspot.com/docs/api/private-apps"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute inset-0 z-20"
+                            onClick={(e) => e.stopPropagation()}
+                          ></a>
+                        </div>
+
+                        <Image src={images.hubspotIcon} alt="" width={48} height={48} />
+                        <h3 className="font-outfit text-xl font-bold text-[#333333]">HubSpot {servicesLoading ? '(...)' : ''}</h3>
+                        <p className="text-sm text-gray-600 text-center">
+                          Connect via Client ID and Client Secret
+                        </p>
+                        {availableServices && !availableServices.hubspot && (
+                          <p className="text-xs text-gray-500">Not available</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Step 2: Form (visible only after provider selection) */}
+                    {newsletterProvider && (
+                      <div className="space-y-5">
+                        {newsletterProvider === "Mailchimp" && (
+                          <div className="firstVerifyScreen group">
+                            <div className="relative w-full">
+                              <input
+                                type={showNewsletterApiKey ? "text" : "password"}
+                                value={newsletterApiKey}
+                                onChange={(e) => setNewsletterApiKey(e.target.value)}
+                                className="w-full px-4 py-3 pr-12 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                                style={{ color: "#949494" }}
+                                placeholder="Mailchimp API Key"
+                                required
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowNewsletterApiKey(!showNewsletterApiKey)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                              >
+                                {showNewsletterApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {newsletterProvider === "HubSpot" && (
+                          <>
+                            <div className="firstVerifyScreen group">
+                              <input
+                                type="text"
+                                value={newsletterClientId}
+                                onChange={(e) => setNewsletterClientId(e.target.value)}
+                                className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                                style={{ color: "#949494" }}
+                                placeholder="HubSpot Client ID"
+                                required
+                              />
+                            </div>
+                            <div className="firstVerifyScreen group">
+                              <div className="relative w-full">
+                                <input
+                                  type={showNewsletterClientSecret ? "text" : "password"}
+                                  value={newsletterClientSecret}
+                                  onChange={(e) => setNewsletterClientSecret(e.target.value)}
+                                  className="w-full px-4 py-3 pr-12 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                                  style={{ color: "#949494" }}
+                                  placeholder="HubSpot Client Secret"
+                                  required
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewsletterClientSecret(!showNewsletterClientSecret)}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                  {showNewsletterClientSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {/* Verify Button */}
+                        <div className="flex justify-center">
+                          <button
+                            type="button"
+                            onClick={verifyNewsletterCredentials}
+                            disabled={verificationStatus === "verifying"}
+                            className="custom-btn !px-6 !py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
+                          >
+                            {verificationStatus === "verifying" && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                            {verificationStatus === "verifying" ? "Verifying..." : "Verify Credentials"}
+                          </button>
+                        </div>
+
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 6: Success Metrics */}
+              {currentStep === 6 && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Success Metrics</h2>
+                  <p className="text-gray-600 mb-4 text-sm">Track your business goals (Optional)</p>
+                  
+                  <div className="space-y-4">
+                    {/* Number of Bookings */}
+                    <div className="relative firstVerifyScreen group">
+                      <select
+                        value={metricsData?.numberOfBookings || ''}
+                        onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, numberOfBookings: e.target.value }))}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
+                        style={{ color: '#949494' }}
+                      >
+                        <option value="">Number of Bookings</option>
+                        <option value="0-10">0-10</option>
+                        <option value="11-50">11-50</option>
+                        <option value="51-100">51-100</option>
+                        <option value="101-500">101-500</option>
+                        <option value="500+">500+</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                    </div>
+
+                    {/* Email List Size */}
+                    <div className="relative firstVerifyScreen group">
+                      <select
+                        value={metricsData?.emailListSize || ''}
+                        onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, emailListSize: e.target.value }))}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
+                        style={{ color: '#949494' }}
+                      >
+                        <option value="">Email List Size</option>
+                        <option value="0-100">0-100</option>
+                        <option value="101-500">101-500</option>
+                        <option value="501-1000">501-1000</option>
+                        <option value="1001-5000">1001-5000</option>
+                        <option value="5001-10000">5001-10000</option>
+                        <option value="10000+">10000+</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                    </div>
+
+                    {/* Amount in Sales */}
+                    <div className="relative firstVerifyScreen group">
+                      <select
+                        value={metricsData?.amountInSales || ''}
+                        onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, amountInSales: e.target.value }))}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
+                        style={{ color: '#949494' }}
+                      >
+                        <option value="">Amount in Sales</option>
+                        <option value="0-10k">$0 - $10k</option>
+                        <option value="10k-50k">$10k - $50k</option>
+                        <option value="50k-100k">$50k - $100k</option>
+                        <option value="100k-500k">$100k - $500k</option>
+                        <option value="500k+">$500k+</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                    </div>
+
+                    {/* Amount in Donations */}
+                    <div className="relative firstVerifyScreen group">
+                      <select
+                        value={metricsData?.amountInDonations || ''}
+                        onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, amountInDonations: e.target.value }))}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
+                        style={{ color: '#949494' }}
+                      >
+                        <option value="">Amount in Donations</option>
+                        <option value="0-1k">$0 - $1k</option>
+                        <option value="1k-5k">$1k - $5k</option>
+                        <option value="5k-10k">$5k - $10k</option>
+                        <option value="10k-50k">$10k - $50k</option>
+                        <option value="50k+">$50k+</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Password Change Section - Removed from steps, always accessible */}
+              {false && (
+              <div style={{display: 'none'}}>
               {/* Password Change Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
                 <h2 className="font-semibold font-outift text-[#333333] mb-4">Change Password</h2>
@@ -1443,29 +2000,61 @@ const ProfilePage = () => {
                   </button>
                 </div>
               </div>
+              </div>
+              )}
 
-              {/* Note Section */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-blue-800 mb-2">Note:</h3>
-                <p className="text-sm font-outift font-regular text-[#333333]">
-                  You can only change your profile image, bio, and password. Your name and title cannot be modified.
-                </p>
-                <div className="mt-4">
+              {/* Navigation Buttons */}
+              <div className="flex items-center justify-between gap-4 pt-6 border-t border-gray-200">
+                {/* Back Button */}
+                {currentStep > 1 && (
+                  <button
+                    onClick={prevStep}
+                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 font-outfit font-medium"
+                  >
+                    ← Back
+                  </button>
+                )}
+
+                <div className="flex-1" />
+
+                {/* Skip Button - Hide on last step */}
+                {currentStep < totalSteps && (
+                  <button
+                    onClick={skipStep}
+                    className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 font-outfit font-medium"
+                  >
+                    Skip
+                  </button>
+                )}
+
+                {/* Next/Save Button */}
+                {currentStep < totalSteps ? (
+                  <button
+                    onClick={nextStep}
+                    disabled={isLoading}
+                    className="px-6 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center space-x-2"
+                  >
+                    <span>Next</span>
+                    <span>→</span>
+                  </button>
+                ) : (
                   <button
                     onClick={handleSaveAll}
                     disabled={isLoading}
-                    className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center space-x-2"
+                    className="px-6 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center space-x-2"
                   >
                     <Save className="w-4 h-4" />
                     <span>{isLoading ? 'Saving...' : 'Save All Changes'}</span>
                   </button>
-                </div>
+                )}
               </div>
             </div>
           </main>
 
-          {/* Footer */}
-          <DashBoardFooter />
+          {/* Footer - Fixed at bottom */}
+          <div className="flex-shrink-0">
+            <DashBoardFooter />
+          </div>
         </div>
       </div>
     </OnboardingProvider>

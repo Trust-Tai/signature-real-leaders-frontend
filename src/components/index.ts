@@ -17,6 +17,7 @@ export { default as LinksSection } from './ui/LinksSection';
 export { default as NewsletterSetupSection } from './ui/NewsletterSetupSection';
 export { default as ProfileTemplateSection } from './ui/ProfileTemplateSection';
 export { default as SignSection } from './ui/SignSection';
+export { default as SuccessMetricsSection } from './ui/SuccessMetricsSection';
 export { default as VerificationReviewSection } from './ui/VerificationReviewSection';
 export { default as PendingReviewSection } from './ui/PendingReviewSection';
 export { default as SimplifiedEmailVerificationSection } from './ui/SimplifiedEmailVerificationSection';

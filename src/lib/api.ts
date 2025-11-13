@@ -88,6 +88,25 @@ export const api = {
     );
   },
 
+  async submitUserInfoWithFiles(authToken: string, formData: FormData) {
+    const url = `${API_BASE_URL}/user/submit-user-info`;
+    const response = await authFetch(url, {
+      method: 'POST',
+      headers: {
+        'X-Auth-Token': authToken,
+        // Don't set Content-Type - browser will set it with boundary for FormData
+      },
+      body: formData,
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to submit user info');
+    }
+    
+    return data as { success: boolean; user_id?: number; message?: string };
+  },
+
   // Removed uploadSignature – signature is now included in submit-user-info payload
 
   async getUserDetails(authToken: string) {
@@ -141,6 +160,7 @@ export const api = {
         date_of_birth: string;
         occupation: string;
         profile_privacy: boolean;
+        tour_guide: boolean;
       };
       profile_completion?: {
         percentage: number;
@@ -583,6 +603,22 @@ export const api = {
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
+      }
+    );
+  },
+
+  async updateTourGuideStatus(authToken: string) {
+    return request<{ success: boolean; message?: string }>(
+      '/user/update-profile',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          tourGuide: true
+        }),
       }
     );
   },

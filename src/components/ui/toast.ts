@@ -11,7 +11,7 @@ export const toast = {
   success(message: string, options: ToastOptions = {}): void {
     toastify.success(message, {
       toastId: options.id,
-      autoClose: options.autoClose ?? 2000, // Default 2 seconds
+      autoClose: options.autoClose ?? 3500, // Default 2 seconds
     });
   },
   error(message: string, options: ToastOptions = {}): void {

@@ -34,8 +34,8 @@ const LoginPage = () => {
           
           // Check if account is pending review
           if (userData.account_status === 'pending_review') {
-            console.log('[Auth Check] Account pending review, redirecting to profile verification step 3');
-            localStorage.setItem('redirect_to_step', '3');
+            console.log('[Auth Check] Account pending review, redirecting to profile verification step 6');
+            localStorage.setItem('redirect_to_step', '6');
             router.replace('/profile-verification');
             return;
           }
@@ -159,8 +159,8 @@ const LoginPage = () => {
             
             // Check account status before redirecting
             if (data?.user?.account_status === 'pending_review') {
-              console.log('[OTP Verify] Account pending review, redirecting to profile verification step 3');
-              localStorage.setItem('redirect_to_step', '3');
+              console.log('[OTP Verify] Account pending review, redirecting to profile verification step 6');
+              localStorage.setItem('redirect_to_step', '6');
               router.replace('/profile-verification');
               return;
             }
@@ -242,8 +242,8 @@ const LoginPage = () => {
               
               // Check account status
               if (response.user.account_status === 'pending_review') {
-                console.log('[Social Callback] Account pending review, redirecting to profile verification step 3');
-                localStorage.setItem('redirect_to_step', '3');
+                console.log('[Social Callback] Account pending review, redirecting to profile verification step 6');
+                localStorage.setItem('redirect_to_step', '6');
                 router.replace('/profile-verification');
                 return;
               }
@@ -259,7 +259,7 @@ const LoginPage = () => {
             }
           } else if (accountStatus === 'pending_review') {
             // New signup - account pending review
-            console.log('[Social Callback] New signup - pending review, redirecting to profile verification step 3');
+            console.log('[Social Callback] New signup - pending review, redirecting to profile verification step 6');
             
             // Store user data
             if (tempToken && userId) {
@@ -267,7 +267,7 @@ const LoginPage = () => {
               localStorage.setItem('user_id', userId);
             }
             
-            localStorage.setItem('redirect_to_step', '3');
+            localStorage.setItem('redirect_to_step', '6');
             router.replace('/profile-verification');
           } else if (accountStatus === 'approved') {
             // Account approved but not logged in yet - fetch token

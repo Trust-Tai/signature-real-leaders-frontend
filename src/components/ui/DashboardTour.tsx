@@ -49,49 +49,49 @@ export const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete }) => {
     // Define tour steps for sidebar menu items
     tg.addSteps([
       {
-        title: '📊 Dashboard Overview',
+        title: 'Dashboard Overview',
         content: 'Welcome! This is your main dashboard where you can see all your key metrics at a glance - bookings, contacts, page views, and link clicks.',
         target: '[data-tour="dashboard"]',
         order: 1,
       },
       {
-        title: '📅 Bookings This Month',
+        title: 'Bookings This Month',
         content: 'Track all your new meetings, consultations, and events scheduled through your signature page. Stay on top of your appointments!',
         target: '[data-tour="bookings"]',
         order: 2,
       },
       {
-        title: '📧 Newsletter Subscribers',
+        title: 'Newsletter Subscribers',
         content: 'Manage and view all the people who have joined your mailing list. Build and engage with your email audience.',
         target: '[data-tour="subscribers"]',
         order: 3,
       },
       {
-        title: '👥 Followers',
+        title: 'Followers',
         content: 'See who is following you and engage with your audience. You can export your followers list anytime for further analysis.',
         target: '[data-tour="followers"]',
         order: 4,
       },
       {
-        title: '👁️ Page Views',
+        title: 'Page Views',
         content: 'Monitor how many times your signature page has been viewed. Track your reach and visibility over time.',
         target: '[data-tour="page-views"]',
         order: 5,
       },
       {
-        title: '🔗 Total Link Clicks',
+        title: 'Total Link Clicks',
         content: 'See the combined total of clicks across all your links. Understand what content resonates most with your audience.',
         target: '[data-tour="link-clicks"]',
         order: 6,
       },
       {
-        title: '📈 Audience Demographics',
+        title: 'Audience Demographics',
         content: 'Get detailed insights about your audience including countries, devices, age groups, and professional roles.',
         target: '[data-tour="demographics"]',
         order: 7,
       },
       {
-        title: '✨ Magic Publishing',
+        title: 'Magic Publishing',
         content: 'Create AI-powered content, books, and podcasts to grow your brand and engage your audience. Your personal content engine!',
         target: '[data-tour="magic-publishing"]',
         order: 8,

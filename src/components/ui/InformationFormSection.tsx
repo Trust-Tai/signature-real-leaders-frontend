@@ -281,7 +281,32 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           </div>
         </div>
 
-        {/* Row 2: Company Name & Company Website */}
+      
+  {/* Date of Birth & Role */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+          <div className="firstVerifyScreen group">
+            <input
+              type="date"
+              value={formData.date_of_birth}
+              onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+              className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+              style={{ color: '#949494' }}
+              placeholder="Date of Birth"
+            />
+          </div>
+          <div className="firstVerifyScreen group">
+            <input
+              type="text"
+              value={formData.occupation}
+              onChange={(e) => handleInputChange('occupation', e.target.value)}
+              className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+              style={{ color: '#949494' }}
+              placeholder="Role"
+            />
+          </div>
+        </div>
+
+  {/* Row 2: Company Name & Company Website */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
            <div className='firstVerifyScreen group'>
           <input
@@ -304,7 +329,6 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           />
           </div>
         </div>
-
         {/* Row 3: Industry & Number of Employees */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
           <div className="relative firstVerifyScreen group">
@@ -368,7 +392,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
             onChange={(e) => handleInputChange('about', e.target.value)}
             className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
             style={{ color: '#949494',height:"180px" }}
-            placeholder="Tell us a little about yourself and what you do..."
+            placeholder="Brief summary about yourself..."
           />
         </div>
 
@@ -451,31 +475,8 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
         </div>
 
         {/* Additional Fields Section */}
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Additional Information</h3>
-
-        {/* Date of Birth & Occupation */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-          <div className="firstVerifyScreen group">
-            <input
-              type="date"
-              value={formData.date_of_birth}
-              onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-              className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-              style={{ color: '#949494' }}
-              placeholder="Date of Birth"
-            />
-          </div>
-          <div className="firstVerifyScreen group">
-            <input
-              type="text"
-              value={formData.occupation}
-              onChange={(e) => handleInputChange('occupation', e.target.value)}
-              className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-              style={{ color: '#949494' }}
-              placeholder="Occupation"
-            />
-          </div>
-        </div>
+        
+       
 
         {/* Brand Voice */}
         <div className="firstVerifyScreen group" style={{height:"auto"}}>

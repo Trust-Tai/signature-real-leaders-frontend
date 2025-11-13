@@ -30,6 +30,7 @@ interface User {
   };
   links: Array<{ name: string; url: string }>;
   account_status: string;
+  template_id?: number;
   profile_template: {
     id: number;
     title: string;

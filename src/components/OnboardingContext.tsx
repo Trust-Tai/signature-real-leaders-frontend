@@ -27,6 +27,7 @@ export interface OnboardingState {
   industry?: string;
   num_employees?: string;
   email_list_size?: string;
+  about?: string;
   target_audience?: Array<{
     name: string;
     age_group: string;

@@ -13,6 +13,9 @@ import {
   MobileSidebarToggle,
   LoadingScreen
 } from '@/components';
+import InformationFormSection from '@/components/ui/InformationFormSection';
+import LinksSection from '@/components/ui/LinksSection';
+import SignSection from '@/components/ui/SignSection';
 import { OnboardingProvider, useOnboarding } from '@/components/OnboardingContext';
 import { api } from '@/lib/api';
 import { images } from "../../assets/index";
@@ -66,7 +69,10 @@ const InnerProfileVerificationPage = () => {
   const steps: Step[] = [
     { id: 1, title: 'Email Verification', status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
     { id: 2, title: 'Code Verification', status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
-    { id: 3, title: 'Pending Review', status: currentStep === 3 ? 'current' : 'pending' }
+    { id: 3, title: 'Information', status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending' },
+    { id: 4, title: 'Links', status: currentStep === 4 ? 'current' : currentStep > 4 ? 'completed' : 'pending' },
+    { id: 5, title: 'Signature', status: currentStep === 5 ? 'current' : currentStep > 5 ? 'completed' : 'pending' },
+    { id: 6, title: 'Pending Review', status: currentStep === 6 ? 'current' : 'pending' }
   ];
 
   const handleStepClick = (stepId: number) => {
@@ -97,7 +103,7 @@ const InnerProfileVerificationPage = () => {
 
   const nextStep = () => {
     console.log('nextStep called, current step:', currentStep);
-    if (currentStep < 3) {
+    if (currentStep < 6) {
       const newStep = currentStep + 1;
       console.log('Setting new step to:', newStep);
       setCurrentStep(newStep);
@@ -169,14 +175,14 @@ const InnerProfileVerificationPage = () => {
               // Use window.location for hard redirect to ensure dashboard loads properly
               window.location.href = '/dashboard';
             } else if (response.user.account_status === 'pending_review' || accountStatus === 'pending_review') {
-              console.log('[Social Callback] Account pending review, showing step 3...');
+              console.log('[Social Callback] Account pending review, showing step 6...');
               // Move to pending review step
-              setCurrentStep(3);
+              setCurrentStep(6);
               // Clean up URL
               window.history.replaceState({}, document.title, '/profile-verification');
             } else {
-              console.log('[Social Callback] Unknown status, showing step 3...');
-              setCurrentStep(3);
+              console.log('[Social Callback] Unknown status, showing step 6...');
+              setCurrentStep(6);
               window.history.replaceState({}, document.title, '/profile-verification');
             }
           }
@@ -382,6 +388,161 @@ const InnerProfileVerificationPage = () => {
         );
       
       case 3:
+        return (
+          <InformationFormSection
+            onSubmit={(data) => {
+              console.log('[Step 3] Information form data:', data);
+              // Store all form data in context
+              setState(prev => ({
+                ...prev,
+                first_name: data.firstName,
+                last_name: data.lastName,
+                company_name: data.companyName,
+                company_website: data.companyWebsite,
+                industry: data.industry,
+                num_employees: data.numberOfEmployees,
+                email_list_size: data.contactEmailListSize,
+                about: data.about,
+                billing_address_1: data.billing_address_1,
+                billing_address_2: data.billing_address_2,
+                billing_city: data.billing_city,
+                billing_postcode: data.billing_postcode,
+                billing_country: data.billing_country,
+                billing_phone: data.billing_phone,
+                brand_voice: data.brand_voice,
+                unique_differentiation: data.unique_differentiation,
+                top_pain_points: data.top_pain_points,
+                content_preference_industry: data.content_preference_industry,
+                primary_call_to_action: data.primary_call_to_action,
+                date_of_birth: data.date_of_birth,
+                occupation: data.occupation,
+                profilePicture: data.profilePicture
+              }));
+              nextStep();
+            }}
+            initialData={{
+              firstName: state.first_name,
+              lastName: state.last_name
+            }}
+          />
+        );
+      
+      case 4:
+        return (
+          <LinksSection
+            onSubmit={(links) => {
+              console.log('[Step 4] Links data:', links);
+              setState(prev => ({ ...prev, links }));
+              nextStep();
+            }}
+          />
+        );
+      
+      case 5:
+        return (
+          <SignSection
+            onSubmit={async (signData) => {
+              try {
+                console.log('[Step 5] Signature data received, preparing final submission');
+                setLoading(true);
+                
+                const authToken = state.auth_token || localStorage.getItem('auth_token');
+                if (!authToken) {
+                  toast.error('Authentication token missing. Please login again.');
+                  return;
+                }
+
+                // Prepare FormData for file upload
+                const formData = new FormData();
+                
+                // Add all text fields with correct API keys
+                if (state.first_name) formData.append('firstName', state.first_name);
+                if (state.last_name) formData.append('lastName', state.last_name);
+                if (state.email) formData.append('email', state.email);
+                if (state.company_name) formData.append('companyName', state.company_name);
+                if (state.company_website) formData.append('companyWebsite', state.company_website);
+                if (state.industry) formData.append('industry', state.industry);
+                if (state.num_employees) formData.append('numEmployees', state.num_employees);
+                if (state.email_list_size) formData.append('emailListSize', state.email_list_size);
+                
+                // Billing address fields
+                if (state.billing_address_1) formData.append('billing_address_1', state.billing_address_1);
+                if (state.billing_address_2) formData.append('billing_address_2', state.billing_address_2);
+                if (state.billing_city) formData.append('billing_city', state.billing_city);
+                if (state.billing_postcode) formData.append('billing_postcode', state.billing_postcode);
+                if (state.billing_country) formData.append('billing_country', state.billing_country);
+                if (state.billing_phone) formData.append('billing_phone', state.billing_phone);
+                
+                // Additional fields
+                if (state.brand_voice) formData.append('brand_voice', state.brand_voice);
+                if (state.unique_differentiation) formData.append('unique_differentiation', state.unique_differentiation);
+                if (state.top_pain_points) formData.append('top_pain_points', state.top_pain_points);
+                if (state.primary_call_to_action) formData.append('primary_call_to_action', state.primary_call_to_action);
+                if (state.date_of_birth) formData.append('date_of_birth', state.date_of_birth);
+                if (state.occupation) formData.append('occupation', state.occupation);
+                
+                // Content preference industry as JSON array
+                if (state.content_preference_industry && state.content_preference_industry.length > 0) {
+                  formData.append('content_preference_industry', JSON.stringify(state.content_preference_industry));
+                }
+                
+                // Links as JSON array
+                if (state.links && state.links.length > 0) {
+                  formData.append('links', JSON.stringify(state.links));
+                }
+                
+                // Consent fields (required by API)
+                formData.append('consentFeatureName', 'true');
+                formData.append('agreeTerms', 'true');
+                formData.append('confimInFoAccurate', 'true');
+                
+                // Add signature file
+                if (signData.signatureFile) {
+                  formData.append('signature', signData.signatureFile);
+                } else if (signData.uploadedImageFile) {
+                  formData.append('signature', signData.uploadedImageFile);
+                }
+                
+                // Add profile picture if exists
+                if (state.profilePicture) {
+                  // Convert base64 to file
+                  const response = await fetch(state.profilePicture);
+                  const blob = await response.blob();
+                  const file = new File([blob], 'profile-picture.png', { type: 'image/png' });
+                  formData.append('profilePicture', file);
+                } else {
+                  // Send empty string if no profile picture
+                  formData.append('profilePicture', '');
+                }
+
+                console.log('[Step 5] Submitting all data to API...');
+                console.log('[Step 5] FormData entries:');
+                for (const [key, value] of formData.entries()) {
+                  console.log(`  ${key}:`, value instanceof File ? `File(${value.name})` : value);
+                }
+                
+                // Call API with FormData
+                const result = await api.submitUserInfoWithFiles(authToken, formData);
+                
+                if (result.success) {
+                  console.log('[Step 5] Submission successful!');
+                  toast.success('Profile submitted successfully! Awaiting admin review.');
+                  nextStep(); // Move to pending review
+                } else {
+                  toast.error(result.message || 'Submission failed. Please try again.');
+                }
+              } catch (error) {
+                console.error('[Step 5] Submission error:', error);
+                toast.error('Failed to submit profile. Please try again.');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            isSubmitting={loading}
+          />
+        );
+      
+      case 6:
         return <PendingReviewSection />;
       
       default:
@@ -483,7 +644,7 @@ const InnerProfileVerificationPage = () => {
 
             <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] max-w-2xl`}>
               {/* Header */}
-             {currentStep !== 3 && (
+             {currentStep !== 6 && (
     <PageHeader
       title="MAKE YOUR MARK"
       subtitle="with RealLeaders signature"

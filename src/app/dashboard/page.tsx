@@ -9,6 +9,7 @@ import { getDashboardStats, DashboardStatistics } from '@/lib/statisticsApi';
 import { toast } from '@/components/ui/toast';
 import { DashboardTour } from '@/components/ui/DashboardTour';
 import { WelcomeModal } from '@/components/ui/WelcomeModal';
+import FirstBox from '@/components/ui/FirstBox';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showTour, setShowTour] = useState(false);
+  const [showFirstBox, setShowFirstBox] = useState(false);
 
   // Check account status on mount - FIRST PRIORITY
   useEffect(() => {
@@ -28,7 +30,7 @@ const Dashboard = () => {
           const userData = JSON.parse(userDataStr);
           if (userData.account_status === 'pending_review') {
             console.log('[Dashboard] Account pending review, redirecting to profile verification');
-            window.location.href = '/profile-verification?hideSteps=true&step=3';
+            window.location.href = '/profile-verification?hideSteps=true&step=6';
             return; // Don't set isCheckingAuth to false, keep showing loading
           }
         }
@@ -57,6 +59,33 @@ const Dashboard = () => {
           return;
         }
 
+        // Fetch user details to check tour_guide status
+        const { api } = await import('@/lib/api');
+        const userResponse = await api.getUserDetails(token);
+        
+        if (userResponse.success && userResponse.user) {
+          const tourGuideStatus = userResponse.user.tour_guide;
+          
+          console.log('[Dashboard] Tour guide status from API:', tourGuideStatus);
+          
+          // Check if user has seen FirstBox
+          const hasSeenFirstBox = localStorage.getItem('has_seen_first_box');
+          
+          // Show FirstBox if tour_guide is false AND hasn't seen FirstBox yet
+          if (!tourGuideStatus && !hasSeenFirstBox) {
+            console.log('[Dashboard] First time user detected, showing FirstBox');
+            setShowFirstBox(true);
+          }
+          // Show welcome modal if tour_guide is false but has seen FirstBox
+          else if (!tourGuideStatus && hasSeenFirstBox) {
+            console.log('[Dashboard] User has seen FirstBox, showing welcome modal');
+            setShowWelcomeModal(true);
+          }
+          
+          // Update localStorage with user data
+          localStorage.setItem('user_data', JSON.stringify(userResponse.user));
+        }
+
         // Fetch dashboard statistics
         const statsResponse = await getDashboardStats(token);
         
@@ -66,15 +95,6 @@ const Dashboard = () => {
         } else {
           setError('Failed to fetch statistics');
           toast.error('Failed to load dashboard statistics');
-        }
-
-        // Check if we should show welcome modal for first-time users
-        const tourCompleted = localStorage.getItem('dashboard_tour_completed');
-        const welcomeShown = localStorage.getItem('welcome_modal_shown');
-        
-        if (tourCompleted !== 'true' && welcomeShown !== 'true') {
-          console.log('[Dashboard] Showing welcome modal for first-time user');
-          setShowWelcomeModal(true);
         }
       } catch (err) {
         console.error('[Dashboard] Error fetching statistics:', err);
@@ -153,14 +173,52 @@ const Dashboard = () => {
     setShowTour(true);
   }, []);
 
-  const handleWelcomeModalClose = useCallback(() => {
+  const handleWelcomeModalClose = useCallback(async () => {
     setShowWelcomeModal(false);
-    localStorage.setItem('welcome_modal_shown', 'true');
+    
+    // Update tour_guide status in API when user closes/skips modal
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const { api } = await import('@/lib/api');
+        await api.updateTourGuideStatus(token);
+        console.log('[Dashboard] Tour guide status updated to true');
+        
+        // Update user_data in localStorage
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          userData.tour_guide = true;
+          localStorage.setItem('user_data', JSON.stringify(userData));
+        }
+      }
+    } catch (error) {
+      console.error('[Dashboard] Error updating tour guide status:', error);
+    }
   }, []);
 
-  const handleTourComplete = useCallback(() => {
+  const handleTourComplete = useCallback(async () => {
     setShowTour(false);
-    localStorage.setItem('dashboard_tour_completed', 'true');
+    
+    // Update tour_guide status in API when tour completes
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const { api } = await import('@/lib/api');
+        await api.updateTourGuideStatus(token);
+        console.log('[Dashboard] Tour guide status updated to true after completion');
+        
+        // Update user_data in localStorage
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          userData.tour_guide = true;
+          localStorage.setItem('user_data', JSON.stringify(userData));
+        }
+      }
+    } catch (error) {
+      console.error('[Dashboard] Error updating tour guide status:', error);
+    }
   }, []);
 
 
@@ -179,6 +237,13 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+      {/* FirstBox Modal - Shows first for new users */}
+      {showFirstBox && (
+        <div className="fixed inset-0 z-50">
+          <FirstBox />
+        </div>
+      )}
+
       {/* Welcome Modal */}
       {showWelcomeModal && (
         <WelcomeModal 
