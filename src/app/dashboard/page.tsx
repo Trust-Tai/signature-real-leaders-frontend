@@ -68,17 +68,18 @@ const Dashboard = () => {
           
           console.log('[Dashboard] Tour guide status from API:', tourGuideStatus);
           
-          // Check if user has seen FirstBox
-          const hasSeenFirstBox = localStorage.getItem('has_seen_first_box');
+          // Check if FirstBox should be shown from ProfileCompletionCard
+          const showFirstBoxFromCard = localStorage.getItem('show_first_box_from_card');
           
-          // Show FirstBox if tour_guide is false AND hasn't seen FirstBox yet
-          if (!tourGuideStatus && !hasSeenFirstBox) {
-            console.log('[Dashboard] First time user detected, showing FirstBox');
+          // Show FirstBox if triggered from ProfileCompletionCard
+          if (showFirstBoxFromCard === 'true') {
+            console.log('[Dashboard] FirstBox triggered from ProfileCompletionCard');
             setShowFirstBox(true);
+            localStorage.removeItem('show_first_box_from_card'); // Clear flag
           }
-          // Show welcome modal if tour_guide is false but has seen FirstBox
-          else if (!tourGuideStatus && hasSeenFirstBox) {
-            console.log('[Dashboard] User has seen FirstBox, showing welcome modal');
+          // Show welcome modal if tour_guide is false (first time user)
+          else if (!tourGuideStatus) {
+            console.log('[Dashboard] First time user, showing welcome modal with tour guide');
             setShowWelcomeModal(true);
           }
           

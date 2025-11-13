@@ -38,7 +38,18 @@ export const ProfileCompletionCard: React.FC<ProfileCompletionCardProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleSetupClick = () => {
-    router.push('/dashboard/profile');
+    // Check if user has seen FirstBox
+    const hasSeenFirstBox = localStorage.getItem('has_seen_first_box');
+    
+    if (!hasSeenFirstBox) {
+      // Show FirstBox by setting a flag
+      localStorage.setItem('show_first_box_from_card', 'true');
+      // Reload to trigger FirstBox display
+      window.location.reload();
+    } else {
+      // Directly go to profile page
+      router.push('/dashboard/profile');
+    }
   };
 
   const toggleExpand = () => {
