@@ -175,14 +175,15 @@ const InnerProfileVerificationPage = () => {
               // Use window.location for hard redirect to ensure dashboard loads properly
               window.location.href = '/dashboard';
             } else if (response.user.account_status === 'pending_review' || accountStatus === 'pending_review') {
-              console.log('[Social Callback] Account pending review, showing step 6...');
-              // Move to pending review step
-              setCurrentStep(6);
+              console.log('[Social Callback] Account pending review, staying on current step...');
+              // Show toast message and stay on current step
+              toast.info('Your account is pending review. Please wait for admin approval.', { autoClose: 4000 });
               // Clean up URL
               window.history.replaceState({}, document.title, '/profile-verification');
             } else {
-              console.log('[Social Callback] Unknown status, showing step 6...');
-              setCurrentStep(6);
+              console.log('[Social Callback] Unknown status, staying on current step...');
+              // Stay on current step for unknown status
+              toast.info('Your account is pending review. Please wait for admin approval.', { autoClose: 4000 });
               window.history.replaceState({}, document.title, '/profile-verification');
             }
           }

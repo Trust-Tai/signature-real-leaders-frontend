@@ -595,6 +595,9 @@ export const api = {
           percentage: string;
           trend: 'up' | 'down';
         };
+        hourly_view_segments: {
+          [key: string]: number;
+        };
       };
     }>(
       '/user/page-view-stats',
@@ -632,7 +635,13 @@ export const api = {
         active_links: number;
         monthly_click_growth_rate: {
           percentage: string;
-          trend: 'up' | 'down';
+          trend: 'up' | 'down' | 'stable';
+        };
+        performance_summary: {
+          above_10_percent_ctr: number;
+          above_5_percent_ctr: number;
+          above_100_clicks: number;
+          above_average_performance: number;
         };
         top_performing_links: Array<{
           link_id: number;
@@ -642,9 +651,12 @@ export const api = {
           click_through_rate: number;
           monthly_growth_rate: {
             percentage: string;
-            trend: 'up' | 'down';
+            trend: 'up' | 'down' | 'stable';
           };
         }>;
+        hourly_click_segments: {
+          [key: string]: number;
+        };
       };
     }>(
       '/user/link-stats',

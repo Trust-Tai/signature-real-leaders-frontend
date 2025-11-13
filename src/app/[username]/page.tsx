@@ -220,6 +220,29 @@ export default function DynamicUserProfile() {
   const handleLinkClick = async (link: { url: string; display_name: string; name: string }) => {
     console.log('[Profile] Link clicked:', link);
     
+    // Check if user is logged in and viewing their own profile
+    const isOwnProfile = user && user.username === profileData?.username;
+    
+    // If user is viewing their own profile and account status is pending review
+    if (isOwnProfile && user) {
+      try {
+        // Fetch current user details to check account status
+        const authToken = localStorage.getItem('auth_token');
+        if (authToken) {
+          const userDetails = await api.getUserDetails(authToken);
+          
+          if (userDetails.success && userDetails.user.account_status === 'pending_review') {
+            console.log('[Profile] User account is pending review, showing toast message');
+            toast.info('Your account is pending review. Please wait for admin approval.', { autoClose: 4000 });
+            return; // Don't open the link, stay on current page
+          }
+        }
+      } catch (error) {
+        console.error('[Profile] Error checking account status:', error);
+        // Continue to open link if there's an error
+      }
+    }
+    
     // Record link click only if it's not the user's own profile
     if (profileData && user && user.username !== profileData.username) {
       try {

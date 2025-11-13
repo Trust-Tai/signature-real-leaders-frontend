@@ -26,8 +26,15 @@ const TotalLinkClicks = () => {
     active_links: 0,
     monthly_click_growth_rate: {
       percentage: '0%',
-      trend: 'up' as 'up' | 'down'
-    }
+      trend: 'up' as 'up' | 'down' | 'stable'
+    },
+    performance_summary: {
+      above_10_percent_ctr: 0,
+      above_5_percent_ctr: 0,
+      above_100_clicks: 0,
+      above_average_performance: 0
+    },
+    hourly_click_segments: {} as { [key: string]: number }
   });
   
   const [links, setLinks] = useState<Array<{
@@ -107,15 +114,25 @@ const TotalLinkClicks = () => {
     }
   ];
 
-  const clickTrends = [
-    { day: 'Mon', clicks: 156, change: '+12%' },
-    { day: 'Tue', clicks: 189, change: '+18%' },
-    { day: 'Wed', clicks: 234, change: '+25%' },
-    { day: 'Thu', clicks: 198, change: '+8%' },
-    { day: 'Fri', clicks: 267, change: '+32%' },
-    { day: 'Sat', clicks: 145, change: '+5%' },
-    { day: 'Sun', clicks: 123, change: '-2%' }
-  ];
+  // Convert hourly_click_segments to array format for display
+  const hourlyClickData = React.useMemo(() => {
+    if (!statsData.hourly_click_segments || Object.keys(statsData.hourly_click_segments).length === 0) {
+      // Default data if API doesn't return hourly segments
+      return [
+        { time: '00:00', clicks: 0 },
+        { time: '04:00', clicks: 0 },
+        { time: '08:00', clicks: 0 },
+        { time: '12:00', clicks: 0 },
+        { time: '16:00', clicks: 0 },
+        { time: '20:00', clicks: 0 }
+      ];
+    }
+
+    // Convert object to array and sort by time
+    return Object.entries(statsData.hourly_click_segments)
+      .map(([time, clicks]) => ({ time, clicks }))
+      .sort((a, b) => a.time.localeCompare(b.time));
+  }, [statsData.hourly_click_segments]);
 
   const handleAddLink = () => {
     if (newLink.name && newLink.url) {
@@ -329,39 +346,41 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
                 )}
               </div>
 
-              {/* Daily Click Trends */}
+              {/* Hourly Click Trends */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
                 <h2 className="text-lg sm:text-xl font-semibold text-[#101117] mb-4">
-                  Daily Click Trends
+                  Hourly Click Trends
                 </h2>
                 
                 <div className="space-y-3">
-                  {clickTrends.map((day, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <span className="text-sm text-gray-600 w-12">{day.day}</span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-3">
-                        <div 
-                          className="bg-[#CF3232] h-3 rounded-full transition-all duration-300"
-                          style={{ width: `${(day.clicks / 267) * 100}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex items-center space-x-2 w-20">
-                        <span className="text-sm font-medium text-[#101117]">
-                          {day.clicks}
-                        </span>
-                        <span className={`text-xs ${
-                          day.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {day.change}
+                  {hourlyClickData.map((data, index) => {
+                    const maxClicks = Math.max(...hourlyClickData.map(d => d.clicks), 1); // Avoid division by zero
+                    const widthPercentage = (data.clicks / maxClicks) * 100;
+                    
+                    return (
+                      <div key={index} className="flex items-center space-x-3">
+                        <span className="text-sm text-gray-600 w-12">{data.time}</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-3">
+                          <div 
+                            className="bg-[#CF3232] h-3 rounded-full transition-all duration-300"
+                            style={{ width: `${widthPercentage}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-[#101117] w-16 text-right">
+                          {data.clicks}
                         </span>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 
                 <div className="mt-4 text-center">
                   <p className="text-xs text-gray-500">
-                    Peak day: Friday (267 clicks, +32%)
+                    {hourlyClickData.length > 0 && (() => {
+                      const maxClicks = Math.max(...hourlyClickData.map(d => d.clicks));
+                      const peakTime = hourlyClickData.find(d => d.clicks === maxClicks);
+                      return peakTime ? `Peak time: ${peakTime.time} (${maxClicks.toLocaleString()} clicks)` : 'No click data available';
+                    })()}
                   </p>
                 </div>
               </div>
@@ -375,19 +394,27 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-2xl font-bold text-[#101117] mb-1">8</h3>
+                  <h3 className="text-2xl font-bold text-[#101117] mb-1">
+                    {loading ? '...' : statsData.performance_summary.above_10_percent_ctr}
+                  </h3>
                   <p className="text-sm text-gray-600">Links with &gt;10% CTR</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-2xl font-bold text-[#101117] mb-1">12</h3>
+                  <h3 className="text-2xl font-bold text-[#101117] mb-1">
+                    {loading ? '...' : statsData.performance_summary.above_5_percent_ctr}
+                  </h3>
                   <p className="text-sm text-gray-600">Links with &gt;5% CTR</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-2xl font-bold text-[#101117] mb-1">6</h3>
+                  <h3 className="text-2xl font-bold text-[#101117] mb-1">
+                    {loading ? '...' : statsData.performance_summary.above_100_clicks}
+                  </h3>
                   <p className="text-sm text-gray-600">Links with &gt;100 clicks</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-2xl font-bold text-[#101117] mb-1">85%</h3>
+                  <h3 className="text-2xl font-bold text-[#101117] mb-1">
+                    {loading ? '...' : statsData.performance_summary.above_average_performance}
+                  </h3>
                   <p className="text-sm text-gray-600">Links performing above avg</p>
                 </div>
               </div>
