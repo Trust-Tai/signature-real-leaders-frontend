@@ -46,7 +46,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStartTour, onClose
           </h2>
           
           <p className="text-gray-600 mb-2 font-outfit">
-            This is where you&apos;ll track bookings, subscribers, followers, views, link clicks, and audience insights. 
+            This is where you&apos;ll track page views, clicks, newsletter subscribers, verified members, and analytics. 
           </p>
           
           <p className="text-gray-600 mb-6 font-outfit">

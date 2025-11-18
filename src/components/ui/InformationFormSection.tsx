@@ -4,11 +4,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Camera, Upload } from 'lucide-react';
 import Image from 'next/image';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 
 
 interface InformationFormSectionProps {
   onSubmit: (data: FormData) => void;
+  onBack?: () => void;
   className?: string;
   error?: string;
   initialData?: {
@@ -24,20 +27,16 @@ interface FormData {
   companyWebsite: string;
   industry: string;
   numberOfEmployees: string;
-  contactEmailListSize: string;
   about: string;
-  // Additional Fields
-  brand_voice: string;
-  unique_differentiation: string;
-  top_pain_points: string;
-  primary_call_to_action: string;
   date_of_birth: string;
   occupation: string;
   profilePicture: string;
+  phone: string;
 }
 
 const InformationFormSection: React.FC<InformationFormSectionProps> = ({
   onSubmit,
+  onBack,
   className,
   error,
   initialData
@@ -49,16 +48,11 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
     companyWebsite: '',
     industry: '',
     numberOfEmployees: '',
-    contactEmailListSize: '',
     about: '',
-    // Additional Fields
-    brand_voice: '',
-    unique_differentiation: '',
-    top_pain_points: '',
-    primary_call_to_action: '',
     date_of_birth: '',
     occupation: '',
-    profilePicture: ''
+    profilePicture: '',
+    phone: ''
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -131,9 +125,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
   const isFormValid = () => {
     const requiredFields = [
       'firstName', 'lastName', 'companyName', 'companyWebsite', 'industry', 
-      'numberOfEmployees', 'contactEmailListSize', 'about',
-      'brand_voice', 'unique_differentiation', 'top_pain_points', 
-      'primary_call_to_action', 'date_of_birth', 'occupation'
+      'numberOfEmployees', 'about', 'occupation', 'phone'
     ];
     
     return requiredFields.every(field => {
@@ -231,35 +223,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
         </div>
 
       
-  {/* Date of Birth & Role */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-          <div className="firstVerifyScreen group">
-            <input
-              type="text"
-              value={formData.date_of_birth}
-              onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-              onFocus={(e) => e.target.type = 'date'}
-              onBlur={(e) => {
-                if (!e.target.value) {
-                  e.target.type = 'text';
-                }
-              }}
-              className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-              style={{ color: '#949494' }}
-              placeholder="Date of Birth"
-            />
-          </div>
-          <div className="firstVerifyScreen group">
-            <input
-              type="text"
-              value={formData.occupation}
-              onChange={(e) => handleInputChange('occupation', e.target.value)}
-              className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-              style={{ color: '#949494' }}
-              placeholder="Role"
-            />
-          </div>
-        </div>
+ 
 
   {/* Row 2: Company Name & Company Website */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
@@ -284,6 +248,53 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           />
           </div>
         </div>
+
+ {/* Role & Phone */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+          <div className="firstVerifyScreen group">
+            <input
+              type="text"
+              value={formData.occupation}
+              onChange={(e) => handleInputChange('occupation', e.target.value)}
+              className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+              style={{ color: '#949494' }}
+              placeholder="Role"
+            />
+          </div>
+          <div className="firstVerifyScreen group">
+            <PhoneInput
+              country={'us'}
+              value={formData.phone}
+              onChange={(phone) => handleInputChange('phone', phone)}
+              inputClass="firstVerifyScreenInput"
+              containerClass="phone-input-container"
+              buttonClass="phone-input-button"
+              dropdownClass="phone-input-dropdown"
+              inputStyle={{
+                width: '100%',
+                height: '48px',
+                fontSize: '14px',
+                paddingLeft: '48px',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                color: '#000000',
+                fontFamily: 'Outfit, sans-serif'
+              }}
+              buttonStyle={{
+                borderRadius: '8px 0 0 8px',
+                border: '1px solid #e5e7eb',
+                backgroundColor: 'white',
+                height: '48px'
+              }}
+              dropdownStyle={{
+                borderRadius: '8px',
+                fontFamily: 'Outfit, sans-serif',
+                color: '#000000'
+              }}
+            />
+          </div>
+        </div>
+        
         {/* Row 3: Industry & Number of Employees */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
           <div className="relative firstVerifyScreen group">
@@ -323,87 +334,38 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           </div>
         </div>
 
-        {/* Row 4: Contact Email List Size */}
-        <div className="relative firstVerifyScreen group">
-          <select
-            value={formData.contactEmailListSize}
-            onChange={(e) => handleInputChange('contactEmailListSize', e.target.value)}
-            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-          >
-            <option value="">Contact email list size</option>
-            <option value="0-100">0-100</option>
-            <option value="101-500">101-500</option>
-            <option value="501-1000">501-1000</option>
-            <option value="1001-5000">1001-5000</option>
-            <option value="5001-10000">5001-10000</option>
-            <option value="10000+">10000+</option>
-          </select>
-          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
-        </div>
-
- <div className="firstVerifyScreen group" style={{height:"200px"}}>
+        {/* About Me Section */}
+        <div className="firstVerifyScreen group" style={{height:"200px"}}>
           <textarea
             value={formData.about}
             onChange={(e) => handleInputChange('about', e.target.value)}
             className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
             style={{ color: '#949494',height:"180px" }}
-            placeholder="Brief summary about yourself..."
+            placeholder="About Me"
           />
         </div>
 
-        {/* Brand Voice */}
-        <div className="firstVerifyScreen group" style={{height:"auto"}}>
-          <textarea
-            value={formData.brand_voice}
-            onChange={(e) => handleInputChange('brand_voice', e.target.value)}
-            className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
-            style={{ color: '#949494' }}
-            placeholder="Describe your brand voice and tone..."
-          />
+        {/* Back and Submit Buttons */}
+        <div className="flex justify-between items-center gap-4 w-full">
+          {/* Back Button - Bottom Left */}
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 transform hover:scale-105 font-outfit font-medium"
+            >
+              BACK
+            </button>
+          )}
+          
+          {/* Submit Button - Bottom Right */}
+          <button
+            onClick={handleSubmit}
+            disabled={!isFormValid()}
+            className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 ml-auto"
+          >
+            SUBMIT
+          </button>
         </div>
-
-        {/* Unique Differentiation */}
-        <div className="firstVerifyScreen group" style={{height:"auto"}}>
-          <textarea
-            value={formData.unique_differentiation}
-            onChange={(e) => handleInputChange('unique_differentiation', e.target.value)}
-            className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
-            style={{ color: '#949494' }}
-            placeholder="What makes you unique? How do you differentiate from competitors?"
-          />
-        </div>
-
-        {/* Top Pain Points */}
-        <div className="firstVerifyScreen group" style={{height:"auto"}}>
-          <textarea
-            value={formData.top_pain_points}
-            onChange={(e) => handleInputChange('top_pain_points', e.target.value)}
-            className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
-            style={{ color: '#949494' }}
-            placeholder="What are the top pain points your audience faces?"
-          />
-        </div>
-
-        {/* Primary Call to Action */}
-        <div className="firstVerifyScreen group" style={{height:"auto"}}>
-          <input
-            type="text"
-            value={formData.primary_call_to_action}
-            onChange={(e) => handleInputChange('primary_call_to_action', e.target.value)}
-            className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-            style={{ color: '#949494' }}
-            placeholder="What is your primary call to action?"
-          />
-        </div>
-
-
-        <button
-          onClick={handleSubmit}
-          disabled={!isFormValid()}
-          className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300" style={{width:"100%"}}
-        >
-          CONTINUE
-        </button>
 
       
         {error && (
@@ -412,7 +374,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
       </div>
 
    
-      <style jsx>{`
+      <style jsx global>{`
         /* Force select color with multiple selectors */
         select,
         select.select-custom-color,
@@ -447,6 +409,100 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
         
         select option:focus {
           background-color: #CF323240 !important;
+          color: white !important;
+        }
+
+        /* Phone Input Styling */
+        .phone-input-container {
+          width: 100%;
+        }
+
+        .phone-input-container .react-tel-input .form-control {
+          width: 100% !important;
+          height: 48px !important;
+          font-size: 14px !important;
+          border-radius: 8px !important;
+          border: 1px solid #e5e7eb !important;
+          color: #000000 !important;
+          font-family: 'Outfit', sans-serif !important;
+          transition: all 0.3s ease !important;
+          padding: 12px 14px 12px 48px !important;
+        }
+
+        .phone-input-container .react-tel-input .form-control:hover {
+          transform: scale(1.02);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .phone-input-container .react-tel-input .form-control:focus {
+          outline: none !important;
+          border-color: #CF323240 !important;
+          box-shadow: 0 0 0 2px rgba(207, 50, 50, 0.2) !important;
+          transform: scale(1.02);
+        }
+
+        .phone-input-container .react-tel-input .flag-dropdown {
+          border-radius: 8px 0 0 8px !important;
+          border: 1px solid #e5e7eb !important;
+          background-color: white !important;
+          height: 48px !important;
+        }
+
+        .phone-input-container .react-tel-input .flag-dropdown:hover {
+          background-color: #f9fafb !important;
+        }
+
+        .phone-input-container .react-tel-input .selected-flag {
+          border-radius: 8px 0 0 8px !important;
+          height: 48px !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+
+        .phone-input-container .react-tel-input .selected-flag .arrow {
+          border-top-color: #000000 !important;
+        }
+
+        .phone-input-container .react-tel-input .country-list {
+          border-radius: 8px !important;
+          font-family: 'Outfit', sans-serif !important;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+          text-align: left !important;
+        }
+
+        .phone-input-container .react-tel-input .country-list .country {
+          color: #000000 !important;
+          padding: 12px 14px !important;
+          height: 48px !important;
+          display: flex !important;
+          align-items: center !important;
+          text-align: left !important;
+        }
+
+        .phone-input-container .react-tel-input .country-list .country .country-name {
+          color: #000000 !important;
+          text-align: left !important;
+        }
+
+        .phone-input-container .react-tel-input .country-list .country .dial-code {
+          color: #000000 !important;
+          text-align: left !important;
+        }
+
+        .phone-input-container .react-tel-input .country-list .country:hover {
+          background-color: #CF323240 !important;
+        }
+
+        .phone-input-container .react-tel-input .country-list .country.highlight {
+          background-color: #CF3232 !important;
+          color: white !important;
+        }
+
+        .phone-input-container .react-tel-input .country-list .country.highlight .dial-code {
+          color: white !important;
+        }
+
+        .phone-input-container .react-tel-input .country-list .country.highlight .country-name {
           color: white !important;
         }
       `}</style>

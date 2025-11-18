@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Calendar, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon, Users, Wand2, BookOpen, Mic, ChevronDown, ChevronRight, FileText, Settings } from 'lucide-react';
+import { X, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon, Users, Wand2, BookOpen, Mic, ChevronDown, ChevronRight, FileText, Settings, HelpCircle } from 'lucide-react';
 import { images } from '@/assets';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
@@ -37,19 +37,19 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
   const sidebarItems = [
     { icon: LayoutDashboardIcon, label: 'Dashboard', path: '/dashboard', page: 'dashboard', tourId: 'dashboard' },
-    { icon: Calendar, label: 'Bookings This Month', path: '/dashboard/booking-this-month', page: 'booking-this-month', tourId: 'bookings' },
-    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
-    { icon: Users, label: 'Followers', path: '/dashboard/followers', page: 'followers', tourId: 'followers' },
     { icon: Eye, label: 'Page Views', path: '/dashboard/page-views', page: 'page-views', tourId: 'page-views' },
-    { icon: Send, label: 'Total Link Clicks', path: '/dashboard/total-link-clicks', page: 'total-link-clicks', tourId: 'link-clicks' },
-    { icon: SquarePlus, label: 'Audience Demographics', path: '/dashboard/audience-demographics', page: 'audience-demographics', tourId: 'demographics' }
+    { icon: Send, label: 'Page Clicks', path: '/dashboard/total-link-clicks', page: 'total-link-clicks', tourId: 'link-clicks' },
+    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
+    { icon: Users, label: 'Verified Members', path: '/dashboard/followers', page: 'followers', tourId: 'followers' },
+    { icon: SquarePlus, label: 'Analytics', path: '/dashboard/analytics', page: 'analytics', tourId: 'analytics' },
+    { icon: HelpCircle, label: 'Help', path: '/dashboard/help', page: 'help', tourId: 'help' }
   ];
 
   const magicPublishingItems = [
-    { icon: Settings, label: 'Setup', path: '/dashboard/magic-publishing/setup', page: 'magic-publishing-setup' },
-    { icon: FileText, label: 'Content', path: '/dashboard/magic-publishing/content', page: 'magic-publishing-content' },
-    { icon: BookOpen, label: 'Books', path: '/dashboard/magic-publishing/books', page: 'magic-publishing-books' },
-    { icon: Mic, label: 'Podcasts', path: '/dashboard/magic-publishing/podcasts', page: 'magic-publishing-podcasts' }
+    { icon: Settings, label: 'Setup', path: '/dashboard/magic-publishing/setup', page: 'magic-publishing-setup', badge: null },
+    { icon: FileText, label: 'Content', path: '/dashboard/magic-publishing/content', page: 'magic-publishing-content', badge: 'Beta' },
+    { icon: BookOpen, label: 'Books', path: '/dashboard/magic-publishing/books', page: 'magic-publishing-books', badge: 'Beta' },
+    { icon: Mic, label: 'Podcasts', path: '/dashboard/magic-publishing/podcasts', page: 'magic-publishing-podcasts', badge: 'Coming Soon' }
   ];
 
 
@@ -144,7 +144,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                   {magicPublishingItems.map((item, index) => (
                     <div 
                       key={index}
-                      className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                      className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
                         currentPage === item.page ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'
                       }`}
                       onClick={() => {
@@ -152,8 +152,19 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                         router.push(`${item.path}`)
                       }}
                     >
-                      <item.icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="text-sm">{item.label}</span>
+                      <div className="flex items-center space-x-3">
+                        <item.icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          item.badge === 'Beta' 
+                            ? 'bg-blue-500/20 text-blue-300' 
+                            : 'bg-yellow-500/20 text-yellow-300'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>

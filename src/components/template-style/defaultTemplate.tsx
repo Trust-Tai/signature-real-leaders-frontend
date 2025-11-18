@@ -244,7 +244,7 @@ export default function DefaultTemplate({
 
             {/* Signature Box */}
             <div
-              className="w-full profilesignimagediv backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-center mb-8"
+              className="w-full profilesignimagediv backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-center mb-4"
               style={{
                 height: '126px',
                 borderRadius: '10px',
@@ -265,7 +265,7 @@ export default function DefaultTemplate({
 
             {/* Newsletter Opt-in - Only show if viewing someone else's profile */}
             {user && user.username !== profileData.username && (
-              <div className="flex items-start justify-center space-x-3 mb-6 px-4">
+              <div className="flex items-start justify-center space-x-3 mb-4 px-4">
                 <input
                   type="checkbox"
                   id="newsletter-default"

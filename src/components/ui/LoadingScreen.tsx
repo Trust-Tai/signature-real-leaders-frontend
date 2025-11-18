@@ -2,8 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { images } from '@/assets';
-
+import gifLoading from "@/assets/images/loaderGif.gif" 
 interface LoadingScreenProps {
   text1?: string;
   text2?: string;
@@ -16,9 +15,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ text1 = "", text2 = "" })
         {/* Logo */}
         <div className="mb-8">
           <Image 
-            src={images.realLeaders} 
+            src={gifLoading} 
             alt="RealLeaders" 
             className="w-auto h-16 mx-auto" 
+            style={{ width: "1200px", height: "1000px" }}
           />
         </div>
         

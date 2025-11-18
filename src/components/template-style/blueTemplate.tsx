@@ -112,8 +112,8 @@ export default function BlueTemplate({
         </div>
 
         {/* Signature Section */}
-        <div className="bg-purple-700/40 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-500/30 shadow-lg">
-          <div className="bg-white rounded-xl p-6 flex items-center justify-center h-32">
+        <div className="bg-purple-700/40 backdrop-blur-sm rounded-2xl p-4 mb-4 border border-purple-500/30 shadow-lg">
+          <div className="bg-white rounded-xl p-4 flex items-center justify-center h-28">
             <Image
               src={profileData.signature_url || images.profileSinature}
               alt={`${profileData.full_name} Signature`}

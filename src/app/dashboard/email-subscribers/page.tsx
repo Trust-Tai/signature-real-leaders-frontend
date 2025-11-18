@@ -11,9 +11,11 @@ import {
   getNewsletterStats, 
   getNewsletterSubscribers, 
   getDateRange,
+  addNewsletterSubscriber,
   type NewsletterStats,
   type SubscriberFilters 
 } from '@/lib/newsletterApi';
+import { toast } from '@/components/ui/toast';
 
 interface LocalSubscriber {
   id: number;
@@ -111,7 +113,10 @@ const EmailSubscribers = () => {
       
       if (subscribersResponse.success) {
         // Convert API subscribers to local format
-        const localSubscribers: LocalSubscriber[] = subscribersResponse.data.subscribers.map((sub, index) => ({
+        // Handle the nested structure: subscribers.mailchimp is an array
+        const allSubscribers = subscribersResponse.data.subscribers.mailchimp || [];
+        
+        const localSubscribers: LocalSubscriber[] = allSubscribers.map((sub, index) => ({
           id: (page - 1) * 20 + index + 1,
           name: sub.name,
           email: sub.email,
@@ -180,13 +185,47 @@ const EmailSubscribers = () => {
     { number: '0%', label: 'GROWTH RATE', description: 'Monthly subscriber increase', color: '#CF3232' }
   ];
 
-  const handleAddSubscriber = () => {
+  const [addingSubscriber, setAddingSubscriber] = useState(false);
+
+  const handleAddSubscriber = async () => {
     if (newSubscriber.name && newSubscriber.email) {
-      // In a real implementation, you would call an API to add the subscriber
-      // For now, we'll just refresh the data
-      fetchSubscribers(currentPage);
-      setNewSubscriber({ name: '', email: '', status: 'Active' });
-      setAddSubscriberModalOpen(false);
+      try {
+        setAddingSubscriber(true);
+        
+        // Split name into first and last name
+        const nameParts = newSubscriber.name.trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
+        const payload = {
+          email: newSubscriber.email,
+          first_name: firstName,
+          last_name: lastName
+        };
+        
+        const response = await addNewsletterSubscriber(payload);
+        
+        if (response.success) {
+          toast.success(response.message || 'Subscriber added successfully!');
+          
+          // Refresh both stats and subscribers list
+          await Promise.all([
+            fetchStats(),
+            fetchSubscribers(currentPage)
+          ]);
+          
+          setNewSubscriber({ name: '', email: '', status: 'Active' });
+          setAddSubscriberModalOpen(false);
+        }
+      } catch (error) {
+        console.error('Error adding subscriber:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to add subscriber';
+        toast.error(errorMessage);
+      } finally {
+        setAddingSubscriber(false);
+      }
+    } else {
+      toast.error('Please fill in all required fields');
     }
   };
 
@@ -841,15 +880,24 @@ const EmailSubscribers = () => {
                 <div className="p-6 border-t border-gray-200 flex gap-3">
                   <button
                     onClick={() => setAddSubscriberModalOpen(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    disabled={addingSubscriber}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleAddSubscriber}
-                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
+                    disabled={addingSubscriber}
+                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
-                    Add Newsletter Subscriber
+                    {addingSubscriber ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Adding...</span>
+                      </>
+                    ) : (
+                      <span>Add Newsletter Subscriber</span>
+                    )}
                   </button>
                 </div>
               </div>

@@ -50,51 +50,45 @@ export const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete }) => {
     tg.addSteps([
       {
         title: 'Dashboard Overview',
-        content: 'Welcome! This is your main dashboard where you can see all your key metrics at a glance - bookings, contacts, page views, and link clicks.',
+        content: 'Welcome! This is your main dashboard where you can see all your key metrics at a glance - page views, clicks, subscribers, and verified members.',
         target: '[data-tour="dashboard"]',
         order: 1,
-      },
-      {
-        title: 'Bookings This Month',
-        content: 'Track all your new meetings, consultations, and events scheduled through your signature page. Stay on top of your appointments!',
-        target: '[data-tour="bookings"]',
-        order: 2,
-      },
-      {
-        title: 'Newsletter Subscribers',
-        content: 'Manage and view all the people who have joined your mailing list. Build and engage with your email audience.',
-        target: '[data-tour="subscribers"]',
-        order: 3,
-      },
-      {
-        title: 'Followers',
-        content: 'See who is following you and engage with your audience. You can export your followers list anytime for further analysis.',
-        target: '[data-tour="followers"]',
-        order: 4,
       },
       {
         title: 'Page Views',
         content: 'Monitor how many times your signature page has been viewed. Track your reach and visibility over time.',
         target: '[data-tour="page-views"]',
+        order: 2,
+      },
+      {
+        title: 'Page Clicks',
+        content: 'See the combined total of clicks across all your links. Understand what content resonates most with your audience.',
+        target: '[data-tour="link-clicks"]',
+        order: 3,
+      },
+      {
+        title: 'Newsletter Subscribers',
+        content: 'Manage and view all the people who have joined your mailing list. Build and engage with your email audience.',
+        target: '[data-tour="subscribers"]',
+        order: 4,
+      },
+      {
+        title: 'Verified Members',
+        content: 'See who is following you and engage with your audience. You can export your members list anytime for further analysis.',
+        target: '[data-tour="followers"]',
         order: 5,
       },
       {
-        title: 'Total Link Clicks',
-        content: 'See the combined total of clicks across all your links. Understand what content resonates most with your audience.',
-        target: '[data-tour="link-clicks"]',
-        order: 6,
-      },
-      {
-        title: 'Audience Demographics',
+        title: 'Analytics',
         content: 'Get detailed insights about your audience including countries, devices, age groups, and professional roles.',
-        target: '[data-tour="demographics"]',
-        order: 7,
+        target: '[data-tour="analytics"]',
+        order: 6,
       },
       {
         title: 'Magic Publishing',
         content: 'Create AI-powered content, books, and podcasts to grow your brand and engage your audience. Your personal content engine!',
         target: '[data-tour="magic-publishing"]',
-        order: 8,
+        order: 7,
       },
     ]);
 

@@ -762,6 +762,12 @@ button#tg-dialog-prev-btn[disabled] {
     transform: scale(1);
   }
 }
+.flag-dropdown .phone-input-button{
+height: 80px !important;
+}
+.react-tel-input .country-list .country{
+display: flex !important;
+}
 /* 
 .profilesignimagediv {
     height: 126px;

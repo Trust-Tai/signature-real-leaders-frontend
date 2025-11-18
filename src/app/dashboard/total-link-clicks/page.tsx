@@ -210,7 +210,7 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
               </button>
               
               <h1 className="text-[#101117] text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                Link Click Analytics
+                Page Clicks
               </h1>
             </div>
             

@@ -77,7 +77,7 @@ const AudienceDemographics = () => {
               </button>
               
               <h1 className="text-[#101117] text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                Audience Demographics
+                Analytics
               </h1>
             </div>
             

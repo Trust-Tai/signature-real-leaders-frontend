@@ -224,10 +224,10 @@ const FollowersPage: React.FC = () => {
   const statsCards = useMemo(() => {
     if (!statsData || !statsData.stats) {
       return [
-        { number: '...', label: 'TOTAL FOLLOWERS', description: 'All people following you', color: '#CF3232' },
-        { number: '...', label: 'NEW THIS MONTH', description: 'Followers added this month', color: '#CF3232' },
-        { number: '...', label: 'TOP COUNTRY', description: 'Most common follower country', color: '#CF3232', smallText: true },
-        { number: '...', label: 'TOP LOCATION', description: 'Most common follower location', color: '#CF3232', smallText: true },
+        { number: '...', label: 'VERIFIED MEMBERS', description: 'All people following you', color: '#CF3232' },
+        { number: '...', label: 'NEW THIS MONTH', description: 'Members added this month', color: '#CF3232' },
+        { number: '...', label: 'TOP COUNTRY', description: 'Most common member country', color: '#CF3232', smallText: true },
+        { number: '...', label: 'TOP LOCATION', description: 'Most common member location', color: '#CF3232', smallText: true },
       ];
     }
 
@@ -238,10 +238,10 @@ const FollowersPage: React.FC = () => {
     const topLocation = stats.top_location?.name || 'N/A';
 
     return [
-      { number: total, label: 'TOTAL FOLLOWERS', description: 'All people following you', color: '#CF3232' },
-      { number: newThisMonth, label: 'NEW THIS MONTH', description: 'Followers added this month', color: '#CF3232' },
-      { number: topCountry, label: 'TOP COUNTRY', description: 'Most common follower country', color: '#CF3232', smallText: true },
-      { number: topLocation, label: 'TOP LOCATION', description: 'Most common follower location', color: '#CF3232', smallText: true },
+      { number: total, label: 'VERIFIED MEMBERS', description: 'All people following you', color: '#CF3232' },
+      { number: newThisMonth, label: 'NEW THIS MONTH', description: 'Members added this month', color: '#CF3232' },
+      { number: topCountry, label: 'TOP COUNTRY', description: 'Most common member country', color: '#CF3232', smallText: true },
+      { number: topLocation, label: 'TOP LOCATION', description: 'Most common member location', color: '#CF3232', smallText: true },
     ];
   }, [statsData]);
 
@@ -311,7 +311,7 @@ const FollowersPage: React.FC = () => {
                 <Menu className="w-6 h-6 text-gray-600" />
               </button>
               <h1 className="text-[#101117] text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                Followers
+                Verified Members
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -319,7 +319,7 @@ const FollowersPage: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input 
                   type="text" 
-                  placeholder="Search followers..." 
+                  placeholder="Search members..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-48 md:w-64 font-outfit"
@@ -345,7 +345,7 @@ const FollowersPage: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input 
               type="text" 
-              placeholder="Search followers..." 
+              placeholder="Search members..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
@@ -360,7 +360,7 @@ const FollowersPage: React.FC = () => {
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#CF3232] mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading followers...</p>
+                  <p className="text-gray-600">Loading members...</p>
                 </div>
               </div>
             ) : error ? (
@@ -387,7 +387,7 @@ const FollowersPage: React.FC = () => {
                 className="bg-white text-[#CF3232] border border-[#CF3232] px-4 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-4 h-4" />
-                <span>{exportLoading ? 'Exporting...' : 'Export Followers'}</span>
+                <span>{exportLoading ? 'Exporting...' : 'Export Members'}</span>
               </button>
               <button 
                 onClick={() => {
@@ -404,7 +404,7 @@ const FollowersPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">Follower List</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">Member List</h2>
                   {searchLoading && (
                     <div className="flex items-center space-x-2 text-[#CF3232]">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#CF3232]"></div>
@@ -420,7 +420,7 @@ const FollowersPage: React.FC = () => {
                   <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
                     <div className="flex items-center space-x-2 text-[#CF3232]">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#CF3232]"></div>
-                      <span className="text-sm font-medium">Filtering followers...</span>
+                      <span className="text-sm font-medium">Filtering members...</span>
                     </div>
                   </div>
                 )}
@@ -447,7 +447,7 @@ const FollowersPage: React.FC = () => {
                   <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
                     <div className="flex items-center space-x-2 text-[#CF3232]">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#CF3232]"></div>
-                      <span className="text-sm font-medium">Filtering followers...</span>
+                      <span className="text-sm font-medium">Filtering members...</span>
                     </div>
                   </div>
                 )}
@@ -480,7 +480,7 @@ const FollowersPage: React.FC = () => {
               <div className="p-4 sm:p-6 border-t border-gray-100">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <p className="text-sm text-gray-600">
-                    Showing {filtered.length} of {totalFollowers} followers
+                    Showing {filtered.length} of {totalFollowers} members
                   </p>
                   
                   {totalPages > 1 && (
@@ -535,7 +535,7 @@ const FollowersPage: React.FC = () => {
               >
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>Filter Followers</h2>
+                    <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>Filter Members</h2>
                     <button onClick={() => setFilterOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                       <X className="w-6 h-6" />
                     </button>

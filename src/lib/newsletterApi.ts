@@ -27,8 +27,11 @@ export interface Subscriber {
 export interface NewsletterSubscribers {
   success: boolean;
   data: {
-    marketing_platform: string;
-    subscribers: Subscriber[];
+    marketing_platform?: string;
+    subscribers: {
+      mailchimp?: Subscriber[];
+      [key: string]: Subscriber[] | undefined;
+    };
     pagination: {
       page: number;
       per_page: number;
@@ -192,4 +195,51 @@ export const formatSubscriberCount = (count: number): string => {
 export const calculateGrowthPercentage = (current: number, previous: number): number => {
   if (previous === 0) return current > 0 ? 100 : 0;
   return ((current - previous) / previous) * 100;
+};
+
+// Add new subscriber to newsletter
+export interface AddSubscriberPayload {
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface AddSubscriberResponse {
+  success: boolean;
+  message: string;
+  data: {
+    platform: string;
+    subscriber_id: string;
+    email: string;
+    status: string;
+    list_id: string;
+    list_name: string;
+    created_at: string;
+  };
+}
+
+export const addNewsletterSubscriber = async (payload: AddSubscriberPayload): Promise<AddSubscriberResponse> => {
+  try {
+    const authToken = localStorage.getItem('auth_token');
+    
+    const response = await authFetch(`${BASE_URL}/add-subscriber`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error adding newsletter subscriber:', error);
+    throw error;
+  }
 };
