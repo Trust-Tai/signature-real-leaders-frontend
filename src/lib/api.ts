@@ -724,6 +724,53 @@ export const api = {
       }
     );
   },
+
+  // Password-based login
+  async loginWithPassword(email: string, password: string) {
+    return request<{ 
+      success: boolean; 
+      token?: string; 
+      user?: Record<string, unknown>; 
+      user_id?: number;
+      message?: string;
+    }>(
+      '/user/login',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      }
+    );
+  },
+
+  // Forgot password - sends reset email
+  async forgotPassword(email: string) {
+    return request<{ success: boolean; message?: string }>(
+      '/user/forgot-password',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      }
+    );
+  },
+
+  // Reset password with key
+  async resetPassword(userLogin: string, resetKey: string, newPassword: string, confirmPassword: string) {
+    return request<{ success: boolean; message?: string }>(
+      '/user/reset-password',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_login: userLogin,
+          reset_key: resetKey,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        }),
+      }
+    );
+  },
 };
 
 

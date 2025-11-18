@@ -500,7 +500,7 @@
 
 'use client';
 import React, { useState, useEffect, FC } from "react";
-import { Mail, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail, ArrowLeft, Loader2, Eye, EyeOff, Lock } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { images } from "@/assets";
@@ -719,6 +719,9 @@ const SignInPage: FC = () => {
   // States
   const [currentScreen, setCurrentScreen] = useState<ScreenType>("signin");
   const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [usePassword, setUsePassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [code, setCode] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -905,6 +908,47 @@ const SignInPage: FC = () => {
     }
   };
 
+  // Login with password
+  const handlePasswordLogin = async (): Promise<void> => {
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const { api } = await import('@/lib/api');
+      const data = await api.loginWithPassword(email, password);
+
+      if (data?.success && data?.token) {
+        localStorage.setItem("auth_token", data.token);
+        if (data?.user) {
+          localStorage.setItem("user_data", JSON.stringify(data.user));
+        }
+        if (data?.user_id) {
+          localStorage.setItem("user_id", data.user_id.toString());
+        }
+
+        if (data?.user?.account_status === "pending_review") {
+          console.log('[Password Login] Account pending review, redirecting to profile verification step 6');
+          localStorage.setItem("redirect_to_step", "6");
+          router.replace('/profile-verification');
+          return;
+        }
+
+        toast.success(data?.message || "Login successful!");
+        router.push('/dashboard');
+      } else {
+        toast.error(data?.message || "Invalid credentials");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Login failed");
+      console.error("Password login error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Verify OTP
   const handleVerifyOTP = async (): Promise<void> => {
     if (code.length !== 6) {
@@ -1041,11 +1085,11 @@ const SignInPage: FC = () => {
           </div>
 
          
-          <div className="mt-6 mb-6 text-center">
+          <div className="mt-6 mb-6 text-center flex items-center justify-center gap-4">
             <button
               onClick={handleResendCode}
               disabled={isResending}
-              className="px-6 py-2 rounded-full border border-zinc-600 text-white hover:bg-zinc-800 transition disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
+              className="px-6 py-2 rounded-full border border-zinc-600 text-white hover:bg-zinc-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isResending ? (
                 <>
@@ -1056,6 +1100,16 @@ const SignInPage: FC = () => {
                 'Resend code'
               )}
             </button>
+            
+            {/* <button
+              onClick={() => {
+                setUsePassword(true);
+                setCurrentScreen("signin");
+              }}
+              className="text-sm text-red-500 hover:text-red-400 transition underline"
+            >
+              Use Password Instead
+            </button> */}
           </div>
 
           <button
@@ -1119,9 +1173,35 @@ const SignInPage: FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@realleaders.com"
                 className="w-full h-12 px-4 rounded-lg bg-white text-zinc-900 focus:outline-none focus:ring-2 focus:ring-red-500"
-                onKeyDown={(e) => e.key === "Enter" && handleSendOTP()}
+                onKeyDown={(e) => e.key === "Enter" && (usePassword ? handlePasswordLogin() : handleSendOTP())}
               />
             </div>
+
+            {usePassword && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Lock size={16} />
+                  <label className="text-sm font-medium">Password</label>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full h-12 px-4 pr-12 rounded-lg bg-white text-zinc-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    onKeyDown={(e) => e.key === "Enter" && handlePasswordLogin()}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center justify-between">
               <label className="flex items-center cursor-pointer">
@@ -1134,27 +1214,46 @@ const SignInPage: FC = () => {
                 <span className="ml-2 text-sm">Remember me</span>
               </label>
               <button
-                onClick={() => setCurrentScreen("forgot-email")}
+                onClick={() => router.push(usePassword ? '/forgot-password' : '/forgot-password')}
                 className="text-sm text-red-500 hover:text-red-400 transition"
               >
-                Forgot email?
+                {usePassword ? 'Forgot password?' : 'Forgot email?'}
               </button>
             </div>
 
             <button
-              onClick={handleSendOTP}
-              disabled={isSubmitting || !email}
+              onClick={usePassword ? handlePasswordLogin : handleSendOTP}
+              disabled={isSubmitting || !email || (usePassword && !password)}
               className="w-full h-12 rounded-full bg-[#cf3232] text-white font-bold hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="animate-spin" size={20} />
-                  Sending...
+                  {usePassword ? 'Logging in...' : 'Sending...'}
                 </>
               ) : (
                 "Login"
               )}
             </button>
+
+          
+
+            {usePassword && (
+              <div className="text-center">
+                <button
+                  onClick={() => {
+                    setUsePassword(false);
+                    setPassword('');
+                  }}
+                  className="text-sm text-zinc-400 hover:text-white transition"
+                >
+                  Or{' '}
+                  <span className="text-red-500 hover:text-red-400 underline">
+                    login with verification code
+                  </span>
+                </button>
+              </div>
+            )}
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

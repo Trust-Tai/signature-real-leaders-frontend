@@ -46,7 +46,7 @@ import hubspotIcon from "./icons/hubspotIcon.png"
 import mailchimpIcon from "./icons/mailchimpIcon.png"
 import janeGoodallRealLeaders from "./images/jane-goodall-profile.jpeg"
 import janeGoodallHero from "./images/jane-goodall-hero.jpeg"
-import signHeroSection from "./images/signin-hero.png"
+import signHeroSection from "./images/signin-hero.jpg"
 export const images ={
   janeGoodallHero: janeGoodallHero,
   signHeroSection:signHeroSection,
