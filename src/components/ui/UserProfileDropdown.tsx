@@ -87,7 +87,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
               }
             >
               <UserIcon className="w-4 h-4" />
-              <span>View Profile</span>
+              <span>Edit Profile</span>
             </div>
              <a
               href={`/${user?.username}`}

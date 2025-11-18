@@ -51,6 +51,8 @@ export interface OnboardingState {
   primary_call_to_action?: string;
   date_of_birth?: string;
   occupation?: string;
+  phone?: string;
+  signature?: string;
 
   newsletter?: NewsletterCredentials;
   profile_template_id?: number;

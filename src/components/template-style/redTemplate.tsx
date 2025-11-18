@@ -113,13 +113,14 @@ export default function RedTemplate({
 
         {/* Signature Section */}
         <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 mb-4 border border-white/30">
-          <div className="bg-white rounded-lg p-4 h-24 flex items-center justify-center">
+          <div className="rounded-lg p-4 h-24 flex items-center justify-center">
             <Image
               src={profileData.signature_url || images.profileSinature}
               alt={`${profileData.full_name} Signature`}
               width={200}
               height={60}
               className="max-w-full max-h-full object-contain"
+              style={{ mixBlendMode: 'multiply', filter: 'brightness(0) invert(1)' }}
               onError={(e) => {
                 e.currentTarget.src = images.profileSinature.src;
               }}

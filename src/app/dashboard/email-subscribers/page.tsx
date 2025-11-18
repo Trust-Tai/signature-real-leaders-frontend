@@ -438,7 +438,7 @@ const EmailSubscribers = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => router.push('/dashboard/profile')}
+                      onClick={() => router.push('/dashboard/profile?step=5')}
                       className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
                     >
                       Setup Newsletter Service

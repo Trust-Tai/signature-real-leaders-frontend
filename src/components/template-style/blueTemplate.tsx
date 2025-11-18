@@ -113,13 +113,14 @@ export default function BlueTemplate({
 
         {/* Signature Section */}
         <div className="bg-purple-700/40 backdrop-blur-sm rounded-2xl p-4 mb-4 border border-purple-500/30 shadow-lg">
-          <div className="bg-white rounded-xl p-4 flex items-center justify-center h-28">
+          <div className="rounded-xl p-4 flex items-center justify-center h-28">
             <Image
               src={profileData.signature_url || images.profileSinature}
               alt={`${profileData.full_name} Signature`}
               width={300}
               height={100}
               className="max-w-full max-h-full object-contain"
+              style={{ mixBlendMode: 'multiply', filter: 'brightness(0) invert(1)' }}
               onError={(e) => {
                 e.currentTarget.src = images.profileSinature.src;
               }}

@@ -328,6 +328,7 @@ interface SignSectionProps {
   className?: string;
   error?: string;
   isSubmitting?: boolean;
+  onBack?: () => void;
 }
 
 interface SignFormData {
@@ -344,7 +345,8 @@ const SignSection: React.FC<SignSectionProps> = ({
   onSubmit,
   className,
   error,
-  isSubmitting
+  isSubmitting,
+  onBack
 }) => {
   const [formData, setFormData] = useState({
     signature: null,
@@ -649,20 +651,30 @@ const SignSection: React.FC<SignSectionProps> = ({
           </label>
         </div>
 
-        {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={!isFormValid || !!isSubmitting}
-          className={`custom-btn my-3 w-full transition-all duration-300 ${
-            !isFormValid || isSubmitting 
-              ? 'opacity-50 cursor-not-allowed transform-none' 
-              : 'transform hover:scale-105 hover:-translate-y-1 active:scale-95'
-          }`}
-          style={{width:"100%"}}
-          aria-busy={isSubmitting ? true : undefined}
-        >
-          {isSubmitting ? 'Submitting...' : 'Confirm & Submit Signature'}
-        </button>
+        {/* Buttons Row */}
+        <div className="flex justify-between items-center gap-4 w-full max-w-2xl mx-auto">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 transform hover:scale-105 font-outfit font-medium"
+            >
+              BACK
+            </button>
+          )}
+          
+          <button
+            onClick={handleSubmit}
+            disabled={!isFormValid || !!isSubmitting}
+            className={`px-8 py-3 rounded-lg font-outfit font-medium transition-all duration-300 ${
+              !isFormValid || isSubmitting 
+                ? 'opacity-50 cursor-not-allowed bg-gray-400 text-gray-200' 
+                : 'bg-[#CF3232] text-white hover:bg-[#B82828] transform hover:scale-105 hover:-translate-y-1 active:scale-95'
+            } ${!onBack ? 'ml-auto' : ''}`}
+            aria-busy={isSubmitting ? true : undefined}
+          >
+            {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+          </button>
+        </div>
 
         {/* Error Message */}
         {error && (

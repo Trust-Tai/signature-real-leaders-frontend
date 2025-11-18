@@ -40,7 +40,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
     { icon: Eye, label: 'Page Views', path: '/dashboard/page-views', page: 'page-views', tourId: 'page-views' },
     { icon: Send, label: 'Page Clicks', path: '/dashboard/total-link-clicks', page: 'total-link-clicks', tourId: 'link-clicks' },
     { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
-    { icon: Users, label: 'Verified Members', path: '/dashboard/followers', page: 'followers', tourId: 'followers' },
+    { icon: Users, label: 'Members', path: '/dashboard/followers', page: 'followers', tourId: 'followers' },
     { icon: SquarePlus, label: 'Analytics', path: '/dashboard/analytics', page: 'analytics', tourId: 'analytics' },
     { icon: HelpCircle, label: 'Help', path: '/dashboard/help', page: 'help', tourId: 'help' }
   ];

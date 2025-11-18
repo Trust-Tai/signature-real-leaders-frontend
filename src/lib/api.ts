@@ -90,6 +90,18 @@ export const api = {
 
   async submitUserInfoWithFiles(authToken: string, formData: FormData) {
     const url = `${API_BASE_URL}/user/submit-user-info`;
+    
+    // Log FormData contents for debugging
+    console.log('[API] Sending FormData to:', url);
+    console.log('[API] FormData entries:');
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`  ${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
+      } else {
+        console.log(`  ${key}: ${value}`);
+      }
+    }
+    
     const response = await authFetch(url, {
       method: 'POST',
       headers: {
@@ -100,6 +112,8 @@ export const api = {
     });
     
     const data = await response.json();
+    console.log('[API] Response:', data);
+    
     if (!response.ok) {
       throw new Error(data.message || 'Failed to submit user info');
     }

@@ -256,7 +256,8 @@ export default function DefaultTemplate({
                 alt={`${profileData.full_name} Signature`}
                 width={300}
                 height={100}
-                className="w-full max-h-full signimage"
+                className="w-full max-h-full signimage object-contain"
+                style={{ mixBlendMode: 'multiply', filter: 'brightness(0) invert(1)' }}
                 onError={(e) => {
                   e.currentTarget.src = images.profileSinature.src;
                 }}

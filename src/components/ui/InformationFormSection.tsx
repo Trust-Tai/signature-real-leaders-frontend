@@ -277,7 +277,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
                 paddingLeft: '48px',
                 borderRadius: '8px',
                 border: '1px solid #e5e7eb',
-                color: '#000000',
+                color: '#333333',
                 fontFamily: 'Outfit, sans-serif'
               }}
               buttonStyle={{
@@ -345,7 +345,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           />
         </div>
 
-        {/* Back and Submit Buttons */}
+        {/* Continue Button */}
         <div className="flex justify-between items-center gap-4 w-full">
           {/* Back Button - Bottom Left */}
           {onBack && (
@@ -357,13 +357,13 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
             </button>
           )}
           
-          {/* Submit Button - Bottom Right */}
+          {/* Continue Button - Bottom Right */}
           <button
             onClick={handleSubmit}
             disabled={!isFormValid()}
             className="custom-btn transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 ml-auto"
           >
-            SUBMIT
+            CONTINUE
           </button>
         </div>
 
@@ -419,11 +419,11 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
 
         .phone-input-container .react-tel-input .form-control {
           width: 100% !important;
-          height: 48px !important;
-          font-size: 14px !important;
+          height: 80px !important;
+          font-size: 22px !important;
           border-radius: 8px !important;
           border: 1px solid #e5e7eb !important;
-          color: #000000 !important;
+          color: #333333 !important;
           font-family: 'Outfit', sans-serif !important;
           transition: all 0.3s ease !important;
           padding: 12px 14px 12px 48px !important;
@@ -445,7 +445,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           border-radius: 8px 0 0 8px !important;
           border: 1px solid #e5e7eb !important;
           background-color: white !important;
-          height: 48px !important;
+          height: 80px !important;
         }
 
         .phone-input-container .react-tel-input .flag-dropdown:hover {

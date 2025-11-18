@@ -18,7 +18,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ text1 = "", text2 = "" })
             src={gifLoading} 
             alt="RealLeaders" 
             className="w-auto h-16 mx-auto" 
-            style={{ width: "1200px", height: "1000px" }}
+            style={{ width: "400px",height:"auto" }}
           />
         </div>
         

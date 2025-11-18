@@ -14,6 +14,7 @@ import {
   LoadingScreen
 } from '@/components';
 import InformationFormSection from '@/components/ui/InformationFormSection';
+import SignSection from '@/components/ui/SignSection';
 import { OnboardingProvider, useOnboarding } from '@/components/OnboardingContext';
 import { api } from '@/lib/api';
 import { images } from "../../assets/index";
@@ -68,7 +69,8 @@ const InnerProfileVerificationPage = () => {
     { id: 1, title: 'Email Verification', status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
     { id: 2, title: 'Code Verification', status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
     { id: 3, title: 'Information', status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending' },
-    { id: 4, title: 'Pending Review', status: currentStep === 4 ? 'current' : 'pending' }
+    { id: 4, title: 'Signature', status: currentStep === 4 ? 'current' : currentStep > 4 ? 'completed' : 'pending' },
+    { id: 5, title: 'Pending Review', status: currentStep === 5 ? 'current' : 'pending' }
   ];
 
   const handleStepClick = (stepId: number) => {
@@ -99,7 +101,7 @@ const InnerProfileVerificationPage = () => {
 
   const nextStep = () => {
     console.log('nextStep called, current step:', currentStep);
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       const newStep = currentStep + 1;
       console.log('Setting new step to:', newStep);
       setCurrentStep(newStep);
@@ -392,86 +394,26 @@ const InnerProfileVerificationPage = () => {
               setCurrentStep(1);
               setShowCodeVerification(false);
             }}
-            onSubmit={async (data) => {
-              try {
-                console.log('[Step 3] Information form data received, preparing final submission');
-                setLoading(true);
-                
-                const authToken = state.auth_token || localStorage.getItem('auth_token');
-                if (!authToken) {
-                  toast.error('Authentication token missing. Please login again.');
-                  return;
-                }
-
-                // Store all form data in context
-                setState(prev => ({
-                  ...prev,
-                  first_name: data.firstName,
-                  last_name: data.lastName,
-                  company_name: data.companyName,
-                  company_website: data.companyWebsite,
-                  industry: data.industry,
-                  num_employees: data.numberOfEmployees,
-                  about: data.about,
-                  occupation: data.occupation,
-                  profilePicture: data.profilePicture,
-                  phone: data.phone
-                }));
-
-                // Prepare FormData for file upload
-                const formData = new FormData();
-                
-                // Add all text fields with correct API keys
-                if (data.firstName) formData.append('firstName', data.firstName);
-                if (data.lastName) formData.append('lastName', data.lastName);
-                if (state.email) formData.append('email', state.email);
-                if (data.companyName) formData.append('companyName', data.companyName);
-                if (data.companyWebsite) formData.append('companyWebsite', data.companyWebsite);
-                if (data.industry) formData.append('industry', data.industry);
-                if (data.numberOfEmployees) formData.append('numEmployees', data.numberOfEmployees);
-                if (data.about) formData.append('about', data.about);
-                if (data.occupation) formData.append('occupation', data.occupation);
-                if (data.phone) formData.append('phone', data.phone);
-                
-                // Consent fields (required by API)
-                formData.append('consentFeatureName', 'true');
-                formData.append('agreeTerms', 'true');
-                formData.append('confimInFoAccurate', 'true');
-                
-                // Add profile picture if exists
-                if (data.profilePicture) {
-                  // Convert base64 to file
-                  const response = await fetch(data.profilePicture);
-                  const blob = await response.blob();
-                  const file = new File([blob], 'profile-picture.png', { type: 'image/png' });
-                  formData.append('profilePicture', file);
-                } else {
-                  // Send empty string if no profile picture
-                  formData.append('profilePicture', '');
-                }
-
-                console.log('[Step 3] Submitting all data to API...');
-                console.log('[Step 3] FormData entries:');
-                for (const [key, value] of formData.entries()) {
-                  console.log(`  ${key}:`, value instanceof File ? `File(${value.name})` : value);
-                }
-                
-                // Call API with FormData
-                const result = await api.submitUserInfoWithFiles(authToken, formData);
-                
-                if (result.success) {
-                  console.log('[Step 3] Submission successful!');
-                  toast.success('Profile submitted successfully! Awaiting admin review.');
-                  nextStep(); // Move to pending review (step 4)
-                } else {
-                  toast.error(result.message || 'Submission failed. Please try again.');
-                }
-              } catch (error) {
-                console.error('[Step 3] Submission error:', error);
-                toast.error('Failed to submit profile. Please try again.');
-              } finally {
-                setLoading(false);
-              }
+            onSubmit={(data) => {
+              console.log('[Step 3] Information form data received, moving to signature step');
+              
+              // Store all form data in context
+              setState(prev => ({
+                ...prev,
+                first_name: data.firstName,
+                last_name: data.lastName,
+                company_name: data.companyName,
+                company_website: data.companyWebsite,
+                industry: data.industry,
+                num_employees: data.numberOfEmployees,
+                about: data.about,
+                occupation: data.occupation,
+                profilePicture: data.profilePicture,
+                phone: data.phone
+              }));
+              
+              // Move to signature step
+              nextStep();
             }}
             initialData={{
               firstName: state.first_name,
@@ -481,6 +423,158 @@ const InnerProfileVerificationPage = () => {
         );
       
       case 4:
+        return (
+          <SignSection
+            onBack={() => setCurrentStep(3)}
+            onSubmit={async (signData) => {
+                try {
+                  console.log('[Step 4] Submitting all data to API...');
+                  setLoading(true);
+                  
+                  const authToken = state.auth_token || localStorage.getItem('auth_token');
+                  if (!authToken) {
+                    toast.error('Authentication token missing. Please login again.');
+                    return;
+                  }
+
+                  // Prepare FormData for file upload
+                  const formData = new FormData();
+                  
+                  // Add all text fields
+                  if (state.first_name) formData.append('firstName', state.first_name);
+                  if (state.last_name) formData.append('lastName', state.last_name);
+                  if (state.email) formData.append('email', state.email);
+                  if (state.company_name) formData.append('companyName', state.company_name);
+                  if (state.company_website) formData.append('companyWebsite', state.company_website);
+                  if (state.industry) formData.append('industry', state.industry);
+                  if (state.num_employees) formData.append('numEmployees', state.num_employees);
+                  if (state.about) formData.append('about', state.about);
+                  if (state.occupation) formData.append('occupation', state.occupation);
+                  if (state.phone) formData.append('phone', state.phone);
+                  
+                  // Add signature - prioritize file objects over data URLs
+                  console.log('[Step 4] Signature data:', {
+                    hasSignatureFile: !!signData.signatureFile,
+                    hasUploadedImageFile: !!signData.uploadedImageFile,
+                    hasSignature: !!signData.signature,
+                    hasUploadedImage: !!signData.uploadedImage
+                  });
+                  
+                  let signatureAdded = false;
+                  
+                  if (signData.signatureFile) {
+                    console.log('[Step 4] Adding signatureFile to FormData:', {
+                      name: signData.signatureFile.name,
+                      size: signData.signatureFile.size,
+                      type: signData.signatureFile.type
+                    });
+                    formData.append('signature', signData.signatureFile, 'signature.png');
+                    signatureAdded = true;
+                  } else if (signData.uploadedImageFile) {
+                    console.log('[Step 4] Adding uploadedImageFile to FormData:', {
+                      name: signData.uploadedImageFile.name,
+                      size: signData.uploadedImageFile.size,
+                      type: signData.uploadedImageFile.type
+                    });
+                    formData.append('signature', signData.uploadedImageFile, signData.uploadedImageFile.name);
+                    signatureAdded = true;
+                  } else if (signData.signature) {
+                    console.log('[Step 4] Converting signature data URL to File');
+                    const signatureResponse = await fetch(signData.signature);
+                    const signatureBlob = await signatureResponse.blob();
+                    const signatureFile = new File([signatureBlob], 'signature.png', { type: 'image/png' });
+                    console.log('[Step 4] Converted signature file:', {
+                      name: signatureFile.name,
+                      size: signatureFile.size,
+                      type: signatureFile.type
+                    });
+                    formData.append('signature', signatureFile, 'signature.png');
+                    signatureAdded = true;
+                  } else if (signData.uploadedImage) {
+                    console.log('[Step 4] Converting uploaded image data URL to File');
+                    const response = await fetch(signData.uploadedImage);
+                    const blob = await response.blob();
+                    const file = new File([blob], 'uploaded-signature.png', { type: 'image/png' });
+                    console.log('[Step 4] Converted uploaded image file:', {
+                      name: file.name,
+                      size: file.size,
+                      type: file.type
+                    });
+                    formData.append('signature', file, 'uploaded-signature.png');
+                    signatureAdded = true;
+                  }
+                  
+                  if (!signatureAdded) {
+                    console.error('[Step 4] No signature data found!');
+                    toast.error('Please add your signature before submitting.');
+                    setLoading(false);
+                    return;
+                  }
+                  
+                  console.log('[Step 4] Signature successfully added to FormData');
+                  
+                  // Consent fields (required by API)
+                  formData.append('consentFeatureName', signData.giveConsent ? 'true' : 'false');
+                  formData.append('agreeTerms', signData.agreeTerms ? 'true' : 'false');
+                  formData.append('confimInFoAccurate', signData.confirmInfo ? 'true' : 'false');
+                  
+                  // Add profile picture if exists
+                  if (state.profilePicture) {
+                    const response = await fetch(state.profilePicture);
+                    const blob = await response.blob();
+                    const file = new File([blob], 'profile-picture.png', { type: 'image/png' });
+                    formData.append('profilePicture', file);
+                  } else {
+                    formData.append('profilePicture', '');
+                  }
+
+                  console.log('[Step 4] Submitting to API...');
+                  
+                  // Log FormData contents for debugging
+                  console.log('[Step 4] FormData contents:');
+                  let hasSignatureInFormData = false;
+                  for (const [key, value] of formData.entries()) {
+                    if (key === 'signature') {
+                      hasSignatureInFormData = true;
+                      console.log(`  ✅ ${key}: File(${value instanceof File ? value.name : 'unknown'}, ${value instanceof File ? value.size : 0} bytes, ${value instanceof File ? value.type : 'unknown'})`);
+                    } else if (value instanceof File) {
+                      console.log(`  ${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
+                    } else {
+                      console.log(`  ${key}: ${value}`);
+                    }
+                  }
+                  
+                  if (!hasSignatureInFormData) {
+                    console.error('[Step 4] ❌ CRITICAL: Signature NOT found in FormData!');
+                    toast.error('Signature missing from form data. Please try again.');
+                    setLoading(false);
+                    return;
+                  }
+                  
+                  console.log('[Step 4] ✅ Signature confirmed in FormData');
+                  
+                  // Call API with FormData
+                  const result = await api.submitUserInfoWithFiles(authToken, formData);
+                  
+                  if (result.success) {
+                    console.log('[Step 4] Submission successful!');
+                    toast.success('Profile submitted successfully! Awaiting admin review.');
+                    nextStep(); // Move to pending review (step 5)
+                  } else {
+                    toast.error(result.message || 'Submission failed. Please try again.');
+                  }
+                } catch (error) {
+                  console.error('[Step 4] Submission error:', error);
+                  toast.error('Failed to submit profile. Please try again.');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              isSubmitting={loading}
+            />
+        );
+      
+      case 5:
         return <PendingReviewSection />;
       
       default:
@@ -541,6 +635,7 @@ const InnerProfileVerificationPage = () => {
       case 2:
         return <InteractiveFollowCard name={fullName} />;
       case 3:
+      case 4:
         return <InteractiveFollowCard name={fullName} />;
       default:
         return <InteractiveFollowCard name={fullName} />;
@@ -588,7 +683,7 @@ const InnerProfileVerificationPage = () => {
 
             <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] max-w-2xl`}>
               {/* Header */}
-             {currentStep !== 4 && (
+             {currentStep !== 5 && (
     <PageHeader
       title="MAKE YOUR MARK"
       subtitle="with RealLeaders signature"
