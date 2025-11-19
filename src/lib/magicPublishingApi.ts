@@ -4,12 +4,13 @@ import { authFetch } from './authUtils';
 const BASE_URL = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/magic-publishing';
 
 export interface GenerateArticlesRequest {
-  article_count: number;
-  article_length: number;
-  tone: string;
-  focus_topics: string[];
-  include_hashtags: boolean;
-  platform_optimization: string;
+  topic?: string;
+  article_count?: number;
+  article_length?: number;
+  tone?: string;
+  focus_topics?: string[];
+  include_hashtags?: boolean;
+  platform_optimization?: string;
 }
 
 export interface GenerateBookRequest {
@@ -17,6 +18,25 @@ export interface GenerateBookRequest {
   book_genre: string;
   chapter_count: number;
   writing_style: string;
+}
+
+export interface GenerateSocialPostsRequest {
+  topic: string;
+  platforms?: string;
+  post_style?: string;
+  include_hashtags?: boolean;
+  include_emojis?: boolean;
+  include_call_to_action?: boolean;
+  post_length?: string;
+}
+
+export interface TopicSuggestion {
+  topic: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  trending_score: number;
+  content_angle: string;
 }
 
 export interface GenerateArticlesResponse {
@@ -65,6 +85,20 @@ export interface ArticleContent {
   articles: Article[];
 }
 
+export interface SocialPost {
+  platform: string;
+  hook_line: string;
+  content: string;
+  call_to_action: string;
+  hashtags: string;
+  visual_description: string;
+  engagement_tip: string;
+}
+
+export interface SocialPostsContent {
+  social_posts: SocialPost[];
+}
+
 export interface GeneratedContent {
   id: string;
   title: string;
@@ -73,9 +107,10 @@ export interface GeneratedContent {
   created_at: string;
   completed_at?: string;
   request_id: string;
-  generated_content?: BookContent | ArticleContent | {
+  generated_content?: BookContent | ArticleContent | SocialPostsContent | {
     articles?: Article[];
     book?: Book;
+    social_posts?: SocialPost[];
   };
   generated_content_json?: string;
   error_message?: string;
@@ -102,7 +137,7 @@ export interface GenerationRequest {
   completed_at?: string;
   updated_at: string;
   request_id: string;
-  generated_content: BookContent | ArticleContent | { articles?: Article[]; book?: Book } | boolean | null;
+  generated_content: BookContent | ArticleContent | SocialPostsContent | { articles?: Article[]; book?: Book; social_posts?: SocialPost[] } | boolean | null;
   generated_content_json: string;
   content_preview: string;
   content_summary: string;
@@ -169,6 +204,53 @@ export const generateBook = async (params: GenerateBookRequest, token: string): 
     return data;
   } catch (error) {
     console.error('Error generating book:', error);
+    throw error;
+  }
+};
+
+// Generate social posts
+export const generateSocialPosts = async (params: GenerateSocialPostsRequest, token: string): Promise<GenerateArticlesResponse> => {
+  try {
+    const response = await authFetch(`${BASE_URL}/generate-social-posts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error generating social posts:', error);
+    throw error;
+  }
+};
+
+// Generate topics
+export const generateTopics = async (token: string): Promise<GenerateArticlesResponse> => {
+  try {
+    const response = await authFetch(`${BASE_URL}/generate-topics`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error generating topics:', error);
     throw error;
   }
 };

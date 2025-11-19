@@ -8,7 +8,6 @@ import DashBoardFooter from "@/components/ui/dashboardFooter"
 import { useRouter } from 'next/navigation';
 import { countries } from '@/default/countries';
 import { api } from '@/lib/api';
-import { useMagicPublishing } from '@/hooks/useMagicPublishing';
 import { toast } from '@/components/ui/toast';
 import { 
   FaHandshake, 
@@ -28,18 +27,9 @@ const MagicPublishingSetup = () => {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, loading: userLoading, error: userError } = useUser();
-  const { handleGenerateArticles, isGenerating, error: magicError, fetchAllGenerationRequests } = useMagicPublishing();
   
-  // State for magic generation
+  // State for profile update
   const [isUpdatingUser, setIsUpdatingUser] = useState(false);
-  const [generationComplete, setGenerationComplete] = useState(false);
-  const [showModifyForm, setShowModifyForm] = useState(false);
-  const [generationParams, setGenerationParams] = useState({
-    article_count: 200,
-    article_length: 2000,
-    tone: 'professional',
-    platform_optimization: 'general'
-  });
   
   // Form data state - initialize with empty values or get from localStorage/API
   const [formData, setFormData] = useState({
@@ -211,17 +201,17 @@ const MagicPublishingSetup = () => {
     }));
   };
 
-  const handleStartMagic = async () => {
+  const handleSaveProfile = async () => {
     try {
       setIsUpdatingUser(true);
       
-      // First, update user profile with form data
+      // Update user profile with form data
       const token = localStorage.getItem('auth_token');
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      console.log('[Setup] Starting Magic - updating user profile first...');
+      console.log('[Setup] Updating user profile...');
 
       // Prepare user update payload
       const userUpdatePayload = {
@@ -251,104 +241,24 @@ const MagicPublishingSetup = () => {
         throw new Error('Failed to update user profile');
       }
 
-      console.log('[Setup] Profile updated successfully, now starting article generation...');
-      toast.success('Profile updated successfully! Starting article generation...', { autoClose: 3000 });
+      console.log('[Setup] Profile updated successfully!');
+      toast.success('Profile updated successfully!', { autoClose: 3000 });
       setIsUpdatingUser(false);
 
-      // Now generate articles with default parameters
-      const articleParams = {
-        article_count: generationParams.article_count,
-        article_length: generationParams.article_length,
-        tone: generationParams.tone,
-        focus_topics: formData.contentPreferenceIndustries,
-        include_hashtags: true,
-        platform_optimization: generationParams.platform_optimization
-      };
-
-      console.log('[Setup] Starting article generation with params:', articleParams);
-      
-      // Start the generation process
-      const result = await handleGenerateArticles(articleParams);
-      
-      // Navigate to specific content page with content_id
-      if (result && result.content_id) {
-        console.log('[Setup] Generation started successfully, refreshing content list...');
-        // Refresh the content list to show the new processing item
-        await fetchAllGenerationRequests();
-        
-        console.log('[Setup] Generation started, navigating to content detail page with ID:', result.content_id);
-        toast.info('Redirecting to track generation progress...', { autoClose: 2000 });
-        
-        // Small delay to let the user see the toast before navigation
-        setTimeout(() => {
-          router.push(`/dashboard/magic-publishing/content`);
-        }, 1000);
-      } else {
-        // Fallback to general content page if no content_id
-        console.log('[Setup] No content_id returned, navigating to general content page...');
-        setTimeout(() => {
-          router.push('/dashboard/magic-publishing/content');
-        }, 1000);
-      }
+      // Navigate back to Magic Publishing main page
+      setTimeout(() => {
+        router.push('/dashboard/magic-publishing');
+      }, 1000);
       
     } catch (error) {
-      console.error('Error in Start Magic:', error);
+      console.error('Error updating profile:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      toast.error(`Failed to start Magic Publishing: ${errorMessage}`);
+      toast.error(`Failed to update profile: ${errorMessage}`);
       setIsUpdatingUser(false);
     }
   };
 
-  const handleModifyResults = () => {
-    setShowModifyForm(true);
-  };
 
-  const handleRegenerate = async () => {
-    try {
-      setShowModifyForm(false);
-      setGenerationComplete(false);
-      
-      const articleParams = {
-        article_count: generationParams.article_count,
-        article_length: generationParams.article_length,
-        tone: generationParams.tone,
-        focus_topics: formData.contentPreferenceIndustries,
-        include_hashtags: true,
-        platform_optimization: generationParams.platform_optimization
-      };
-
-      console.log('[Setup] Regenerating articles with modified params:', articleParams);
-      
-      // Start the regeneration process
-      const result = await handleGenerateArticles(articleParams);
-      
-      // Navigate to specific content page with content_id
-      if (result && result.content_id) {
-        console.log('[Setup] Regeneration started successfully, refreshing content list...');
-        // Refresh the content list to show the new processing item
-        await fetchAllGenerationRequests();
-        
-        console.log('[Setup] Regeneration started, navigating to content detail page with ID:', result.content_id);
-        toast.info('Redirecting to track regeneration progress...', { autoClose: 2000 });
-        
-        // Small delay to let the user see the toast before navigation
-        setTimeout(() => {
-          router.push(`/dashboard/magic-publishing/content/${result.content_id}`);
-        }, 1000);
-      } else {
-        // Fallback to general content page if no content_id
-        console.log('[Setup] No content_id returned, navigating to general content page...');
-        setTimeout(() => {
-          router.push('/dashboard/magic-publishing/content');
-        }, 1000);
-      }
-      
-    } catch (error) {
-      console.error('Error in regenerate:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      toast.error(`Failed to regenerate content: ${errorMessage}`);
-    }
-  };
 
   // Show loading state while user data is being fetched
   if (userLoading) {
@@ -772,180 +682,26 @@ const MagicPublishingSetup = () => {
                     Clear
                   </button>
                   
-                  {!generationComplete ? (
-                    <button
-                      onClick={handleStartMagic}
-                      disabled={isUpdatingUser || isGenerating}
-                      className="px-6 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                    >
-                      {isUpdatingUser ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Updating Profile...</span>
-                        </>
-                      ) : isGenerating ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Generating Content...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4" />
-                          <span>Start Magic & Generate Content</span>
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleModifyResults}
-                      className="px-6 py-2 bg-[#cf3232] text-white rounded-lg hover:bg-red-700 transition-colors"
-                    >
-                      Modify Results
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Modify Results Form */}
-            {showModifyForm && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h3 className="text-xl font-bold text-[#101117] mb-6">Modify Generation Parameters</h3>
-                
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Article Count</label>
-                      <input
-                        type="number"
-                        value={generationParams.article_count}
-                        onChange={(e) => setGenerationParams(prev => ({
-                          ...prev,
-                          article_count: parseInt(e.target.value) || 200
-                        }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                        min="1"
-                        max="1000"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Article Length</label>
-                      <input
-                        type="number"
-                        value={generationParams.article_length}
-                        onChange={(e) => setGenerationParams(prev => ({
-                          ...prev,
-                          article_length: parseInt(e.target.value) || 2000
-                        }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                        min="500"
-                        max="5000"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Tone</label>
-                      <select
-                        value={generationParams.tone}
-                        onChange={(e) => setGenerationParams(prev => ({
-                          ...prev,
-                          tone: e.target.value
-                        }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      >
-                        <option value="professional">Professional</option>
-                        <option value="casual">Casual</option>
-                        <option value="friendly">Friendly</option>
-                        <option value="authoritative">Authoritative</option>
-                        <option value="conversational">Conversational</option>
-                        <option value="technical">Technical</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Platform Optimization</label>
-                      <select
-                        value={generationParams.platform_optimization}
-                        onChange={(e) => setGenerationParams(prev => ({
-                          ...prev,
-                          platform_optimization: e.target.value
-                        }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      >
-                        <option value="general">General</option>
-                        <option value="linkedin">LinkedIn</option>
-                        <option value="twitter">Twitter/X</option>
-                        <option value="facebook">Facebook</option>
-                        <option value="instagram">Instagram</option>
-                        <option value="blog">Blog</option>
-                        <option value="newsletter">Newsletter</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end space-x-4 pt-6 mt-8 border-t border-gray-200">
                   <button
-                    onClick={() => setShowModifyForm(false)}
-                    className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleRegenerate}
-                    disabled={isGenerating}
+                    onClick={handleSaveProfile}
+                    disabled={isUpdatingUser}
                     className="px-6 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
                   >
-                    {isGenerating ? (
+                    {isUpdatingUser ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Regenerating...</span>
+                        <span>Saving Profile...</span>
                       </>
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4" />
-                        <span>Regenerate Content</span>
+                        <span>Save Profile</span>
                       </>
                     )}
                   </button>
                 </div>
               </div>
-            )}
-
-            {/* Error Display */}
-            {magicError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <div className="flex items-center">
-                  <div className="text-red-600 mr-3">
-                    <Info className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-red-800 font-medium">Generation Error</h4>
-                    <p className="text-red-700 text-sm mt-1">{magicError}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Success Message */}
-            {generationComplete && !showModifyForm && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center">
-                  <div className="text-green-600 mr-3">
-                    <Info className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-green-800 font-medium">Content Generation Complete!</h4>
-                    <p className="text-green-700 text-sm mt-1">
-                      Your articles have been generated successfully. You can now modify the parameters and regenerate if needed.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+            </div>
 
           </div>
         </main>

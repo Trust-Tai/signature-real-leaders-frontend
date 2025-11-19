@@ -732,26 +732,12 @@ const SignInPage: FC = () => {
   useEffect(() => {
     const checkExistingAuth = (): void => {
       try {
-        const token = localStorage.getItem("auth_token");
-        const userDataStr = localStorage.getItem("user_data");
-
-        if (token && userDataStr) {
-          const userData: UserData = JSON.parse(userDataStr);
-
-          if (userData.account_status === "pending_review") {
-            console.log('[Auth Check] Account pending review, redirecting to profile verification');
-            // Don't set redirect_to_step here - let profile-verification page handle the current step
-            router.replace('/profile-verification');
-            return;
-          }
-
-          // User is logged in and approved, redirect to dashboard
-          router.replace('/dashboard');
-          return;
-        }
+        // Allow login page access - don't auto-redirect
+        // User can manually access login page even if logged in
+        console.log('[Auth Check] Login page loaded - allowing access');
+        setIsCheckingAuth(false);
       } catch (error) {
         console.error("Error checking existing auth:", error);
-      } finally {
         setIsCheckingAuth(false);
       }
     };

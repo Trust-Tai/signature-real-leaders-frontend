@@ -28,10 +28,8 @@ export interface NewsletterSubscribers {
   success: boolean;
   data: {
     marketing_platform?: string;
-    subscribers: {
-      mailchimp?: Subscriber[];
-      [key: string]: Subscriber[] | undefined;
-    };
+    subscribers: Subscriber[];
+    secondary_newsletter?: Subscriber[];
     pagination: {
       page: number;
       per_page: number;

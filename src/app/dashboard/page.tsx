@@ -30,7 +30,8 @@ const Dashboard = () => {
           const userData = JSON.parse(userDataStr);
           if (userData.account_status === 'pending_review') {
             console.log('[Dashboard] Account pending review, redirecting to profile verification');
-            window.location.href = '/profile-verification?hideSteps=true&step=6';
+            // User cannot access dashboard until profile is complete
+            window.location.href = '/profile-verification';
             return; // Don't set isCheckingAuth to false, keep showing loading
           }
         }

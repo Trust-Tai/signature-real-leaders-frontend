@@ -212,6 +212,25 @@ export const api = {
     );
   },
 
+  async updateProfileWithFiles(authToken: string, formData: FormData) {
+    return request<{
+      success: boolean;
+      message: string;
+      updated_fields: string[];
+      user_id: number;
+    }>(
+      '/user/update-profile',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          // Don't set Content-Type - browser will set it with boundary for FormData
+        },
+        body: formData,
+      }
+    );
+  },
+
   async updatePassword(authToken: string, currentPassword: string, newPassword: string) {
     return request<{
       success: boolean;

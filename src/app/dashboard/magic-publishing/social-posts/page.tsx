@@ -7,22 +7,22 @@ import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { useRouter } from 'next/navigation';
 import { useMagicPublishing } from '@/hooks/useMagicPublishing';
-import CreateBookModal from '@/components/ui/CreateBookModal';
-import BooksList from './components/BooksList';
-import { GenerateBookRequest } from '@/lib/magicPublishingApi';
+import CreateSocialPostModal from './components/CreateSocialPostModal';
+import SocialPostsList from './components/SocialPostsList';
+import { GenerateSocialPostsRequest } from '@/lib/magicPublishingApi';
 
-const MagicPublishingBooks = () => {
+const MagicPublishingSocialPosts = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const router = useRouter();
 
-  // Function to trigger BooksList refresh - will be called when polling completes
-  const triggerBooksListRefresh = useCallback(() => {
-    console.log('[Books Page] Polling completion callback triggered! Refreshing BooksList...');
+  // Function to trigger SocialPostsList refresh - will be called when polling completes
+  const triggerSocialPostsListRefresh = useCallback(() => {
+    console.log('[Social Posts Page] Polling completion callback triggered! Refreshing SocialPostsList...');
     setRefreshTrigger(prev => {
       const newValue = prev + 1;
-      console.log('[Books Page] Setting refreshTrigger to:', newValue);
+      console.log('[Social Posts Page] Setting refreshTrigger to:', newValue);
       return newValue;
     });
   }, []);
@@ -30,47 +30,48 @@ const MagicPublishingBooks = () => {
   const {
     isGenerating,
     error,
-    handleGenerateBook,
+    handleGenerateSocialPosts,
     fetchAllGenerationRequests,
     clearError,
-  } = useMagicPublishing('book', triggerBooksListRefresh);
+  } = useMagicPublishing('social_posts', triggerSocialPostsListRefresh);
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
-    const loadBooks = async () => {
+    const loadSocialPosts = async () => {
       setIsInitialLoading(true);
       await fetchAllGenerationRequests();
       setIsInitialLoading(false);
     };
-    loadBooks();
+    loadSocialPosts();
   }, [fetchAllGenerationRequests]);
 
-  const handleCreateBook = async (params: GenerateBookRequest) => {
-    console.log('[Books Page] Starting book creation with params:', params);
-    const response = await handleGenerateBook(params);
-    console.log('[Books Page] Book generation response:', response);
+  const handleCreateSocialPost = async (params: GenerateSocialPostsRequest) => {
+    console.log('[Social Posts Page] Starting social post creation with params:', params);
+    const response = await handleGenerateSocialPosts(params);
+    console.log('[Social Posts Page] Social post generation response:', response);
     
     if (response) {
-      console.log('[Books Page] Generation started successfully, refreshing content list...');
+      console.log('[Social Posts Page] Generation started successfully, refreshing content list...');
       // Refresh the content list to show the new processing item
       await fetchAllGenerationRequests();
       
-      // Trigger BooksList refresh
+      // Trigger SocialPostsList refresh
       setRefreshTrigger(prev => prev + 1);
-      console.log('[Books Page] Content list refreshed, closing modal...');
+      console.log('[Social Posts Page] Content list refreshed, closing modal...');
       
       setIsCreateModalOpen(false);
     } else {
-      console.log('[Books Page] No response received from book generation');
+      console.log('[Social Posts Page] No response received from social post generation');
     }
   };
+
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
       <UserProfileSidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        currentPage="magic-publishing-books"
+        currentPage="magic-publishing-social-posts"
       />
 
       {/* Right Side (Header + Main Content + Footer) */}
@@ -101,7 +102,7 @@ const MagicPublishingBooks = () => {
                 className="text-[#101117] text-lg sm:text-xl font-semibold" 
                 style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}
               >
-                Magic Publishing (Books)
+                Magic Publishing (Social Posts)
               </h1>
             </div>
             
@@ -121,15 +122,9 @@ const MagicPublishingBooks = () => {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
-                    3
-                  </span> */}
                 </div>
                 <div className="relative">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
-                    16
-                  </span> */}
                 </div>
                 <UserProfileDropdown />
               </div>
@@ -143,7 +138,7 @@ const MagicPublishingBooks = () => {
               <input 
                 type="text" 
                 placeholder="Search here..." 
-                className="pl-10  pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
+                className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full font-outfit"
                 style={{ color: '#949494' }}
               />
             </div>
@@ -155,19 +150,20 @@ const MagicPublishingBooks = () => {
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             
             {/* Magic Publishing Header */}
-           
+         
 
-            {/* Book Ideas & Content Section */}
+
+            {/* Social Posts Section */}
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
-                <h3 className="text-lg sm:text-xl font-bold text-[#101117]">Book Ideas & Content</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-[#101117]">Social Posts</h3>
                 <button 
                   onClick={() => setIsCreateModalOpen(true)}
                   className="flex items-center justify-center space-x-2 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base w-full sm:w-auto"
                   disabled={isGenerating}
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Create New Book</span>
+                  <span>Generate Social Posts</span>
                 </button>
               </div>
 
@@ -186,7 +182,7 @@ const MagicPublishingBooks = () => {
                 </div>
               )}
 
-              {/* Books List */}
+              {/* Social Posts List */}
               {isInitialLoading ? (
                 <div className="flex flex-col items-center justify-center py-16">
                   <div className="relative mb-6">
@@ -195,9 +191,9 @@ const MagicPublishingBooks = () => {
                       <div className="animate-ping w-6 h-6 bg-[#cf3232] rounded-full opacity-75"></div>
                     </div>
                   </div>
-                  <h4 className="text-lg font-semibold text-[#101117] mb-2">Loading Books...</h4>
+                  <h4 className="text-lg font-semibold text-[#101117] mb-2">Loading Social Posts...</h4>
                   <p className="text-gray-500 text-center max-w-md mx-auto">
-                    Fetching your books from the server. This may take a moment.
+                    Fetching your social posts from the server. This may take a moment.
                   </p>
                   <div className="flex space-x-1 justify-center mt-4">
                     <span className="animate-bounce inline-block w-2 h-2 bg-[#cf3232] rounded-full" style={{ animationDelay: '0ms' }}></span>
@@ -206,7 +202,7 @@ const MagicPublishingBooks = () => {
                   </div>
                 </div>
               ) : (
-                <BooksList refreshTrigger={refreshTrigger} />
+                <SocialPostsList refreshTrigger={refreshTrigger} />
               )}
             </div>
 
@@ -217,15 +213,15 @@ const MagicPublishingBooks = () => {
         <DashBoardFooter />
       </div>
 
-      {/* Create Book Modal */}
-      <CreateBookModal
+      {/* Create Social Post Modal */}
+      <CreateSocialPostModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreateBook}
+        onSubmit={handleCreateSocialPost}
         isGenerating={isGenerating}
       />
     </div>
   );
 };
 
-export default MagicPublishingBooks;
+export default MagicPublishingSocialPosts;

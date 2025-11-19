@@ -17,12 +17,14 @@ interface InformationFormSectionProps {
   initialData?: {
     firstName?: string;
     lastName?: string;
+    email?: string;
   };
 }
 
 interface FormData {
   firstName: string;
   lastName: string;
+  email: string;
   companyName: string;
   companyWebsite: string;
   industry: string;
@@ -44,6 +46,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
+    email: '',
     companyName: '',
     companyWebsite: '',
     industry: '',
@@ -57,7 +60,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle initial data and auto-prefill first name and last name
+  // Handle initial data and auto-prefill first name, last name, and email
   useEffect(() => {
     if (initialData) {
       // If both firstName and lastName are provided separately, use them directly
@@ -65,7 +68,8 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
         setFormData(prev => ({
           ...prev,
           firstName: initialData.firstName || '',
-          lastName: initialData.lastName || ''
+          lastName: initialData.lastName || '',
+          email: initialData.email || ''
         }));
       } 
       // If only firstName is provided (from the name field), split it by spaces
@@ -77,7 +81,8 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
         setFormData(prev => ({
           ...prev,
           firstName,
-          lastName
+          lastName,
+          email: initialData.email || ''
         }));
       }
     }
@@ -222,8 +227,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           </div>
         </div>
 
-      
- 
+        {/* Email field hidden - kept in background for API submission */}
 
   {/* Row 2: Company Name & Company Website */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
@@ -272,8 +276,8 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
               dropdownClass="phone-input-dropdown"
               inputStyle={{
                 width: '100%',
-                height: '48px',
-                fontSize: '14px',
+                height: '80px',
+                fontSize: '20px',
                 paddingLeft: '48px',
                 borderRadius: '8px',
                 border: '1px solid #e5e7eb',
@@ -284,7 +288,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
                 borderRadius: '8px 0 0 8px',
                 border: '1px solid #e5e7eb',
                 backgroundColor: 'white',
-                height: '48px'
+                height: '80px'
               }}
               dropdownStyle={{
                 borderRadius: '8px',

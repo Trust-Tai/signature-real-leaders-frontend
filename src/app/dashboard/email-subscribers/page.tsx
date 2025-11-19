@@ -113,8 +113,8 @@ const EmailSubscribers = () => {
       
       if (subscribersResponse.success) {
         // Convert API subscribers to local format
-        // Handle the nested structure: subscribers.mailchimp is an array
-        const allSubscribers = subscribersResponse.data.subscribers.mailchimp || [];
+        // API returns subscribers as a direct array
+        const allSubscribers = subscribersResponse.data.subscribers || [];
         
         const localSubscribers: LocalSubscriber[] = allSubscribers.map((sub, index) => ({
           id: (page - 1) * 20 + index + 1,

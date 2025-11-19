@@ -3,18 +3,20 @@ import { useRouter } from 'next/navigation';
 import {
   generateArticles,
   generateBook,
+  generateSocialPosts,
   getGeneratedContent,
   getAllContent,
   deleteGeneratedContent,
   pollForCompletion,
   GenerateArticlesRequest,
   GenerateBookRequest,
+  GenerateSocialPostsRequest,
   GenerationRequest
 } from '@/lib/magicPublishingApi';
 import { toast } from '@/components/ui/toast';
 
 export const useMagicPublishing = (
-  contentType: 'articles' | 'book' = 'articles',
+  contentType: 'articles' | 'book' | 'social_posts' = 'articles',
   onPollingComplete?: () => void
 ) => {
   const router = useRouter();
@@ -53,6 +55,9 @@ export const useMagicPublishing = (
             } else if (item.content_type === 'book' && 'chapters' in item.generated_content && item.generated_content.chapters) {
               requestedCount = item.generated_content.chapters.length;
               generatedCount = item.generated_content.chapters.length;
+            } else if (item.content_type === 'social_posts' && 'social_posts' in item.generated_content && item.generated_content.social_posts) {
+              requestedCount = item.generated_content.social_posts.length;
+              generatedCount = item.generated_content.social_posts.length;
             }
           } else if (item.status === 'processing') {
             // For processing items, we might not have the final count yet
@@ -98,17 +103,11 @@ export const useMagicPublishing = (
       }
 
       console.log('[Hook] Starting article generation with params:', params);
-      toast.info('Starting article generation...', { autoClose: 2000 });
 
       const response = await generateArticles(params, token);
 
       if (response.success) {
         console.log('[Hook] Article generation started successfully:', response);
-
-        // Show success toast
-        toast.success(`Article generation started! Generating ${params.article_count} articles...`, {
-          autoClose: 3000
-        });
 
         // Add content ID to pending set
         setProcessingContentIds(prev => new Set([...prev, response.content_id.toString()]));
@@ -207,7 +206,6 @@ export const useMagicPublishing = (
       } else {
         console.error('[Hook] Failed to start article generation:', response);
         setError('Failed to start article generation');
-        toast.error('Failed to start article generation');
         setIsGenerating(false);
         return null;
       }
@@ -215,7 +213,6 @@ export const useMagicPublishing = (
       console.error('[Hook] Exception during article generation:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       setError(errorMessage);
-      toast.error(`Error: ${errorMessage}`);
       setIsGenerating(false);
       return null;
     }
@@ -417,6 +414,144 @@ export const useMagicPublishing = (
     }
   }, [fetchAllGenerationRequests, router, onPollingComplete]);
 
+  const handleGenerateSocialPosts = useCallback(async (params: GenerateSocialPostsRequest) => {
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setError('No authentication token found');
+        toast.error('Authentication token not found');
+        setIsGenerating(false);
+        router.push('/login');
+        return null;
+      }
+
+      console.log('[Hook] Starting social posts generation with params:', params);
+      toast.info('Starting social posts generation...', { autoClose: 2000 });
+
+      const response = await generateSocialPosts(params, token);
+
+      if (response.success) {
+        console.log('[Hook] Social posts generation started successfully:', response);
+
+        // Show success toast
+        toast.success(`Social posts generation started! Generating posts for ${params.platforms || 'all platforms'}...`, {
+          autoClose: 3000
+        });
+
+        // Add content ID to pending set
+        setProcessingContentIds(prev => new Set([...prev, response.content_id.toString()]));
+
+        // Create immediate UI feedback - add pending card
+        const newProcessingContent: GenerationRequest = {
+          id: response.content_id,
+          title: `Generating Social Posts: "${params.topic}"...`,
+          slug: `generating-social-posts-${response.content_id}`,
+          content_type: 'social_posts',
+          status: 'processing',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          request_id: response.request_id,
+          generated_content: false,
+          generated_content_json: '',
+          content_preview: `Generating social posts about "${params.topic}" with ${params.post_style || 'professional'} style...`,
+          content_summary: 'Social posts generation in progress...',
+          word_count: 0,
+          error_message: '',
+          tags: [],
+          categories: [],
+          // Legacy fields for backward compatibility
+          duration: '0s',
+          requested_count: 4, // LinkedIn, Twitter, Facebook, Instagram
+          generated_count: 0,
+          items_with_images: 0,
+          completion_percentage: 0,
+          generation_params: params as unknown as Record<string, unknown>,
+          preview: `Generating social posts about "${params.topic}" with ${params.post_style || 'professional'} style...`
+        };
+
+        // Add to the beginning of the list for immediate feedback
+        setGeneratedContents(prev => [newProcessingContent, ...prev]);
+
+        // Start polling for completion
+        pollForCompletion(
+          response.content_id.toString(),
+          (content) => {
+            console.log('[Hook] Polling update received:', content.status);
+            // Update the content in the list during polling
+            setGeneratedContents(prev =>
+              prev.map(item =>
+                item.id.toString() === content.id ? {
+                  ...item,
+                  status: content.status
+                } : item
+              )
+            );
+          },
+          (content) => {
+            console.log('[Hook] Social posts generation completed!', content);
+            // Content generation completed
+            setProcessingContentIds(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(content.id);
+              return newSet;
+            });
+
+            // Show completion toast
+            const postsCount = content.generated_content && 'social_posts' in content.generated_content ? content.generated_content.social_posts?.length || 0 : 0;
+            toast.success(`🎉 Social posts generated successfully! ${postsCount} posts ready for different platforms.`, {
+              autoClose: 5000
+            });
+
+            setIsGenerating(false);
+
+            // Call the polling complete callback if provided
+            if (onPollingComplete) {
+              console.log('[Hook] Social posts polling completed, calling callback to refresh SocialPostsList...');
+              onPollingComplete();
+            } else {
+              console.log('[Hook] No polling complete callback provided for social posts');
+            }
+          },
+          (errorMessage) => {
+            console.error('[Hook] Social posts generation failed:', errorMessage);
+            // Handle error
+            setError(errorMessage);
+            toast.error(`Generation failed: ${errorMessage}`);
+            setIsGenerating(false);
+
+            // Remove from pending set
+            setProcessingContentIds(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(response.content_id.toString());
+              return newSet;
+            });
+          },
+          fetchAllGenerationRequests, // Pass the refresh function
+          onPollingComplete
+        );
+
+        // Return the response so caller can access content_id
+        return response;
+      } else {
+        console.error('[Hook] Failed to start social posts generation:', response);
+        setError('Failed to start social posts generation');
+        toast.error('Failed to start social posts generation');
+        setIsGenerating(false);
+        return null;
+      }
+    } catch (error) {
+      console.error('[Hook] Exception during social posts generation:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(errorMessage);
+      toast.error(`Error: ${errorMessage}`);
+      setIsGenerating(false);
+      return null;
+    }
+  }, [fetchAllGenerationRequests, router, onPollingComplete]);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -428,6 +563,7 @@ export const useMagicPublishing = (
     processingContentIds,
     handleGenerateArticles,
     handleGenerateBook,
+    handleGenerateSocialPosts,
     handleDeleteContent,
     refreshContent,
     fetchAllGenerationRequests,

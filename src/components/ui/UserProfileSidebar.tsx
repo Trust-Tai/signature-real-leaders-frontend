@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { X, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon, Users, Wand2, BookOpen, Mic, ChevronDown, ChevronRight, FileText, Settings, HelpCircle } from 'lucide-react';
+import { X, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon, Users, Wand2, HelpCircle } from 'lucide-react';
 import { images } from '@/assets';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
@@ -20,15 +20,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   setSidebarOpen, 
   currentPage 
 }) => {
-  // Auto-expand Magic Publishing submenu when on any magic publishing page
-  const [magicPublishingOpen, setMagicPublishingOpen] = useState(
-    currentPage.startsWith('magic-publishing')
-  );
-  const router = useRouter()
-  // Update submenu state when currentPage changes
-  useEffect(() => {
-    setMagicPublishingOpen(currentPage.startsWith('magic-publishing'));
-  }, [currentPage]);
+  const router = useRouter();
 
   const handleLogoClick = () => {
     // Navigate to WordPress site with auto-login
@@ -44,15 +36,6 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
     { icon: SquarePlus, label: 'Analytics', path: '/dashboard/analytics', page: 'analytics', tourId: 'analytics' },
     { icon: HelpCircle, label: 'Help', path: '/dashboard/help', page: 'help', tourId: 'help' }
   ];
-
-  const magicPublishingItems = [
-    { icon: Settings, label: 'Setup', path: '/dashboard/magic-publishing/setup', page: 'magic-publishing-setup', badge: null },
-    { icon: FileText, label: 'Content', path: '/dashboard/magic-publishing/content', page: 'magic-publishing-content', badge: 'Beta' },
-    { icon: BookOpen, label: 'Books', path: '/dashboard/magic-publishing/books', page: 'magic-publishing-books', badge: 'Beta' },
-    { icon: Mic, label: 'Podcasts', path: '/dashboard/magic-publishing/podcasts', page: 'magic-publishing-podcasts', badge: 'Coming Soon' }
-  ];
-
-
 
   return (
     <>
@@ -118,11 +101,14 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
               </div>
             ))}
 
-            {/* Magic Publishing Section */}
+            {/* Magic Publishing - Single Menu Item */}
             <div className="mt-6">
-              <button
+              <div
                 data-tour="magic-publishing"
-                onClick={() => setMagicPublishingOpen(!magicPublishingOpen)}
+                onClick={() => {
+                  setSidebarOpen(false);
+                  router.push('/dashboard/magic-publishing');
+                }}
                 className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
                   currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
                 }`}
@@ -134,44 +120,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                     Beta
                   </span>
                 </div>
-                {(magicPublishingOpen || currentPage.startsWith('magic-publishing')) ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
-                )}
-              </button>
-
-              {/* Magic Publishing Sub-menu - Always show when on magic publishing pages */}
-              {(magicPublishingOpen || currentPage.startsWith('magic-publishing')) && (
-                <div className="ml-6 mt-2 space-y-1">
-                  {magicPublishingItems.map((item, index) => (
-                    <div 
-                      key={index}
-                      className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
-                        currentPage === item.page ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                      }`}
-                      onClick={() => {
-                        setSidebarOpen(false)
-                        router.push(`${item.path}`)
-                      }}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <item.icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-sm">{item.label}</span>
-                      </div>
-                      {item.badge && (
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                          item.badge === 'Beta' 
-                            ? 'bg-blue-500/20 text-blue-300' 
-                            : 'bg-yellow-500/20 text-yellow-300'
-                        }`}>
-                          {item.badge}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+              </div>
             </div>
           </nav>
         </div>

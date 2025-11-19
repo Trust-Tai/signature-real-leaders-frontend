@@ -1,3 +1,4 @@
+'use client'
 import React from 'react';
 import Image from 'next/image';
 import { Sparkles, FileText, MessageSquare, Mic, Megaphone, Mail, Video, BookOpen } from 'lucide-react';
@@ -51,9 +52,9 @@ export default function ContentGenerator() {
       icon: <MessageSquare className="h-8 w-8" />,
       title: "Social Posts",
       description: "Create engaging social media content for LinkedIn, Twitter, and more",
-      path: "/content/social",
+      path: "/dashboard/magic-publishing/social-posts",
       bgImage: socialImg,
-      status: "coming-soon"
+      status: "beta"
     },
     {
       icon: <Megaphone className="h-8 w-8" />,
@@ -195,7 +196,11 @@ export default function ContentGenerator() {
                 and automated weekly content generation.
               </p>
               <button
-                onClick={() => console.log('Complete profile clicked')}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.href = '/dashboard/magic-publishing/setup';
+                  }
+                }}
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold h-10 px-6 py-2 text-white transition-colors hover:opacity-90"
                 style={{ background: BRAND_RED }}
               >

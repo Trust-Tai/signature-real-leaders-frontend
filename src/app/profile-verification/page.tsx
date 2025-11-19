@@ -21,31 +21,45 @@ import { toast } from '@/components/ui/toast';
 import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
 
 const InnerProfileVerificationPage = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  // Initialize currentStep from localStorage if available
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const redirectStep = localStorage.getItem('redirect_to_step');
+      
+      if (redirectStep) {
+        console.log('[Profile Verification Init] Using redirect_to_step:', redirectStep);
+        localStorage.removeItem('redirect_to_step');
+        // Clear saved step when using redirect_to_step (fresh social login)
+        localStorage.removeItem('profile_verification_current_step');
+        return parseInt(redirectStep, 10);
+      }
+      
+      // Don't restore saved step - always start fresh at step 1
+      // This ensures user starts from beginning when manually accessing profile-verification
+      console.log('[Profile Verification Init] Starting at step 1');
+      localStorage.removeItem('profile_verification_current_step');
+    }
+    return 1; // Default to step 1
+  });
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showCodeVerification, setShowCodeVerification] = useState(false);
   
-  // Check localStorage for redirect step on mount and when page becomes visible
+  // Don't save current step to localStorage
+  // User should always start fresh when accessing profile-verification
+  // Only social login with redirect_to_step should set the step
+  
+  // Check for redirect step when page becomes visible
   React.useEffect(() => {
-    const checkRedirectStep = () => {
-      if (typeof window !== 'undefined') {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && typeof window !== 'undefined') {
         const redirectStep = localStorage.getItem('redirect_to_step');
         if (redirectStep) {
-          console.log('[Profile Verification] Found redirect_to_step:', redirectStep);
+          console.log('[Profile Verification] Found redirect_to_step on visibility change:', redirectStep);
           const step = parseInt(redirectStep, 10);
           setCurrentStep(step);
-          localStorage.removeItem('redirect_to_step'); // Clear after reading
+          localStorage.removeItem('redirect_to_step');
         }
-      }
-    };
-    
-    // Check immediately on mount
-    checkRedirectStep();
-    
-    // Also check when page becomes visible (in case of navigation)
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        checkRedirectStep();
       }
     };
     
@@ -329,11 +343,12 @@ const InnerProfileVerificationPage = () => {
             onSubmit={(data) => {
               console.log('[Step 2] Information form data received, moving to signature step');
               
-              // Store all form data in context
+              // Store all form data in context including email
               setState(prev => ({
                 ...prev,
                 first_name: data.firstName,
                 last_name: data.lastName,
+                email: data.email || prev.email, // Use form email or keep existing
                 company_name: data.companyName,
                 company_website: data.companyWebsite,
                 industry: data.industry,
@@ -349,7 +364,8 @@ const InnerProfileVerificationPage = () => {
             }}
             initialData={{
               firstName: state.first_name,
-              lastName: state.last_name
+              lastName: state.last_name,
+              email: state.email
             }}
           />
         );
@@ -371,6 +387,12 @@ const InnerProfileVerificationPage = () => {
 
                   // Prepare FormData for file upload
                   const formData = new FormData();
+                  
+                  // Add user_id from localStorage if available
+                  const userId = localStorage.getItem('user_id');
+                  if (userId) {
+                    formData.append('user_id', userId);
+                  }
                   
                   // Add all text fields
                   if (state.first_name) formData.append('firstName', state.first_name);
@@ -483,15 +505,27 @@ const InnerProfileVerificationPage = () => {
                     return;
                   }
                   
-                  console.log('[Step 4] ✅ Signature confirmed in FormData');
+                  console.log('[Step 3] ✅ Signature confirmed in FormData');
                   
-                  // Call API with FormData
-                  const result = await api.submitUserInfoWithFiles(authToken, formData);
+                  // Check if user came from social login (pending_review status)
+                  const userDataStr = localStorage.getItem('user_data');
+                  const isSocialLoginUser = userDataStr && JSON.parse(userDataStr).account_status === 'pending_review';
+                  
+                  let result;
+                  if (isSocialLoginUser) {
+                    // Use update-profile API for social login users with pending_review
+                    console.log('[Step 3] Social login user detected, using update-profile API');
+                    result = await api.updateProfileWithFiles(authToken, formData);
+                  } else {
+                    // Use submit-user-info API for regular users
+                    console.log('[Step 3] Regular user, using submit-user-info API');
+                    result = await api.submitUserInfoWithFiles(authToken, formData);
+                  }
                   
                   if (result.success) {
-                    console.log('[Step 4] Submission successful!');
+                    console.log('[Step 3] Submission successful!');
                     toast.success('Profile submitted successfully! Awaiting admin review.');
-                    nextStep(); // Move to pending review (step 5)
+                    nextStep(); // Move to pending review (step 4)
                   } else {
                     toast.error(result.message || 'Submission failed. Please try again.');
                   }

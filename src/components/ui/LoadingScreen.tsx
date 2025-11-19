@@ -23,9 +23,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ text1 = "", text2 = "" })
         </div>
         
         {/* Loading Spinner */}
-        <div className="flex justify-center mb-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#CF3232]"></div>
-        </div>
+       
         
         {/* Loading Text */}
         <div className="text-[#fff] text-lg font-medium">

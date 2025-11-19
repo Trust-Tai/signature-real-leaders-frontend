@@ -23,8 +23,20 @@ interface GenerationRequest {
   preview?: string;
 }
 
-const GeneratedArticlesList: React.FC = () => {
+interface GeneratedArticlesListProps {
+  refreshTrigger?: number;
+}
+
+const GeneratedArticlesList: React.FC<GeneratedArticlesListProps> = ({ refreshTrigger: externalRefreshTrigger }) => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Update internal refresh trigger when external one changes
+  useEffect(() => {
+    if (externalRefreshTrigger !== undefined && externalRefreshTrigger > 0) {
+      console.log('[GeneratedArticlesList] External refresh trigger changed to:', externalRefreshTrigger);
+      setRefreshTrigger(prev => prev + 1);
+    }
+  }, [externalRefreshTrigger]);
   
   // Function to trigger ArticlesList refresh - will be called when polling completes
   const triggerArticlesListRefresh = useCallback(() => {

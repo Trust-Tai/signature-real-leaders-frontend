@@ -177,7 +177,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
 
   // Effect for refresh trigger
   useEffect(() => {
-    if (refreshTrigger) {
+    if (refreshTrigger !== undefined && refreshTrigger > 0) {
       console.log('[ArticlesList] Refresh trigger changed to:', refreshTrigger, '- fetching articles...');
       fetchArticles();
     }

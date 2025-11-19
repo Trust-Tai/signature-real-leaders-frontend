@@ -30,6 +30,13 @@ interface BlueTemplateProps {
   handleLinkClick: (link: { url: string; display_name: string; name: string }) => void;
   getIconForLink: (linkName: string) => React.ReactNode;
   user: { username?: string } | null;
+  showNewsletterModal?: boolean;
+  setShowNewsletterModal?: (value: boolean) => void;
+  newsletterData?: { name: string; email: string; age: string };
+  setNewsletterData?: (value: { name: string; email: string; age: string }) => void;
+  newsletterLoading?: boolean;
+  handleNewsletterSubmit?: () => void;
+  handleNewsletterCheckboxChange?: (checked: boolean) => void;
 }
 
 export default function BlueTemplate({
@@ -42,7 +49,14 @@ export default function BlueTemplate({
   handleGoToDashboard,
   handleLinkClick,
   getIconForLink,
-  user
+  user,
+  showNewsletterModal,
+  setShowNewsletterModal,
+  newsletterData,
+  setNewsletterData,
+  newsletterLoading,
+  handleNewsletterSubmit,
+  handleNewsletterCheckboxChange
 }: BlueTemplateProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 flex items-center justify-center px-4 py-8">
@@ -128,15 +142,15 @@ export default function BlueTemplate({
           </div>
         </div>
 
-        {/* Newsletter Section - Only show if viewing someone else's profile */}
-        {user && user.username !== profileData.username && (
+        {/* Newsletter Section - Show for all users viewing someone else's profile */}
+        {(!user || user.username !== profileData.username) && (
           <div className="flex items-start mb-6 px-2">
             <input
               type="checkbox"
               id="newsletter-blue"
               checked={optIn}
-              onChange={(e) => setOptIn(e.target.checked)}
-              className="w-5 h-5 text-purple-600 bg-gray-100 border-gray-300 rounded mt-1 focus:ring-purple-500 flex-shrink-0"
+              onChange={(e) => handleNewsletterCheckboxChange ? handleNewsletterCheckboxChange(e.target.checked) : setOptIn(e.target.checked)}
+              className="w-5 h-5 text-purple-600 bg-gray-100 border-gray-300 rounded mt-1 focus:ring-purple-500 flex-shrink-0 cursor-pointer"
             />
             <label htmlFor="newsletter-blue" className="text-purple-200/90 text-base ml-3 leading-relaxed cursor-pointer">
               Join {profileData.full_name}&apos;s Newsletter – Get insights and updates delivered to your inbox
@@ -162,6 +176,95 @@ export default function BlueTemplate({
           </button>
         )}
       </div>
+
+      {/* Newsletter Modal for Non-Logged-In Users */}
+      {showNewsletterModal && setShowNewsletterModal && newsletterData && setNewsletterData && handleNewsletterSubmit && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowNewsletterModal(false)}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold text-gray-800">Subscribe to Newsletter</h2>
+              <button
+                onClick={() => setShowNewsletterModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              Join {profileData.full_name}&apos;s newsletter to receive insights and updates.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={newsletterData.name}
+                  onChange={(e) => setNewsletterData({ ...newsletterData, name: e.target.value })}
+                  placeholder="Enter your full name"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  value={newsletterData.email}
+                  onChange={(e) => setNewsletterData({ ...newsletterData, email: e.target.value })}
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Age *
+                </label>
+                <input
+                  type="number"
+                  value={newsletterData.age}
+                  onChange={(e) => setNewsletterData({ ...newsletterData, age: e.target.value })}
+                  placeholder="Enter your age"
+                  min="1"
+                  max="120"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowNewsletterModal(false)}
+                disabled={newsletterLoading}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleNewsletterSubmit}
+                disabled={newsletterLoading}
+                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {newsletterLoading ? 'Subscribing...' : 'Subscribe'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Menu, Users, Globe, BookOpen, Mic, Info, Loader2 } from 'lucide-react';
+import { Search, Bell, Menu, Users, Loader2, BookOpen } from 'lucide-react';
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
@@ -198,47 +198,7 @@ const BookContentPage = () => {
                     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
                         {/* Magic Publishing Header */}
-                        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-                                <div className="flex items-center space-x-2 sm:space-x-3">
-                                    <h2 className="text-xl sm:text-2xl font-bold text-[#101117]">Magic Publishing</h2>
-                                    <Info className="w-5 h-5 text-gray-400" />
-                                </div>
-                            </div>
-                            <p className="text-gray-600 mb-6 text-sm sm:text-base">Generate and manage your content across all platforms.</p>
-
-                            {/* Navigation Tabs */}
-                            <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg w-full sm:w-fit overflow-x-auto">
-                                <div
-                                    onClick={() => router.push("/dashboard/magic-publishing/setup")}
-                                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
-                                >
-                                    <Globe className="w-4 h-4" />
-                                    <span className="text-sm sm:text-base">Setup</span>
-                                </div>
-                                <div
-                                    onClick={() => router.push("/dashboard/magic-publishing/content")}
-                                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
-                                >
-                                    <Globe className="w-4 h-4" />
-                                    <span className="text-sm sm:text-base">Content</span>
-                                </div>
-                                <div
-                                    onClick={() => router.push("/dashboard/magic-publishing/books")}
-                                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md bg-[#CF3232] text-white transition-colors cursor-pointer whitespace-nowrap"
-                                >
-                                    <BookOpen className="w-4 h-4" />
-                                    <span className="text-sm sm:text-base">Books</span>
-                                </div>
-                                <div
-                                    onClick={() => router.push("/dashboard/magic-publishing/podcasts")}
-                                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors cursor-pointer whitespace-nowrap"
-                                >
-                                    <Mic className="w-4 h-4" />
-                                    <span className="text-sm sm:text-base">Podcasts</span>
-                                </div>
-                            </div>
-                        </div>
+                       
 
                         {/* Content Area */}
                         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">

@@ -89,6 +89,13 @@ export default function DynamicUserProfile() {
   const [optIn, setOptIn] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [showNewsletterModal, setShowNewsletterModal] = useState(false);
+  const [newsletterData, setNewsletterData] = useState({
+    name: '',
+    email: '',
+    age: ''
+  });
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
 
   // Check follow status
   const checkFollowStatus = useCallback(async (userId: number) => {
@@ -217,6 +224,76 @@ export default function DynamicUserProfile() {
     router.push('/dashboard');
   };
 
+  // Handle newsletter checkbox click
+  const handleNewsletterCheckboxChange = (checked: boolean) => {
+    // If user is not logged in, show modal
+    const authToken = localStorage.getItem('auth_token');
+    if (!authToken || !user) {
+      if (checked) {
+        setShowNewsletterModal(true);
+      }
+      setOptIn(false); // Keep checkbox unchecked for non-logged users
+    } else {
+      // Logged in user can directly check/uncheck
+      setOptIn(checked);
+    }
+  };
+
+  // Handle newsletter modal submit
+  const handleNewsletterSubmit = async () => {
+    if (!newsletterData.name || !newsletterData.email || !newsletterData.age) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newsletterData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    // Validate age
+    const ageNum = parseInt(newsletterData.age);
+    if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
+      toast.error('Please enter a valid age');
+      return;
+    }
+
+    try {
+      setNewsletterLoading(true);
+      
+      // Split name into first and last name
+      const nameParts = newsletterData.name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      // Import the newsletter API function
+      const { addNewsletterSubscriber } = await import('@/lib/newsletterApi');
+      
+      const payload = {
+        email: newsletterData.email,
+        first_name: firstName,
+        last_name: lastName
+      };
+      
+      const response = await addNewsletterSubscriber(payload);
+      
+      if (response.success) {
+        toast.success('Successfully subscribed to newsletter!');
+        setOptIn(true);
+        setShowNewsletterModal(false);
+        setNewsletterData({ name: '', email: '', age: '' });
+      }
+    } catch (error) {
+      console.error('Error subscribing to newsletter:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to subscribe to newsletter';
+      toast.error(errorMessage);
+    } finally {
+      setNewsletterLoading(false);
+    }
+  };
+
   // Handle link click with tracking
   const handleLinkClick = async (link: { url: string; display_name: string; name: string }) => {
     console.log('[Profile] Link clicked:', link);
@@ -306,6 +383,13 @@ export default function DynamicUserProfile() {
         handleLinkClick={handleLinkClick}
         getIconForLink={getIconForLink}
         user={user}
+        showNewsletterModal={showNewsletterModal}
+        setShowNewsletterModal={setShowNewsletterModal}
+        newsletterData={newsletterData}
+        setNewsletterData={setNewsletterData}
+        newsletterLoading={newsletterLoading}
+        handleNewsletterSubmit={handleNewsletterSubmit}
+        handleNewsletterCheckboxChange={handleNewsletterCheckboxChange}
       />
     );
   }
@@ -324,6 +408,13 @@ export default function DynamicUserProfile() {
         handleLinkClick={handleLinkClick}
         getIconForLink={getIconForLink}
         user={user}
+        showNewsletterModal={showNewsletterModal}
+        setShowNewsletterModal={setShowNewsletterModal}
+        newsletterData={newsletterData}
+        setNewsletterData={setNewsletterData}
+        newsletterLoading={newsletterLoading}
+        handleNewsletterSubmit={handleNewsletterSubmit}
+        handleNewsletterCheckboxChange={handleNewsletterCheckboxChange}
       />
     );
   }
@@ -341,6 +432,13 @@ export default function DynamicUserProfile() {
       handleLinkClick={handleLinkClick}
       getIconForLink={getIconForLink}
       user={user}
+      showNewsletterModal={showNewsletterModal}
+      setShowNewsletterModal={setShowNewsletterModal}
+      newsletterData={newsletterData}
+      setNewsletterData={setNewsletterData}
+      newsletterLoading={newsletterLoading}
+      handleNewsletterSubmit={handleNewsletterSubmit}
+      handleNewsletterCheckboxChange={handleNewsletterCheckboxChange}
     />
   );
 }
