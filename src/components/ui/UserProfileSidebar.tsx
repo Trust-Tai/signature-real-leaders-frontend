@@ -66,7 +66,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
       {/* Sidebar */}
       <aside className={`
-        bg-[#101117] w-64 flex flex-col fixed lg:static min-h-screen z-40 transition-transform duration-300 ease-in-out lg:transform-none
+        bg-[#101117] w-[280px] flex flex-col fixed lg:static min-h-screen z-40 transition-transform duration-300 ease-in-out lg:transform-none
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Mobile Close Button */}
@@ -130,6 +130,9 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                 <div className="flex items-center space-x-3">
                   <Wand2 className="w-5 h-5 flex-shrink-0" />
                   <span className="text-sm">Magic Publishing</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
+                    Beta
+                  </span>
                 </div>
                 {(magicPublishingOpen || currentPage.startsWith('magic-publishing')) ? (
                   <ChevronDown className="w-4 h-4" />

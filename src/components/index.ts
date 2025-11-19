@@ -21,6 +21,7 @@ export { default as SuccessMetricsSection } from './ui/SuccessMetricsSection';
 export { default as VerificationReviewSection } from './ui/VerificationReviewSection';
 export { default as PendingReviewSection } from './ui/PendingReviewSection';
 export { default as SimplifiedEmailVerificationSection } from './ui/SimplifiedEmailVerificationSection';
+export { default as CombinedEmailOtpSection } from './ui/CombinedEmailOtpSection';
 export { default as SocialLoginButtons } from './ui/SocialLoginButtons';
 export { default as ForgotEmailSection } from './ui/ForgotEmailSection';
 export { default as MobileMenuToggle } from './ui/MobileSidebarToggle';

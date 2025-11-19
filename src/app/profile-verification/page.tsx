@@ -6,13 +6,12 @@ import {
   RightImageSection,
   MainContent,
   PageHeader,
-  SimplifiedEmailVerificationSection,
-  CodeVerificationSection,
   PendingReviewSection,
   Step,
   MobileSidebarToggle,
   LoadingScreen
 } from '@/components';
+import CombinedEmailOtpSection from '@/components/ui/CombinedEmailOtpSection';
 import InformationFormSection from '@/components/ui/InformationFormSection';
 import SignSection from '@/components/ui/SignSection';
 import { OnboardingProvider, useOnboarding } from '@/components/OnboardingContext';
@@ -66,11 +65,10 @@ const InnerProfileVerificationPage = () => {
   const [resendResponseMessage, setResendResponseMessage] = useState<string | undefined>(undefined);
 
   const steps: Step[] = [
-    { id: 1, title: 'Email Verification', status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
-    { id: 2, title: 'Code Verification', status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
-    { id: 3, title: 'Information', status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending' },
-    { id: 4, title: 'Signature', status: currentStep === 4 ? 'current' : currentStep > 4 ? 'completed' : 'pending' },
-    { id: 5, title: 'Pending Review', status: currentStep === 5 ? 'current' : 'pending' }
+    { id: 1, title: 'Email & Code Verification', status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
+    { id: 2, title: 'Experience', status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
+    { id: 3, title: 'Signature', status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending' },
+    { id: 4, title: 'Complete', status: currentStep === 4 ? 'current' : 'pending' }
   ];
 
   const handleStepClick = (stepId: number) => {
@@ -78,7 +76,7 @@ const InnerProfileVerificationPage = () => {
     if (stepId <= currentStep) {
       setCurrentStep(stepId);
       
-      // Special handling for step 1 (Email) - reset email and verification state
+      // Special handling for step 1 (Email & OTP) - reset email and verification state
       if (stepId === 1) {
         setState(prev => ({ ...prev, email: undefined }));
         setShowCodeVerification(false);
@@ -86,13 +84,6 @@ const InnerProfileVerificationPage = () => {
         setResendResponseMessage(undefined);
         setError(undefined);
         console.log(`Navigated to step ${stepId} - reset email and verification state`);
-      }
-      // Special handling for step 2 (Code Verification) - reset OTP state
-      else if (stepId === 2) {
-        setInfoMessage(undefined);
-        setResendResponseMessage(undefined);
-        setError(undefined);
-        console.log(`Navigated to step ${stepId} - reset OTP state`);
       } else {
         console.log(`Navigated to step ${stepId}`);
       }
@@ -101,7 +92,7 @@ const InnerProfileVerificationPage = () => {
 
   const nextStep = () => {
     console.log('nextStep called, current step:', currentStep);
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       const newStep = currentStep + 1;
       console.log('Setting new step to:', newStep);
       setCurrentStep(newStep);
@@ -173,15 +164,17 @@ const InnerProfileVerificationPage = () => {
               // Use window.location for hard redirect to ensure dashboard loads properly
               window.location.href = '/dashboard';
             } else if (response.user.account_status === 'pending_review' || accountStatus === 'pending_review') {
-              console.log('[Social Callback] Account pending review, staying on current step...');
-              // Show toast message and stay on current step
-              toast.info('Your account is pending review. Please wait for admin approval.', { autoClose: 4000 });
+              console.log('[Social Callback] Account pending review, navigating to step 2 (Experience)...');
+              // Navigate to step 2 (Experience) for pending review users
+              setCurrentStep(2);
+              toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
               // Clean up URL
               window.history.replaceState({}, document.title, '/profile-verification');
             } else {
-              console.log('[Social Callback] Unknown status, staying on current step...');
-              // Stay on current step for unknown status
-              toast.info('Your account is pending review. Please wait for admin approval.', { autoClose: 4000 });
+              console.log('[Social Callback] Unknown status, navigating to step 2 (Experience)...');
+              // Navigate to step 2 for unknown status
+              setCurrentStep(2);
+              toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
               window.history.replaceState({}, document.title, '/profile-verification');
             }
           }
@@ -234,121 +227,56 @@ const InnerProfileVerificationPage = () => {
     console.log('renderCurrentStep called with currentStep:', currentStep);
     switch (currentStep) {
       case 1:
-        if (showCodeVerification) {
-          return (
-            <CodeVerificationSection
-              onVerify={async (code) => {
-                try {
-                  if (!state.email) return;
-                  setSendingCode(true);
-                  setError(undefined);
-                
-                  console.log('[Step 2] Verifying code with email', { email: state.email, code });
-                  const res = await api.verifyCode(state.email, code);
-                
-                  if (res.success && res.auth_token) {
-                    setState(prev => ({ ...prev, auth_token: res.auth_token }));
-                    console.log('[Step 2] Verified. Moving to pending review');
-                    nextStep();
-                  } else {
-                    setError(res.message || 'Invalid code');
-                  }
-                } catch (e: unknown) {
-                  const errorMessage = e instanceof Error ? e.message : 'Verification failed';
-                  setError(errorMessage);
-                } finally {
-                  setSendingCode(false);
-                }
-              }}
-              onResendCode={async () => {
-                try {
-                  if (!state.email) return;
-                  setSendingCode(true);
-                  setError(undefined);
-                  setResendResponseMessage(undefined);
-                  console.log('[Step 2] Resending verification code', { email: state.email });
-                  const res = await api.sendVerificationCode(state.email);
-                  if (res.message) {
-                    setResendResponseMessage(res.message);
-                  }
-                } catch (e: unknown) {
-                  const errorMessage = e instanceof Error ? e.message : 'Failed to resend';
-                  setError(errorMessage);
-                  setResendResponseMessage(errorMessage);
-                } finally {
-                  setSendingCode(false);
-                }
-              }}
-              isLoading={sendingCode}
-              error={error}
-              infoMessage={infoMessage}
-              resendResponseMessage={resendResponseMessage}
-            />
-          );
-        } else {
-          return (
-            <SimplifiedEmailVerificationSection
-              onSendCode={async (email) => {
-                try {
-                  setSendingCode(true);
-                  setError(undefined);
-                  console.log('[Step 1] Sending verification code', { email });
-                  const res = await api.sendVerificationCode(email);
-                 
-                  // Expect res.code to be 'sent_email' or 'email_exists'
-                  if (res.code === 'sent_email') {
-                    setState(prev => ({ ...prev, email }));
-                    setInfoMessage(res.message);
-                    console.log('[Step 1] Email verified: code sent. Showing OTP step');
-                    setShowCodeVerification(true);
-                    setCurrentStep(2);
-                  } else if (res.code === 'email_exists') {
-                    // Stay on same screen and show message
-                    setError(undefined);
-                    setInfoMessage(undefined);
-                    setState(prev => ({ ...prev, email }));
-                    console.log('[Step 1] Email exists. Staying on email screen with message');
-                    const msg = res.message || 'Email already exists';
-                    setError(msg);
-                    toast.warning(msg, { id: 'email-exists' });
-                  } else {
-                    // Fallback: treat as error
-                    const msg = res.message || 'Failed to send code';
-                    setError(msg);
-                    toast.error(msg, { id: 'send-code-error' });
-                  }
-                } catch (e: unknown) {
-                  const errorMessage = e instanceof Error ? e.message : 'Failed to send code';
-                  setError(errorMessage);
-                  toast.error(errorMessage, { id: 'send-code-exception'});
-                } finally {
-                  setSendingCode(false);
-                }
-              }}
-              onGoogleLogin={() => handleSocialLogin('google')}
-              onAppleLogin={() => handleSocialLogin('apple')}
-              onLinkedInLogin={() => handleSocialLogin('linkedin')}
-              error={error}
-              isLoading={sendingCode}
-            />
-          );
-        }
-      
-      case 2:
         return (
-          <CodeVerificationSection
+          <CombinedEmailOtpSection
+            onSendCode={async (email) => {
+              try {
+                setSendingCode(true);
+                setError(undefined);
+                console.log('[Step 1] Sending verification code', { email });
+                const res = await api.sendVerificationCode(email);
+               
+                // Expect res.code to be 'sent_email' or 'email_exists'
+                if (res.code === 'sent_email') {
+                  setState(prev => ({ ...prev, email }));
+                  setInfoMessage(res.message);
+                  console.log('[Step 1] Email verified: code sent. Showing OTP input');
+                  setShowCodeVerification(true);
+                } else if (res.code === 'email_exists') {
+                  // Stay on same screen and show message
+                  setError(undefined);
+                  setInfoMessage(undefined);
+                  setState(prev => ({ ...prev, email }));
+                  console.log('[Step 1] Email exists. Staying on email screen with message');
+                  const msg = res.message || 'Email already exists';
+                  setError(msg);
+                  toast.warning(msg, { id: 'email-exists' });
+                } else {
+                  // Fallback: treat as error
+                  const msg = res.message || 'Failed to send code';
+                  setError(msg);
+                  toast.error(msg, { id: 'send-code-error' });
+                }
+              } catch (e: unknown) {
+                const errorMessage = e instanceof Error ? e.message : 'Failed to send code';
+                setError(errorMessage);
+                toast.error(errorMessage, { id: 'send-code-exception'});
+              } finally {
+                setSendingCode(false);
+              }
+            }}
             onVerify={async (code) => {
               try {
                 if (!state.email) return;
                 setSendingCode(true);
                 setError(undefined);
               
-                console.log('[Step 2] Verifying code with email', { email: state.email, code });
+                console.log('[Step 1] Verifying code with email', { email: state.email, code });
                 const res = await api.verifyCode(state.email, code);
               
                 if (res.success && res.auth_token) {
                   setState(prev => ({ ...prev, auth_token: res.auth_token }));
-                  console.log('[Step 2] Verified. Moving to pending review');
+                  console.log('[Step 1] Verified. Moving to next step');
                   nextStep();
                 } else {
                   setError(res.message || 'Invalid code');
@@ -366,7 +294,7 @@ const InnerProfileVerificationPage = () => {
                 setSendingCode(true);
                 setError(undefined);
                 setResendResponseMessage(undefined);
-                console.log('[Step 2] Resending verification code', { email: state.email });
+                console.log('[Step 1] Resending verification code', { email: state.email });
                 const res = await api.sendVerificationCode(state.email);
                 if (res.message) {
                   setResendResponseMessage(res.message);
@@ -379,23 +307,27 @@ const InnerProfileVerificationPage = () => {
                 setSendingCode(false);
               }
             }}
-            isLoading={sendingCode}
+            onGoogleLogin={() => handleSocialLogin('google')}
+            onAppleLogin={() => handleSocialLogin('apple')}
+            onLinkedInLogin={() => handleSocialLogin('linkedin')}
             error={error}
+            isLoading={sendingCode}
             infoMessage={infoMessage}
             resendResponseMessage={resendResponseMessage}
+            showOtpInput={showCodeVerification}
           />
         );
       
-      case 3:
+      case 2:
         return (
           <InformationFormSection
             onBack={() => {
-              console.log('[Step 3] Going back to step 1');
+              console.log('[Step 2] Going back to step 1');
               setCurrentStep(1);
               setShowCodeVerification(false);
             }}
             onSubmit={(data) => {
-              console.log('[Step 3] Information form data received, moving to signature step');
+              console.log('[Step 2] Information form data received, moving to signature step');
               
               // Store all form data in context
               setState(prev => ({
@@ -422,10 +354,10 @@ const InnerProfileVerificationPage = () => {
           />
         );
       
-      case 4:
+      case 3:
         return (
           <SignSection
-            onBack={() => setCurrentStep(3)}
+            onBack={() => setCurrentStep(2)}
             onSubmit={async (signData) => {
                 try {
                   console.log('[Step 4] Submitting all data to API...');
@@ -574,12 +506,12 @@ const InnerProfileVerificationPage = () => {
             />
         );
       
-      case 5:
+      case 4:
         return <PendingReviewSection />;
       
       default:
         return (
-          <SimplifiedEmailVerificationSection
+          <CombinedEmailOtpSection
             onSendCode={async (email) => {
               try {
                 setSendingCode(true);
@@ -590,9 +522,8 @@ const InnerProfileVerificationPage = () => {
                 if (res.code === 'sent_email') {
                   setState(prev => ({ ...prev, email }));
                   setInfoMessage(res.message);
-                  console.log('[Step 1] Email verified: code sent. Showing OTP step');
+                  console.log('[Step 1] Email verified: code sent. Showing OTP input');
                   setShowCodeVerification(true);
-                  setCurrentStep(2);
                 } else if (res.code === 'email_exists') {
                   setError(undefined);
                   setInfoMessage(undefined);
@@ -613,11 +544,56 @@ const InnerProfileVerificationPage = () => {
                 setSendingCode(false);
               }
             }}
+            onVerify={async (code) => {
+              try {
+                if (!state.email) return;
+                setSendingCode(true);
+                setError(undefined);
+              
+                console.log('[Step 1] Verifying code with email', { email: state.email, code });
+                const res = await api.verifyCode(state.email, code);
+              
+                if (res.success && res.auth_token) {
+                  setState(prev => ({ ...prev, auth_token: res.auth_token }));
+                  console.log('[Step 1] Verified. Moving to next step');
+                  nextStep();
+                } else {
+                  setError(res.message || 'Invalid code');
+                }
+              } catch (e: unknown) {
+                const errorMessage = e instanceof Error ? e.message : 'Verification failed';
+                setError(errorMessage);
+              } finally {
+                setSendingCode(false);
+              }
+            }}
+            onResendCode={async () => {
+              try {
+                if (!state.email) return;
+                setSendingCode(true);
+                setError(undefined);
+                setResendResponseMessage(undefined);
+                console.log('[Step 1] Resending verification code', { email: state.email });
+                const res = await api.sendVerificationCode(state.email);
+                if (res.message) {
+                  setResendResponseMessage(res.message);
+                }
+              } catch (e: unknown) {
+                const errorMessage = e instanceof Error ? e.message : 'Failed to resend';
+                setError(errorMessage);
+                setResendResponseMessage(errorMessage);
+              } finally {
+                setSendingCode(false);
+              }
+            }}
             onGoogleLogin={() => handleSocialLogin('google')}
             onAppleLogin={() => handleSocialLogin('apple')}
             onLinkedInLogin={() => handleSocialLogin('linkedin')}
             error={error}
             isLoading={sendingCode}
+            infoMessage={infoMessage}
+            resendResponseMessage={resendResponseMessage}
+            showOtpInput={showCodeVerification}
           />
         );
     }
@@ -683,7 +659,7 @@ const InnerProfileVerificationPage = () => {
 
             <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] max-w-2xl`}>
               {/* Header */}
-             {currentStep !== 5 && (
+             {currentStep !== 4 && (
     <PageHeader
       title="MAKE YOUR MARK"
       subtitle="with RealLeaders signature"

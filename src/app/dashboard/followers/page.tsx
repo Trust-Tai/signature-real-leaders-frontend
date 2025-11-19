@@ -224,7 +224,7 @@ const FollowersPage: React.FC = () => {
   const statsCards = useMemo(() => {
     if (!statsData || !statsData.stats) {
       return [
-        { number: '...', label: 'VERIFIED MEMBERS', description: 'All people following you', color: '#CF3232' },
+        { number: '...', label: 'MEMBERS', description: 'All people following you', color: '#CF3232' },
         { number: '...', label: 'NEW THIS MONTH', description: 'Members added this month', color: '#CF3232' },
         { number: '...', label: 'TOP COUNTRY', description: 'Most common member country', color: '#CF3232', smallText: true },
         { number: '...', label: 'TOP LOCATION', description: 'Most common member location', color: '#CF3232', smallText: true },
@@ -238,7 +238,7 @@ const FollowersPage: React.FC = () => {
     const topLocation = stats.top_location?.name || 'N/A';
 
     return [
-      { number: total, label: 'VERIFIED MEMBERS', description: 'All people following you', color: '#CF3232' },
+      { number: total, label: 'MEMBERS', description: 'All people following you', color: '#CF3232' },
       { number: newThisMonth, label: 'NEW THIS MONTH', description: 'Members added this month', color: '#CF3232' },
       { number: topCountry, label: 'TOP COUNTRY', description: 'Most common member country', color: '#CF3232', smallText: true },
       { number: topLocation, label: 'TOP LOCATION', description: 'Most common member location', color: '#CF3232', smallText: true },
@@ -311,7 +311,7 @@ const FollowersPage: React.FC = () => {
                 <Menu className="w-6 h-6 text-gray-600" />
               </button>
               <h1 className="text-[#101117] text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                Verified Members
+                Members
               </h1>
             </div>
             <div className="flex items-center space-x-4">

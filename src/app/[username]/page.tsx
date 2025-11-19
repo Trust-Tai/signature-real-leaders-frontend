@@ -176,13 +176,14 @@ export default function DynamicUserProfile() {
 
   // Handle follow/unfollow button click
   const handleFollowToggle = async () => {
-    if (!profileData || !user) return;
-
+    // Check if user is logged in first
     const authToken = localStorage.getItem('auth_token');
-    if (!authToken) {
-      toast.error('Please log in to follow users');
+    if (!authToken || !user) {
+      toast.error('You are not logged in');
       return;
     }
+
+    if (!profileData) return;
 
     try {
       setFollowLoading(true);

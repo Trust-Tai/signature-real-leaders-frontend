@@ -739,8 +739,8 @@ const SignInPage: FC = () => {
           const userData: UserData = JSON.parse(userDataStr);
 
           if (userData.account_status === "pending_review") {
-            console.log('[Auth Check] Account pending review, redirecting to profile verification step 6');
-            localStorage.setItem("redirect_to_step", "6");
+            console.log('[Auth Check] Account pending review, redirecting to profile verification');
+            // Don't set redirect_to_step here - let profile-verification page handle the current step
             router.replace('/profile-verification');
             return;
           }
@@ -811,8 +811,9 @@ const SignInPage: FC = () => {
 
               // Check account status
               if (response.user.account_status === "pending_review") {
-                console.log('[Social Callback] Account pending review, redirecting to profile verification step 6');
-                localStorage.setItem("redirect_to_step", "6");
+                console.log('[Social Callback] Account pending review, redirecting to profile verification step 2 (Experience)');
+                toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+                localStorage.setItem("redirect_to_step", "2");
                 router.replace('/profile-verification');
                 return;
               }
@@ -828,7 +829,7 @@ const SignInPage: FC = () => {
             }
           } else if (accountStatus === "pending_review") {
             // New signup - account pending review
-            console.log('[Social Callback] New signup - pending review, redirecting to profile verification step 6');
+            console.log('[Social Callback] New signup - pending review, redirecting to profile verification step 2 (Experience)');
             
             // Store user data
             if (tempToken && userId) {
@@ -836,7 +837,8 @@ const SignInPage: FC = () => {
               localStorage.setItem("user_id", userId);
             }
             
-            localStorage.setItem("redirect_to_step", "6");
+            toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+            localStorage.setItem("redirect_to_step", "2");
             router.replace('/profile-verification');
           } else if (accountStatus === "approved") {
             // Account approved but not logged in yet - fetch token
@@ -930,8 +932,9 @@ const SignInPage: FC = () => {
         }
 
         if (data?.user?.account_status === "pending_review") {
-          console.log('[Password Login] Account pending review, redirecting to profile verification step 6');
-          localStorage.setItem("redirect_to_step", "6");
+          console.log('[Password Login] Account pending review, redirecting to profile verification step 2 (Experience)');
+          toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+          localStorage.setItem("redirect_to_step", "2");
           router.replace('/profile-verification');
           return;
         }
@@ -979,8 +982,9 @@ const SignInPage: FC = () => {
           }
 
           if (data?.user?.account_status === "pending_review") {
-            console.log('[OTP Verify] Account pending review, redirecting to profile verification step 6');
-            localStorage.setItem("redirect_to_step", "6");
+            console.log('[OTP Verify] Account pending review, redirecting to profile verification step 2 (Experience)');
+            toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+            localStorage.setItem("redirect_to_step", "2");
             router.replace('/profile-verification');
             return;
           }
