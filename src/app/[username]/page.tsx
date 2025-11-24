@@ -26,6 +26,8 @@ interface ProfileData {
   description: string;
   company_name: string;
   company_website: string;
+  rss_feed_url: string;
+  rss_feed_html: string;
   industry: string;
   newsletter_service: string;
   occupation: string;
@@ -127,8 +129,11 @@ export default function DynamicUserProfile() {
         
         if (response.success) {
           // Transform links to match the expected format
+          const profile = response.profile as Record<string, unknown>;
           const transformedProfile = {
             ...response.profile,
+            rss_feed_url: (profile.rss_feed_url as string) || '',
+            rss_feed_html: (profile.rss_feed_html as string) || '',
             links: response.profile.links?.map((link: {
               id?: number;
               key?: number;

@@ -17,6 +17,8 @@ interface User {
   last_name: string;
   company_name: string;
   company_website: string;
+  rss_feed_url: string;
+  rss_feed_html: string;
   industry: string;
   num_employees: string;
   email_list_size: string;
@@ -108,7 +110,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       clearTimeout(timeoutId);
       
       if (response.success) {
-        setUser(response.user);
+        const userData = response.user as Record<string, unknown>;
+        setUser({
+          ...response.user,
+          rss_feed_url: (userData.rss_feed_url as string) || '',
+          rss_feed_html: (userData.rss_feed_html as string) || ''
+        });
       } else {
         setError('Failed to fetch user details');
       }

@@ -11,7 +11,7 @@ import { api } from '@/lib/api';
 import {
   FaInstagram, FaTiktok, FaYoutube, FaSpotify, FaLinkedin, FaFacebook, FaPodcast, FaBlog, FaHandshake, FaHeart, FaXTwitter
 } from 'react-icons/fa6';
-import { FaMapMarkedAlt } from 'react-icons/fa';
+import { FaMapMarkedAlt, FaRss } from 'react-icons/fa';
 import { images } from '@/assets';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { countries } from '@/default/countries';
@@ -55,6 +55,7 @@ const ProfilePage = () => {
     occupation: string;
     companyName: string;
     companyWebsite: string;
+    rss_feed_url: string;
     industry: string;
     numberOfEmployees: string;
     contactEmailListSize: string;
@@ -141,7 +142,7 @@ const ProfilePage = () => {
     '65+'
   ];
 
-  // Suggested items for links
+  // Suggested items for links (RSS Feed removed - now a separate profile field)
   const suggestedItems: { label: string; icon: React.ReactNode; placeholder?: string }[] = [
     { label: 'Work With Me', icon: <FaHandshake style={{ color: '#1CA235' }} />, placeholder: 'https://your-website.com/work-with-me' },
     { label: 'Donations', icon: <FaHeart style={{ color: '#e74c3c' }} />, placeholder: 'https://donate.example.com/your-handle' },
@@ -434,6 +435,7 @@ const ProfilePage = () => {
         occupation: user.occupation || '',
         companyName: user.company_name || '',
         companyWebsite: user.company_website || '',
+        rss_feed_url: user.rss_feed_url || '',
         industry: user.industry || '',
         numberOfEmployees: user.num_employees || '',
         contactEmailListSize: user.email_list_size || '',
@@ -555,6 +557,7 @@ const ProfilePage = () => {
         updateData.occupation = informationData.occupation;
         updateData.companyName = informationData.companyName;
         updateData.companyWebsite = informationData.companyWebsite;
+        updateData.rss_feed_url = informationData.rss_feed_url;
         updateData.industry = informationData.industry;
         updateData.numEmployees = informationData.numberOfEmployees;
         updateData.emailListSize = informationData.contactEmailListSize;
@@ -979,7 +982,22 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                     </div>
                   </div>
 
-                  {/* Row 3: Industry & Number of Employees */}
+                  {/* Row 4: RSS Feed URL */}
+                  <div className="mb-[10]">
+                    <div className='firstVerifyScreen group relative'>
+                      <FaRss className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#FF6600] z-10" />
+                      <input
+                        type="url"
+                        value={informationData?.rss_feed_url || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, rss_feed_url: e.target.value } : null)}
+                        className="w-full pl-12 pr-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Add your RSS feed URL so followers can see your latest content"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 5: Industry & Number of Employees */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
                     <div className="relative firstVerifyScreen group">
                       <select

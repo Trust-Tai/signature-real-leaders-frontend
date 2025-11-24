@@ -9,6 +9,8 @@ interface BlueTemplateProps {
     username: string;
     occupation?: string;
     company_name?: string;
+    rss_feed_url?: string;
+    rss_feed_html?: string;
     audience_description?: string;
     profile_picture_url?: string;
     profile_image?: string;
@@ -124,6 +126,32 @@ export default function BlueTemplate({
             </div>
           )}
         </div>
+
+        {/* RSS Feed Button - if RSS URL exists */}
+        {profileData.rss_feed_url && (
+          <a
+            href={profileData.rss_feed_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block bg-gradient-to-r from-orange-500/30 to-orange-600/30 backdrop-blur-sm rounded-2xl p-4 mb-4 border border-orange-400/40 hover:from-orange-500/40 hover:to-orange-600/40 transition-all group shadow-lg"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="text-2xl">
+                  <svg className="w-6 h-6 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 3a1 1 0 000 2c5.523 0 10 4.477 10 10a1 1 0 102 0C17 8.373 11.627 3 5 3z"/>
+                    <path d="M4 9a1 1 0 011-1 7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 1 1 0 01-1-1zM3 15a2 2 0 114 0 2 2 0 01-4 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white font-semibold">RSS Feed</p>
+                  <p className="text-orange-200 text-sm">Subscribe to my content</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-orange-300 group-hover:text-white transition-colors" />
+            </div>
+          </a>
+        )}
 
         {/* Signature Section */}
         <div className="bg-purple-700/40 backdrop-blur-sm rounded-2xl p-4 mb-4 border border-purple-500/30 shadow-lg">
