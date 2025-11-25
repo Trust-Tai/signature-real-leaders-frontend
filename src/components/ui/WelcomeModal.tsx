@@ -42,17 +42,17 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStartTour, onClose
         {/* Content */}
         <div className="px-8 pb-8 text-center">
           <h2 className="text-2xl font-bold text-[#101117] mb-4 font-outfit">
-            Welcome to your Signature Dashboard
+            Welcome to Real Leaders Signature! 🎉
           </h2>
           
           <p className="text-gray-600 mb-2 font-outfit">
-            This is where you&apos;ll track page views, clicks, newsletter subscribers, verified members, and analytics. 
+            Your dashboard now starts with{' '}
+            <span className="text-[#CF3232] font-semibold">Magic Publishing</span>{' '}
+            - your AI-powered content creation engine.
           </p>
           
           <p className="text-gray-600 mb-6 font-outfit">
-            You can also use{' '}
-            <span className="text-[#CF3232] font-semibold">Magic Publishing</span>{' '}
-            to generate a full content engine tailored to your audience.
+            Track your analytics (page views, clicks, members) all in one place, manage your newsletter subscribers, and grow your brand with AI-generated content.
           </p>
 
           {/* Buttons */}

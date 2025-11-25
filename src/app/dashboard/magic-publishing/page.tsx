@@ -1,17 +1,117 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Bell, Menu, Users } from 'lucide-react';
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import ContentGenerator from '@/components/ui/ContentGenerator';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
+import { DashboardTour } from '@/components/ui/DashboardTour';
+import { WelcomeModal } from '@/components/ui/WelcomeModal';
 
 const MagicPublishingPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+
+  // Check if user should see welcome modal and tour
+  useEffect(() => {
+    const checkTourStatus = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+
+        // Fetch user details to check tour_guide status
+        const { api } = await import('@/lib/api');
+        const userResponse = await api.getUserDetails(token);
+        
+        if (userResponse.success && userResponse.user) {
+          const tourGuideStatus = userResponse.user.tour_guide;
+          
+          console.log('[Magic Publishing] Tour guide status from API:', tourGuideStatus);
+          
+          // Show welcome modal if tour_guide is false (first time user)
+          if (!tourGuideStatus) {
+            console.log('[Magic Publishing] First time user, showing welcome modal with tour guide');
+            setShowWelcomeModal(true);
+          }
+          
+          // Update localStorage with user data
+          localStorage.setItem('user_data', JSON.stringify(userResponse.user));
+        }
+      } catch (error) {
+        console.error('[Magic Publishing] Error checking tour status:', error);
+      }
+    };
+
+    checkTourStatus();
+  }, []);
+
+  const handleStartTour = useCallback(() => {
+    setShowTour(true);
+  }, []);
+
+  const handleWelcomeModalClose = useCallback(async () => {
+    setShowWelcomeModal(false);
+    
+    // Update tour_guide status in API when user closes/skips modal
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const { api } = await import('@/lib/api');
+        await api.updateTourGuideStatus(token);
+        console.log('[Magic Publishing] Tour guide status updated to true');
+        
+        // Update user_data in localStorage
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          userData.tour_guide = true;
+          localStorage.setItem('user_data', JSON.stringify(userData));
+        }
+      }
+    } catch (error) {
+      console.error('[Magic Publishing] Error updating tour guide status:', error);
+    }
+  }, []);
+
+  const handleTourComplete = useCallback(async () => {
+    setShowTour(false);
+    
+    // Update tour_guide status in API when tour completes
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const { api } = await import('@/lib/api');
+        await api.updateTourGuideStatus(token);
+        console.log('[Magic Publishing] Tour guide status updated to true after completion');
+        
+        // Update user_data in localStorage
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          userData.tour_guide = true;
+          localStorage.setItem('user_data', JSON.stringify(userData));
+        }
+      }
+    } catch (error) {
+      console.error('[Magic Publishing] Error updating tour guide status:', error);
+    }
+  }, []);
 
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+      {/* Welcome Modal */}
+      {showWelcomeModal && (
+        <WelcomeModal 
+          onStartTour={handleStartTour}
+          onClose={handleWelcomeModalClose}
+        />
+      )}
+
+      {/* Tour Guide */}
+      {showTour && <DashboardTour onComplete={handleTourComplete} />}
+
       <UserProfileSidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}

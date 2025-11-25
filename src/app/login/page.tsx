@@ -804,11 +804,11 @@ const SignInPage: FC = () => {
                 return;
               }
               
-              console.log('[Social Callback] Token stored, redirecting to dashboard...');
+              console.log('[Social Callback] Token stored, redirecting to Magic Publishing...');
               toast.success(message || "Login successful!");
               
               // Use replace instead of push to avoid back button issues
-              router.replace('/dashboard');
+              router.replace('/dashboard/magic-publishing');
             } else {
               console.error('[Social Callback] Invalid response from API');
               toast.error('Failed to complete login. Please try again.');
@@ -839,7 +839,7 @@ const SignInPage: FC = () => {
               localStorage.setItem("user_id", response.user.id.toString());
               
               toast.success(message || "Login successful!");
-              router.replace('/dashboard');
+              router.replace('/dashboard/magic-publishing');
             }
           } else {
             console.log('[Social Callback] Account not approved');
@@ -926,7 +926,7 @@ const SignInPage: FC = () => {
         }
 
         toast.success(data?.message || "Login successful!");
-        router.push('/dashboard');
+        router.push('/dashboard/magic-publishing');
       } else {
         toast.error(data?.message || "Invalid credentials");
       }
@@ -976,7 +976,7 @@ const SignInPage: FC = () => {
           }
 
           toast.success(data?.message || "Login successful!");
-          router.push('/dashboard');
+          router.push('/dashboard/magic-publishing');
         }
       } else {
         toast.error(data?.message || "Invalid code");

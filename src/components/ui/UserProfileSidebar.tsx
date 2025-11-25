@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, Mail, Eye, Send, SquarePlus, LayoutDashboardIcon, Users, Wand2, HelpCircle } from 'lucide-react';
+import { X, Mail, SquarePlus, Users, Wand2, HelpCircle } from 'lucide-react';
 import { images } from '@/assets';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
@@ -28,13 +28,9 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   };
 
   const sidebarItems = [
-    { icon: LayoutDashboardIcon, label: 'Dashboard', path: '/dashboard', page: 'dashboard', tourId: 'dashboard' },
-    { icon: Eye, label: 'Page Views', path: '/dashboard/page-views', page: 'page-views', tourId: 'page-views' },
-    { icon: Send, label: 'Page Clicks', path: '/dashboard/total-link-clicks', page: 'total-link-clicks', tourId: 'link-clicks' },
-    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
-    { icon: Users, label: 'Members', path: '/dashboard/followers', page: 'followers', tourId: 'followers' },
-    { icon: Users, label: 'Following', path: '/dashboard/following', page: 'following', tourId: 'following' },
     { icon: SquarePlus, label: 'Analytics', path: '/dashboard/analytics', page: 'analytics', tourId: 'analytics' },
+    { icon: Users, label: 'Following', path: '/dashboard/following', page: 'following', tourId: 'following' },
+    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
     { icon: HelpCircle, label: 'Help', path: '/dashboard/help', page: 'help', tourId: 'help' }
   ];
 
@@ -84,6 +80,30 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
         {/* Sidebar Nav */}
         <div className="p-6 flex-1">
           <nav className="space-y-2">
+            {/* Magic Publishing - Top Menu Item */}
+            <div
+              data-tour="magic-publishing"
+              onClick={() => {
+                setSidebarOpen(false);
+                router.push('/dashboard/magic-publishing');
+              }}
+              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
+                currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <Wand2 className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm">Magic Publishing</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
+                  Beta
+                </span>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-700 my-4"></div>
+
+            {/* Other Menu Items */}
             {sidebarItems.map((item, index) => (
               <div 
                 key={index}
@@ -101,28 +121,6 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                 <span className="text-sm">{item.label}</span>
               </div>
             ))}
-
-            {/* Magic Publishing - Single Menu Item */}
-            <div className="mt-6">
-              <div
-                data-tour="magic-publishing"
-                onClick={() => {
-                  setSidebarOpen(false);
-                  router.push('/dashboard/magic-publishing');
-                }}
-                className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
-                  currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <Wand2 className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm">Magic Publishing</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
-                    Beta
-                  </span>
-                </div>
-              </div>
-            </div>
           </nav>
         </div>
         

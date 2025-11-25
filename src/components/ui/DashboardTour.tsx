@@ -46,25 +46,13 @@ export const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete }) => {
       dialogMaxWidth: 400,
     });
 
-    // Define tour steps for sidebar menu items
+    // Define tour steps for sidebar menu items - Updated structure
     tg.addSteps([
       {
-        title: 'Dashboard Overview',
-        content: 'Welcome! This is your main dashboard where you can see all your key metrics at a glance - page views, clicks, subscribers, and verified members.',
-        target: '[data-tour="dashboard"]',
+        title: 'Magic Publishing - Your Default Dashboard',
+        content: 'Welcome! This is your new default landing page. Create AI-powered content, articles, books, and podcasts to grow your brand. This is your personal content creation engine!',
+        target: '[data-tour="magic-publishing"]',
         order: 1,
-      },
-      {
-        title: 'Page Views',
-        content: 'Monitor how many times your signature page has been viewed. Track your reach and visibility over time.',
-        target: '[data-tour="page-views"]',
-        order: 2,
-      },
-      {
-        title: 'Page Clicks',
-        content: 'See the combined total of clicks across all your links. Understand what content resonates most with your audience.',
-        target: '[data-tour="link-clicks"]',
-        order: 3,
       },
       {
         title: 'Newsletter Subscribers',
@@ -73,22 +61,22 @@ export const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete }) => {
         order: 4,
       },
       {
-        title: 'Verified Members',
-        content: 'See who is following you and engage with your audience. You can export your members list anytime for further analysis.',
-        target: '[data-tour="followers"]',
-        order: 5,
+        title: 'Following',
+        content: 'See the RSS feeds and profiles you are following. Stay updated with content from your network.',
+        target: '[data-tour="following"]',
+        order: 3,
       },
       {
-        title: 'Analytics',
-        content: 'Get detailed insights about your audience including countries, devices, age groups, and professional roles.',
+        title: 'Analytics Hub',
+        content: 'Your complete analytics center with 4 powerful tabs: Dashboard (overview), Page Views (traffic), Page Clicks (link performance), and Members (follower management). All your insights in one place!',
         target: '[data-tour="analytics"]',
-        order: 6,
+        order: 2,
       },
       {
-        title: 'Magic Publishing',
-        content: 'Create AI-powered content, books, and podcasts to grow your brand and engage your audience. Your personal content engine!',
-        target: '[data-tour="magic-publishing"]',
-        order: 7,
+        title: 'Help Center',
+        content: 'Need assistance? Access our help center for guides, FAQs, and support resources.',
+        target: '[data-tour="help"]',
+        order: 5,
       },
     ]);
 
