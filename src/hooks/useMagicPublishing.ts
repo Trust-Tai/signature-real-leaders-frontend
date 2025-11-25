@@ -160,11 +160,30 @@ export const useMagicPublishing = (
           },
           (content) => {
             console.log('[Hook] Content generation completed!', content);
+            console.log('[Hook] Completed content status:', content.status);
+            console.log('[Hook] Completed content ID:', content.id);
+            
             // Content generation completed
             setProcessingContentIds(prev => {
               const newSet = new Set(prev);
               newSet.delete(content.id);
+              console.log('[Hook] Removed from processing IDs:', content.id);
               return newSet;
+            });
+
+            // Update the content in the list with completed status
+            setGeneratedContents(prev => {
+              const updated = prev.map(item => {
+                if (item.id.toString() === content.id) {
+                  return {
+                    ...item,
+                    status: 'completed' as const
+                  };
+                }
+                return item;
+              });
+              console.log('[Hook] Updated generatedContents after completion, new status: completed');
+              return updated;
             });
 
             // Show completion toast
@@ -174,6 +193,10 @@ export const useMagicPublishing = (
             });
 
             setIsGenerating(false);
+
+            // Fetch all generation requests to ensure we have the latest data
+            console.log('[Hook] Fetching all generation requests after completion...');
+            fetchAllGenerationRequests();
 
             // Call the polling complete callback if provided
             if (onPollingComplete) {

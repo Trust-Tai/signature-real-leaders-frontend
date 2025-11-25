@@ -14,6 +14,9 @@ interface Article {
   content: string;
   hashtags: string;
   meta_description: string;
+  article_image?: string;
+  image_alt_text?: string;
+  image_description?: string;
 }
 
 interface ContentItem {
@@ -92,38 +95,29 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
       const response = await getAllContent('articles', token, options);
 
       if (response.success && response.data && response.data.content) {
-        console.log('[ArticlesList] Received content items:', response.data.content.length);
         const allArticles: Article[] = [];
         const allContentItems: ContentItem[] = response.data.content;
         
         // Process each content item - only get articles from completed ones
         response.data.content.forEach((contentItem: ContentItem) => {
-          console.log('Processing content item:', contentItem.id, 'Status:', contentItem.status, 'Generated content:', contentItem.generated_content);
-          
+          // Only process completed items for articles display
           if (contentItem.status === 'completed') {
             // Try to get articles from generated_content first
             if (contentItem.generated_content && typeof contentItem.generated_content === 'object') {
-              console.log('Generated content type:', typeof contentItem.generated_content, 'Content:', contentItem.generated_content);
-              
               // Check if generated_content has articles array
               if ('articles' in contentItem.generated_content && Array.isArray(contentItem.generated_content.articles)) {
-                console.log('Found articles array with', contentItem.generated_content.articles.length, 'articles');
                 allArticles.push(...contentItem.generated_content.articles);
               }
               // If generated_content is directly an article object
               else if ('title' in contentItem.generated_content && 'content' in contentItem.generated_content) {
-                console.log('Found direct article object');
                 allArticles.push(contentItem.generated_content as Article);
               }
             } 
             // Fallback to generated_content_json
             else if (contentItem.generated_content_json) {
-              console.log('Trying to parse generated_content_json');
               try {
                 const parsedContent = JSON.parse(contentItem.generated_content_json);
-                console.log('Parsed content:', parsedContent);
                 if (parsedContent.articles && Array.isArray(parsedContent.articles)) {
-                  console.log('Found articles in JSON with', parsedContent.articles.length, 'articles');
                   allArticles.push(...parsedContent.articles);
                 }
               } catch (parseError) {
@@ -132,8 +126,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
             }
           }
         });
-
-        console.log('[ArticlesList] Processed articles:', allArticles.length, 'Content items:', allContentItems.length);
+        
         setArticles(allArticles);
         setContentItems(allContentItems);
         
@@ -143,7 +136,6 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
           setTotalPages(response.data.pagination.total_pages);
           setTotalItems(response.data.pagination.total_items);
           setHasMore(response.data.pagination.has_more);
-          console.log('[ArticlesList] Pagination info:', response.data.pagination);
         }
       } else {
         setError('Failed to fetch articles');
@@ -178,7 +170,6 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
   // Effect for refresh trigger
   useEffect(() => {
     if (refreshTrigger !== undefined && refreshTrigger > 0) {
-      console.log('[ArticlesList] Refresh trigger changed to:', refreshTrigger, '- fetching articles...');
       fetchArticles();
     }
   }, [refreshTrigger, fetchArticles]);
@@ -248,7 +239,17 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
     return <NewsletterPage article={selectedArticle} onBack={handleBackToList} />;
   }
 
-  const processingItems = contentItems.filter(item => item.status === 'processing');
+  // Filter processing and failed items - ensure completed items are excluded
+  const processingItems = contentItems.filter(item => {
+    // Strictly check for processing status only
+    const isProcessing = item.status === 'processing';
+    // Double check: if item has generated_content with articles, it's NOT processing
+    if (item.generated_content && typeof item.generated_content === 'object' && 'articles' in item.generated_content) {
+      return false;
+    }
+    return isProcessing;
+  });
+  
   const failedItems = contentItems.filter(item => item.status === 'failed');
 
   return (
@@ -495,7 +496,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
 
           {articles.length > 0 && (
             <>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
                 <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">
                   Generated Articles ({articles.length})
                 </h2>
@@ -504,79 +505,132 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              {/* Google Docs Style Grid View */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {articles.map((article, index) => (
-                  <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                    {/* Article Header */}
-                    <div className="p-4 sm:p-6">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base sm:text-lg font-semibold text-[#101117] mb-2">
-                            {article.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-3">
-                            {article.meta_description}
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {article?.hashtags?.split(' ').filter(tag => tag.trim()).map((tag, tagIndex) => (
-                              <span key={tagIndex} className="px-2 py-1 bg-[#fee3e3] text-[#333333] text-xs rounded-full">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
+                  <div 
+                    key={index} 
+                    className="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col"
+                  >
+                    {/* Document Preview - Top Section */}
+                    <div className="relative bg-white border-b border-gray-200 h-48 overflow-hidden">
+                      {/* Article Image or Document Lines Preview */}
+                      {article.article_image && article.article_image.trim() !== '' ? (
+                        <img 
+                          src={article.article_image} 
+                          alt={article.image_alt_text || article.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Fallback to document lines if image fails to load
+                            e.currentTarget.style.display = 'none';
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              const fallback = document.createElement('div');
+                              fallback.className = 'p-4 space-y-2';
+                              fallback.innerHTML = `
+                                <div class="h-4 bg-gray-900 rounded w-3/4"></div>
+                                <div class="h-2 bg-gray-300 rounded w-full"></div>
+                                <div class="h-2 bg-gray-300 rounded w-5/6"></div>
+                                <div class="h-2 bg-gray-300 rounded w-full"></div>
+                                <div class="h-2 bg-gray-300 rounded w-4/5"></div>
+                                <div class="h-2 bg-gray-300 rounded w-full"></div>
+                                <div class="h-2 bg-gray-300 rounded w-3/4"></div>
+                              `;
+                              parent.appendChild(fallback);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className="p-4 space-y-2">
+                          <div className="h-4 bg-gray-900 rounded w-3/4"></div>
+                          <div className="h-2 bg-gray-300 rounded w-full"></div>
+                          <div className="h-2 bg-gray-300 rounded w-5/6"></div>
+                          <div className="h-2 bg-gray-300 rounded w-full"></div>
+                          <div className="h-2 bg-gray-300 rounded w-4/5"></div>
+                          <div className="h-2 bg-gray-300 rounded w-full"></div>
+                          <div className="h-2 bg-gray-300 rounded w-3/4"></div>
                         </div>
-                        <div className="flex items-center space-x-2 flex-shrink-0">
-                          <button
-                            onClick={() => handleCopyArticle(article)}
-                            className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-                            title="Copy article"
-                          >
-                            <Copy className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDownloadArticle(article, index)}
-                            className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-                            title="Download article"
-                          >
-                            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </button>
+                      )}
+                      
+                      {/* Hover Overlay with Actions */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyArticle(article);
+                          }}
+                          className="p-3 bg-white rounded-full hover:bg-gray-100 transition-colors shadow-lg"
+                          title="Copy article"
+                        >
+                          <Copy className="w-5 h-5 text-gray-700" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadArticle(article, index);
+                          }}
+                          className="p-3 bg-white rounded-full hover:bg-gray-100 transition-colors shadow-lg"
+                          title="Download article"
+                        >
+                          <Download className="w-5 h-5 text-gray-700" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Document Info - Bottom Section */}
+                    <div className="p-4 flex-1 flex flex-col">
+                      <h3 className="text-sm font-semibold text-[#101117] mb-2 line-clamp-2 flex-1">
+                        {article.title}
+                      </h3>
+                      
+                      {/* Document Icon and Date */}
+                      <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
+                        <div className="flex items-center space-x-1">
+                          <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                          </svg>
+                          <span>Article</span>
                         </div>
+                        <span>{new Date().toLocaleDateString()}</span>
                       </div>
 
-                      {/* Article Content - Always Visible */}
-                      <div className="mb-6">
-                        <div className="prose max-w-none">
-                          <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                            {article.content}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Preview Buttons */}
-                      <div className="flex flex-wrap gap-2 sm:gap-3 pt-4 border-t border-gray-100">
+                      {/* Preview Buttons - Compact */}
+                      <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
                         <button
-                          onClick={() => handlePreviewClick('linkedin', article)}
-                          className="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition-colors flex-1 sm:flex-none min-w-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePreviewClick('linkedin', article);
+                          }}
+                          className="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded transition-colors"
                         >
-                          <span className="hidden sm:inline">Preview for </span>LinkedIn
+                          LinkedIn
                         </button>
                         <button
-                          onClick={() => handlePreviewClick('twitter', article)}
-                          className="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition-colors flex-1 sm:flex-none min-w-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePreviewClick('twitter', article);
+                          }}
+                          className="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded transition-colors"
                         >
-                          <span className="hidden sm:inline">Preview for </span>X
+                          X
                         </button>
                         <button
-                          onClick={() => handlePreviewClick('facebook', article)}
-                          className="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition-colors flex-1 sm:flex-none min-w-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePreviewClick('facebook', article);
+                          }}
+                          className="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded transition-colors"
                         >
-                          <span className="hidden sm:inline">Preview for </span>Facebook
+                          Facebook
                         </button>
                         <button
-                          onClick={() => handlePreviewClick('newsletter', article)}
-                          className="px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex-1 sm:flex-none min-w-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePreviewClick('newsletter', article);
+                          }}
+                          className="px-2 py-1.5 bg-[#cf3232] hover:bg-red-700 text-white text-xs font-medium rounded transition-colors"
                         >
-                          <span className="hidden sm:inline">Preview for </span>Newsletter
+                          Newsletter
                         </button>
                       </div>
                     </div>

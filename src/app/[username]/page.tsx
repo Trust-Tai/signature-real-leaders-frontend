@@ -273,22 +273,44 @@ export default function DynamicUserProfile() {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
       
-      // Import the newsletter API function
-      const { addNewsletterSubscriber } = await import('@/lib/newsletterApi');
+      // Get auth token and user_id if available
+      const authToken = localStorage.getItem('auth_token');
+      const userDataStr = localStorage.getItem('user_data');
+      let userId = null;
       
-      const payload = {
-        email: newsletterData.email,
-        first_name: firstName,
-        last_name: lastName
-      };
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          userId = userData.id;
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+      }
       
-      const response = await addNewsletterSubscriber(payload);
+      // Call the newsletter API endpoint
+      const response = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+        },
+        body: JSON.stringify({
+          email: newsletterData.email,
+          first_name: firstName,
+          last_name: lastName,
+          ...(userId && { user_id: userId })
+        })
+      });
       
-      if (response.success) {
-        toast.success('Successfully subscribed to newsletter!');
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(data.message || 'Successfully subscribed to newsletter!');
         setOptIn(true);
         setShowNewsletterModal(false);
         setNewsletterData({ name: '', email: '', age: '' });
+      } else {
+        toast.error(data.message || 'Failed to subscribe to newsletter');
       }
     } catch (error) {
       console.error('Error subscribing to newsletter:', error);

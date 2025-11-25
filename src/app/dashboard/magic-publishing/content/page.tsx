@@ -19,8 +19,15 @@ const MagicPublishingContent = () => {
   const [topicSuggestions, setTopicSuggestions] = useState<TopicSuggestion[]>([]);
   const [showTopicModal, setShowTopicModal] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isCreatingArticle, setIsCreatingArticle] = useState(false);
 
-  const { handleGenerateArticles, fetchAllGenerationRequests } = useMagicPublishing('articles');
+  // Callback when polling completes - refresh the articles list
+  const handlePollingComplete = () => {
+    console.log('[Content Page] Polling completed, refreshing articles list...');
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const { handleGenerateArticles, fetchAllGenerationRequests } = useMagicPublishing('articles', handlePollingComplete);
 
   const BRAND_RED = "#E74B3B";
 
@@ -100,6 +107,7 @@ const MagicPublishingContent = () => {
         return;
       }
 
+      setIsCreatingArticle(true);
       console.log('[Content Page] Starting article generation with topic:', topic);
       toast.info('Starting article generation...', { autoClose: 2000 });
 
@@ -109,7 +117,7 @@ const MagicPublishingContent = () => {
       });
 
       if (response) {
-        console.log('[Content Page] Article generation started:', response);
+        console.log('[Content Page] Article generation started with content_id:', response.content_id);
         toast.success('Article generation started! Check the list below for progress.', { autoClose: 3000 });
         
         // Refresh the articles list to show processing item
@@ -122,6 +130,8 @@ const MagicPublishingContent = () => {
     } catch (error) {
       console.error('[Content Page] Article generation error:', error);
       toast.error('Error generating articles');
+    } finally {
+      setIsCreatingArticle(false);
     }
   };
 
@@ -217,7 +227,7 @@ const MagicPublishingContent = () => {
          
 
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 mb-6">
-              <h2 className="text-lg font-semibold text-neutral-900 mb-4">Generate Article</h2>
+              <h2 className="text-lg font-semibold text-neutral-900 mb-4">Create Your Article</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">
@@ -228,7 +238,7 @@ const MagicPublishingContent = () => {
                       type="text"
                       value={topic}
                       onChange={(e) => setTopic(e.target.value)}
-                      placeholder="Enter a topic or auto-generate one..."
+                      placeholder="Type a topic or click “Suggest a topic” to get ideas…"
                       className="flex h-10 w-full text-[#333333] rounded-md border border-input  px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1"
                       disabled={isGeneratingTopic}
                     />
@@ -242,19 +252,28 @@ const MagicPublishingContent = () => {
                       ) : (
                         <Sparkles className="h-4 w-4 mr-2" style={{ color: BRAND_RED }} />
                       )}
-                      Auto Generate Topic
+                     Suggest A Topic
                     </button>
                   </div>
                 </div>
 
                 <button
                   onClick={handleGenerateContent}
-                  disabled={!topic.trim()}
+                  disabled={!topic.trim() || isCreatingArticle}
                   style={{ background: BRAND_RED }}
                   className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 w-full text-white"
                 >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Generate Content
+                  {isCreatingArticle ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Create Article
+                    </>
+                  )}
                 </button>
               </div>
             </div>

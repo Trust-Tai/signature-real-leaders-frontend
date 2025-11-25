@@ -103,11 +103,10 @@ export default function ContentGenerator() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-neutral-900 mb-3">
-              What would you like to generate?
+             What are we creating today?
             </h2>
             <p className="text-neutral-600 max-w-2xl mx-auto">
-              Choose a content type below to start creating AI-powered thought leadership content 
-              tailored to your voice, audience, and goals.
+              Select a content type to start crafting AI-guided content tailored to your voice and audience
             </p>
           </div>
 

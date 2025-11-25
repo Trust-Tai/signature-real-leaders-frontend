@@ -3,7 +3,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { X, Mail, SquarePlus, Users, Wand2, HelpCircle } from 'lucide-react';
-import { images } from '@/assets';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { useRouter } from 'next/navigation';
@@ -124,15 +123,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
           </nav>
         </div>
         
-        <div className="p-6 hidden lg:block">
-          <button 
-            onClick={handleLogoClick}
-            className="hover:opacity-80 transition-opacity cursor-pointer"
-            title="Go to Real Leaders Website"
-          >
-            <Image src={images.realLeaders} alt='Real Leaders Logo' className='w-32 h-8 ml-[80]'/>
-          </button>
-        </div>
+        
       </aside>
     </>
   );

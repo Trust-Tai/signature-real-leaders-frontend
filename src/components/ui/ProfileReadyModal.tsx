@@ -100,9 +100,26 @@ export default function ProfileReadyModal({ isOpen, onClose, profileData, user }
       );
     }
 
+    // Get username from profileData or user object or localStorage
+    const getUsernameFromStorage = () => {
+      try {
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          return userData.username;
+        }
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+      return null;
+    };
+
+    const displayUsername = profileData.username || user?.username || getUsernameFromStorage() || 'username';
+    const displayFullName = profileData.full_name || 'User';
+
     const safeProfileData = {
-      full_name: profileData.full_name || 'User',
-      username: profileData.username || 'username',
+      full_name: displayFullName,
+      username: displayUsername,
       occupation: profileData.occupation as string | undefined,
       company_name: profileData.company_name as string | undefined,
       audience_description: profileData.audience_description as string | undefined,

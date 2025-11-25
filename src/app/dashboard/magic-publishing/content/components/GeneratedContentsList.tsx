@@ -83,24 +83,36 @@ const GeneratedArticlesList: React.FC<GeneratedArticlesListProps> = ({ refreshTr
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const processingContents = generatedContents.filter(content => content.status === 'processing');
+      // Filter processing contents with detailed logging
+      const processingContents = generatedContents.filter(content => {
+        const isProcessing = content.status === 'processing';
+        console.log(`[Auto-polling] Content ${content.id}: status="${content.status}", isProcessing=${isProcessing}`);
+        return isProcessing;
+      });
+
+      console.log(`[Auto-polling] Total contents: ${generatedContents.length}, Processing: ${processingContents.length}`);
 
       if (processingContents.length > 0) {
         console.log(`[Auto-polling] Refreshing ${processingContents.length} processing content at ${new Date().toLocaleTimeString()}`);
         setIsRefreshing(true);
 
         for (const content of processingContents) {
+          console.log(`[Auto-polling] Refreshing content ID: ${content.id}`);
           await refreshContent(content.id.toString());
         }
 
         setIsRefreshing(false);
+        
+        // After refresh, fetch all to ensure we have latest status
+        console.log('[Auto-polling] Fetching all generation requests after refresh...');
+        await fetchAllGenerationRequests();
       } else {
-        console.log('[Auto-polling] No processing content to refresh');
+        console.log('[Auto-polling] No processing content to refresh - all completed or failed');
       }
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [generatedContents, refreshContent]);
+  }, [generatedContents, refreshContent, fetchAllGenerationRequests]);
 
 
 
