@@ -38,8 +38,8 @@ interface DefaultTemplateProps {
   user: { username?: string } | null;
   showNewsletterModal?: boolean;
   setShowNewsletterModal?: (value: boolean) => void;
-  newsletterData?: { name: string; email: string; age: string };
-  setNewsletterData?: (value: { name: string; email: string; age: string }) => void;
+  newsletterData?: { first_name: string; last_name: string; email: string };
+  setNewsletterData?: (value: { first_name: string; last_name: string; email: string }) => void;
   newsletterLoading?: boolean;
   handleNewsletterSubmit?: () => void;
   handleNewsletterCheckboxChange?: (checked: boolean) => void;
@@ -316,13 +316,19 @@ export default function DefaultTemplate({
             {/* Newsletter Opt-in - Show for all users viewing someone else's profile */}
             {(!user || user.username !== profileData.username) && (
               <div className="flex items-start justify-center space-x-3 mb-4 px-4">
-                <input
-                  type="checkbox"
-                  id="newsletter-default"
-                  checked={optIn}
-                  onChange={(e) => handleNewsletterCheckboxChange ? handleNewsletterCheckboxChange(e.target.checked) : setOptIn(e.target.checked)}
-                  className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded mt-[5px] focus:ring-red-500 flex-shrink-0 cursor-pointer"
-                />
+                {newsletterLoading ? (
+                  <div className="w-4 h-4 mt-[5px] flex-shrink-0">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : (
+                  <input
+                    type="checkbox"
+                    id="newsletter-default"
+                    checked={optIn}
+                    onChange={(e) => handleNewsletterCheckboxChange ? handleNewsletterCheckboxChange(e.target.checked) : setOptIn(e.target.checked)}
+                    className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded mt-[5px] focus:ring-red-500 flex-shrink-0 cursor-pointer"
+                  />
+                )}
                 <label
                   htmlFor="newsletter-default"
                   className="text-start cursor-pointer"
@@ -400,13 +406,26 @@ export default function DefaultTemplate({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
+                  First Name *
                 </label>
                 <input
                   type="text"
-                  value={newsletterData.name}
-                  onChange={(e) => setNewsletterData({ ...newsletterData, name: e.target.value })}
-                  placeholder="Enter your full name"
+                  value={newsletterData.first_name}
+                  onChange={(e) => setNewsletterData({ ...newsletterData, first_name: e.target.value })}
+                  placeholder="Enter your first name"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  value={newsletterData.last_name}
+                  onChange={(e) => setNewsletterData({ ...newsletterData, last_name: e.target.value })}
+                  placeholder="Enter your last name"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-800"
                 />
               </div>
@@ -420,21 +439,6 @@ export default function DefaultTemplate({
                   value={newsletterData.email}
                   onChange={(e) => setNewsletterData({ ...newsletterData, email: e.target.value })}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Age *
-                </label>
-                <input
-                  type="number"
-                  value={newsletterData.age}
-                  onChange={(e) => setNewsletterData({ ...newsletterData, age: e.target.value })}
-                  placeholder="Enter your age"
-                  min="1"
-                  max="120"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-800"
                 />
               </div>

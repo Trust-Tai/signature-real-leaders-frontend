@@ -93,9 +93,9 @@ export default function DynamicUserProfile() {
   const [followLoading, setFollowLoading] = useState(false);
   const [showNewsletterModal, setShowNewsletterModal] = useState(false);
   const [newsletterData, setNewsletterData] = useState({
-    name: '',
-    email: '',
-    age: ''
+    first_name: '',
+    last_name: '',
+    email: ''
   });
   const [newsletterLoading, setNewsletterLoading] = useState(false);
 
@@ -230,7 +230,7 @@ export default function DynamicUserProfile() {
   };
 
   // Handle newsletter checkbox click
-  const handleNewsletterCheckboxChange = (checked: boolean) => {
+  const handleNewsletterCheckboxChange = async (checked: boolean) => {
     // If user is not logged in, show modal
     const authToken = localStorage.getItem('auth_token');
     if (!authToken || !user) {
@@ -239,14 +239,73 @@ export default function DynamicUserProfile() {
       }
       setOptIn(false); // Keep checkbox unchecked for non-logged users
     } else {
-      // Logged in user can directly check/uncheck
-      setOptIn(checked);
+      // Logged in user - make API call with their details
+      if (checked) {
+        try {
+          setNewsletterLoading(true);
+          
+          // Get user details from localStorage or user context
+          const userDataStr = localStorage.getItem('user_data');
+          let firstName = user.first_name || '';
+          let lastName = user.last_name || '';
+          let email = user.email || '';
+          let userId = user.id;
+          
+          // Try to get more complete data from localStorage if available
+          if (userDataStr) {
+            try {
+              const userData = JSON.parse(userDataStr);
+              firstName = userData.first_name || firstName;
+              lastName = userData.last_name || lastName;
+              email = userData.email || email;
+              userId = userData.id || userId;
+            } catch (e) {
+              console.error('Error parsing user data:', e);
+            }
+          }
+          
+          // Call the newsletter API endpoint
+          const response = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+              email: email,
+              first_name: firstName,
+              last_name: lastName,
+              user_id: userId
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            toast.success(data.message || 'Successfully subscribed to newsletter!');
+            setOptIn(true);
+          } else {
+            toast.error(data.message || 'Failed to subscribe to newsletter');
+            setOptIn(false);
+          }
+        } catch (error) {
+          console.error('Error subscribing to newsletter:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Failed to subscribe to newsletter';
+          toast.error(errorMessage);
+          setOptIn(false);
+        } finally {
+          setNewsletterLoading(false);
+        }
+      } else {
+        // Unchecking - just update state (no unsubscribe API for now)
+        setOptIn(false);
+      }
     }
   };
 
   // Handle newsletter modal submit
   const handleNewsletterSubmit = async () => {
-    if (!newsletterData.name || !newsletterData.email || !newsletterData.age) {
+    if (!newsletterData.first_name || !newsletterData.last_name || !newsletterData.email) {
       toast.error('Please fill in all fields');
       return;
     }
@@ -258,20 +317,8 @@ export default function DynamicUserProfile() {
       return;
     }
 
-    // Validate age
-    const ageNum = parseInt(newsletterData.age);
-    if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
-      toast.error('Please enter a valid age');
-      return;
-    }
-
     try {
       setNewsletterLoading(true);
-      
-      // Split name into first and last name
-      const nameParts = newsletterData.name.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
       
       // Get auth token and user_id if available
       const authToken = localStorage.getItem('auth_token');
@@ -296,8 +343,8 @@ export default function DynamicUserProfile() {
         },
         body: JSON.stringify({
           email: newsletterData.email,
-          first_name: firstName,
-          last_name: lastName,
+          first_name: newsletterData.first_name,
+          last_name: newsletterData.last_name,
           ...(userId && { user_id: userId })
         })
       });
@@ -308,7 +355,7 @@ export default function DynamicUserProfile() {
         toast.success(data.message || 'Successfully subscribed to newsletter!');
         setOptIn(true);
         setShowNewsletterModal(false);
-        setNewsletterData({ name: '', email: '', age: '' });
+        setNewsletterData({ first_name: '', last_name: '', email: '' });
       } else {
         toast.error(data.message || 'Failed to subscribe to newsletter');
       }
