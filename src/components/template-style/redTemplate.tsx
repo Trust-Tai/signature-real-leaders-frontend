@@ -15,6 +15,7 @@ interface RedTemplateProps {
     profile_picture_url?: string;
     profile_image?: string;
     signature_url?: string;
+    newsletter_service?: string;
     links?: Array<{
       id: number;
       name: string;
@@ -170,8 +171,8 @@ export default function RedTemplate({
           </div>
         </div>
 
-        {/* Newsletter Text - Show for all users viewing someone else's profile */}
-        {(!user || user.username !== profileData.username) && (
+        {/* Newsletter Text - Show only if newsletter_service is configured and user is viewing someone else's profile */}
+        {profileData.newsletter_service && profileData.newsletter_service.trim() !== '' && (!user || user.username !== profileData.username) && (
           <div className="flex items-start justify-center space-x-3 mb-4 px-2">
             {newsletterLoading ? (
               <div className="w-4 h-4 mt-1 flex-shrink-0">

@@ -313,8 +313,8 @@ export default function DefaultTemplate({
               />
             </div>
 
-            {/* Newsletter Opt-in - Show for all users viewing someone else's profile */}
-            {(!user || user.username !== profileData.username) && (
+            {/* Newsletter Opt-in - Show only if newsletter_service is configured and user is viewing someone else's profile */}
+            {profileData.newsletter_service && profileData.newsletter_service.trim() !== '' && (!user || user.username !== profileData.username) && (
               <div className="flex items-start justify-center space-x-3 mb-4 px-4">
                 {newsletterLoading ? (
                   <div className="w-4 h-4 mt-[5px] flex-shrink-0">
