@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, Menu, Users, Mic, Plus, ArrowLeft } from 'lucide-react';
+import { Search, Menu, Mic, Plus, ArrowLeft } from 'lucide-react';
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
@@ -64,18 +64,7 @@ const MagicPublishingPodcasts = () => {
               
               {/* Notifications and Profile Icons */}
               <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
-                    3
-                  </span> */}
-                </div>
-                <div className="relative">
-                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  {/* <span className="absolute -top-2 -right-2 bg-[#CF3232] text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
-                    16
-                  </span> */}
-                </div>
+              
                 <UserProfileDropdown />
               </div>
             </div>

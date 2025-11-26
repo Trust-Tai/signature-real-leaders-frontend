@@ -25,9 +25,19 @@ interface GenerationRequest {
 
 interface GeneratedArticlesListProps {
   refreshTrigger?: number;
+  processingContentIds?: Set<string>;
+  generatedContents?: GenerationRequest[];
+  refreshContent?: (contentId: string) => Promise<void>;
+  fetchAllGenerationRequests?: () => Promise<void>;
 }
 
-const GeneratedArticlesList: React.FC<GeneratedArticlesListProps> = ({ refreshTrigger: externalRefreshTrigger }) => {
+const GeneratedArticlesList: React.FC<GeneratedArticlesListProps> = ({ 
+  refreshTrigger: externalRefreshTrigger, 
+  processingContentIds,
+  generatedContents: propsGeneratedContents,
+  refreshContent: propsRefreshContent,
+  fetchAllGenerationRequests: propsFetchAllGenerationRequests
+}) => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // Update internal refresh trigger when external one changes
@@ -48,7 +58,14 @@ const GeneratedArticlesList: React.FC<GeneratedArticlesListProps> = ({ refreshTr
     });
   }, []);
 
-  const { generatedContents, refreshContent, fetchAllGenerationRequests } = useMagicPublishing('articles', triggerArticlesListRefresh);
+  // Use hook only if props are not provided (for backward compatibility)
+  const hookData = useMagicPublishing('articles', triggerArticlesListRefresh);
+  
+  // Use props if available, otherwise use hook data
+  const generatedContents = propsGeneratedContents || hookData.generatedContents;
+  const refreshContent = propsRefreshContent || hookData.refreshContent;
+  const fetchAllGenerationRequests = propsFetchAllGenerationRequests || hookData.fetchAllGenerationRequests;
+  const effectiveProcessingIds = processingContentIds || hookData.processingContentIds;
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -177,7 +194,10 @@ const GeneratedArticlesList: React.FC<GeneratedArticlesListProps> = ({ refreshTr
               </p>
             </div>
           ) : (
-          <ArticlesList refreshTrigger={refreshTrigger} />
+          <ArticlesList 
+            refreshTrigger={refreshTrigger} 
+            processingContentIds={effectiveProcessingIds}
+          />
           )}
 
          

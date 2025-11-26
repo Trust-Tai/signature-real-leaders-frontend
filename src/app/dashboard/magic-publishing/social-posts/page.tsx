@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Bell, Menu, Users, Plus, ArrowLeft } from 'lucide-react';
+import { Search, Menu,  Plus, ArrowLeft } from 'lucide-react';
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
@@ -120,12 +120,7 @@ const MagicPublishingSocialPosts = () => {
               
               {/* Notifications and Profile Icons */}
               <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                </div>
-                <div className="relative">
-                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                </div>
+               
                 <UserProfileDropdown />
               </div>
             </div>

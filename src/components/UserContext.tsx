@@ -5,6 +5,26 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { isUnauthorizedError } from '@/lib/authUtils';
 
+interface RSSFeedItem {
+  title: string;
+  description: string;
+  link: string;
+  pub_date: string;
+  guid: string;
+  author: string;
+  category: string;
+  content: string;
+}
+
+interface RSSFeeds {
+  feed_url: string;
+  feed_title: string;
+  feed_description: string;
+  items: RSSFeedItem[];
+  total_items: number;
+  fetched_at: string;
+}
+
 interface User {
   id: number;
   username: string;
@@ -19,6 +39,7 @@ interface User {
   company_website: string;
   rss_feed_url: string;
   rss_feed_html: string;
+  rss_feeds?: RSSFeeds;
   industry: string;
   num_employees: string;
   email_list_size: string;

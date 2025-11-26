@@ -1,106 +1,71 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Search, Bell, Menu, Users, Rss, Calendar, FileText, ExternalLink } from 'lucide-react';
-import { UserProfileSidebar } from '@/components';
+import { Search, Menu, Rss, Calendar, FileText, ExternalLink } from 'lucide-react';
+import { UserProfileSidebar, useUser } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
-import Image from 'next/image';
-
-// Mock data for followed accounts (will be replaced with API data later)
-const followedAccounts = [
-  {
-    id: 1,
-    username: 'johndoe',
-    full_name: 'John Doe',
-    profile_picture: '/placeholder-avatar.jpg',
-    bio: 'Tech entrepreneur and podcast host',
-    rss_feeds: [
-      {
-        id: 1,
-        title: 'Tech Talks Podcast',
-        url: 'https://example.com/rss/tech-talks',
-        latest_items: [
-          {
-            title: 'The Future of AI in Business',
-            link: 'https://example.com/episode-1',
-            pubDate: '2024-01-15',
-            description: 'Exploring how AI is transforming modern business practices...'
-          },
-          {
-            title: 'Building Scalable Startups',
-            link: 'https://example.com/episode-2',
-            pubDate: '2024-01-10',
-            description: 'Key strategies for scaling your startup effectively...'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 2,
-    username: 'janesmit',
-    full_name: 'Jane Smith',
-    profile_picture: '/placeholder-avatar.jpg',
-    bio: 'Marketing expert and content creator',
-    rss_feeds: [
-      {
-        id: 2,
-        title: 'Marketing Insights Blog',
-        url: 'https://example.com/rss/marketing',
-        latest_items: [
-          {
-            title: '10 Social Media Trends for 2024',
-            link: 'https://example.com/post-1',
-            pubDate: '2024-01-12',
-            description: 'Stay ahead with these emerging social media trends...'
-          }
-        ]
-      }
-    ]
-  }
-];
 
 const FollowingPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useUser();
 
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const filteredAccounts = followedAccounts.filter(account =>
-    account.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    account.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Extract RSS feed data from user
+  const rssFeedData = useMemo(() => {
+    if (!user?.rss_feeds) return null;
+    
+    return {
+      feed_url: user.rss_feeds.feed_url || '',
+      feed_title: user.rss_feeds.feed_title || 'RSS Feed',
+      feed_description: user.rss_feeds.feed_description || '',
+      items: user.rss_feeds.items || [],
+      total_items: user.rss_feeds.total_items || 0,
+      fetched_at: user.rss_feeds.fetched_at || ''
+    };
+  }, [user?.rss_feeds]);
 
-  // Calculate stats from followed accounts
+  // Filter items based on search query
+  const filteredItems = useMemo(() => {
+    if (!rssFeedData?.items) return [];
+    
+    if (!searchQuery.trim()) return rssFeedData.items;
+    
+    const query = searchQuery.toLowerCase();
+    return rssFeedData.items.filter(item =>
+      item.title?.toLowerCase().includes(query) ||
+      item.description?.toLowerCase().includes(query) ||
+      item.content?.toLowerCase().includes(query)
+    );
+  }, [rssFeedData?.items, searchQuery]);
+
+  // Calculate stats from RSS feed
   const stats = useMemo(() => {
-    const totalFollowing = followedAccounts.length;
-    const totalRSSFeeds = followedAccounts.reduce((sum, account) => sum + account.rss_feeds.length, 0);
-    const totalContent = followedAccounts.reduce((sum, account) => {
-      return sum + account.rss_feeds.reduce((feedSum, feed) => feedSum + feed.latest_items.length, 0);
-    }, 0);
+    const totalContent = rssFeedData?.items?.length || 0;
+    const totalItems = rssFeedData?.total_items || 0;
     
     // Get latest content date
     let latestDate = '';
-    followedAccounts.forEach(account => {
-      account.rss_feeds.forEach(feed => {
-        feed.latest_items.forEach(item => {
-          if (!latestDate || new Date(item.pubDate) > new Date(latestDate)) {
-            latestDate = item.pubDate;
-          }
-        });
+    if (rssFeedData?.items && rssFeedData.items.length > 0) {
+      rssFeedData.items.forEach(item => {
+        if (item.pub_date && (!latestDate || new Date(item.pub_date) > new Date(latestDate))) {
+          latestDate = item.pub_date;
+        }
       });
-    });
+    }
 
     return {
-      totalFollowing,
-      totalRSSFeeds,
+      totalFeeds: rssFeedData ? 1 : 0,
       totalContent,
-      latestUpdate: latestDate ? new Date(latestDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'
+      totalItems,
+      latestUpdate: latestDate ? new Date(latestDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
+      fetchedAt: rssFeedData?.fetched_at ? new Date(rssFeedData.fetched_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'
     };
-  }, []);
+  }, [rssFeedData]);
 
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
@@ -140,12 +105,7 @@ const FollowingPage = () => {
               </div>
               
               <div className="flex items-center space-x-3">
-                <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-                  <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                </button>
-                <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                </button>
+              
                 <UserProfileDropdown />
               </div>
             </div>
@@ -158,27 +118,7 @@ const FollowingPage = () => {
             
             {/* Stats Cards - Dashboard Theme */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {/* Total Following */}
-              <div className="bg-white rounded-xl px-[16px] py-[8px] shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
-                <div className="flex justify-end mb-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-50 rounded-full flex items-center justify-center">
-                    <Users className="w-3 h-3 sm:w-4 sm:h-4 text-[#CF3232]" />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <h3 className="text-3xl sm:text-5xl font-bold text-[#101117] mb-1" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                    {stats.totalFollowing}
-                  </h3>
-                  <p className="font-semibold text-xs sm:text-sm tracking-wide text-[#CF3232]">
-                    FOLLOWING
-                  </p>
-                </div>
-                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                  Total Accounts You Are Following
-                </p>
-              </div>
-
-              {/* RSS Feeds */}
+              {/* RSS Feed */}
               <div className="bg-white rounded-xl px-[16px] py-[8px] shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
                 <div className="flex justify-end mb-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-50 rounded-full flex items-center justify-center">
@@ -187,18 +127,18 @@ const FollowingPage = () => {
                 </div>
                 <div className="mb-4">
                   <h3 className="text-3xl sm:text-5xl font-bold text-[#101117] mb-1" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                    {stats.totalRSSFeeds}
+                    {stats.totalFeeds}
                   </h3>
                   <p className="font-semibold text-xs sm:text-sm tracking-wide text-[#CF3232]">
-                    RSS FEEDS
+                    RSS FEED
                   </p>
                 </div>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                  Active RSS Feeds From Followed Accounts
+                  {rssFeedData?.feed_title || 'No RSS Feed Connected'}
                 </p>
               </div>
 
-              {/* Total Content */}
+              {/* Showing Items */}
               <div className="bg-white rounded-xl px-[16px] py-[8px] shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
                 <div className="flex justify-end mb-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-50 rounded-full flex items-center justify-center">
@@ -210,11 +150,31 @@ const FollowingPage = () => {
                     {stats.totalContent}
                   </h3>
                   <p className="font-semibold text-xs sm:text-sm tracking-wide text-[#CF3232]">
-                    CONTENT ITEMS
+                    SHOWING ITEMS
                   </p>
                 </div>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                  Total Content Pieces Available
+                  Content Items Currently Displayed
+                </p>
+              </div>
+
+              {/* Total Items */}
+              <div className="bg-white rounded-xl px-[16px] py-[8px] shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
+                <div className="flex justify-end mb-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-50 rounded-full flex items-center justify-center">
+                    <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-[#CF3232]" />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-3xl sm:text-5xl font-bold text-[#101117] mb-1" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
+                    {stats.totalItems}
+                  </h3>
+                  <p className="font-semibold text-xs sm:text-sm tracking-wide text-[#CF3232]">
+                    TOTAL ITEMS
+                  </p>
+                </div>
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                  Total Items Available in Feed
                 </p>
               </div>
 
@@ -226,7 +186,7 @@ const FollowingPage = () => {
                   </div>
                 </div>
                 <div className="mb-4">
-                  <h3 className="text-lg sm:text-xl font-bold text-[#101117] mb-1" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
+                  <h3 className="text-base sm:text-lg font-bold text-[#101117] mb-1" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
                     {stats.latestUpdate}
                   </h3>
                   <p className="font-semibold text-xs sm:text-sm tracking-wide text-[#CF3232]">
@@ -240,91 +200,125 @@ const FollowingPage = () => {
             </div>
 
             {/* Empty State */}
-            {filteredAccounts.length === 0 && (
+            {!rssFeedData && (
               <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
-                <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Accounts Found</h3>
+                <Rss className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No RSS Feed Connected</h3>
+                <p className="text-gray-500 mb-4">
+                  Connect your RSS feed in profile settings to see content here
+                </p>
+                <button
+                  onClick={() => window.location.href = '/dashboard/profile'}
+                  className="px-6 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Go to Profile Settings
+                </button>
+              </div>
+            )}
+
+            {/* No Results State */}
+            {rssFeedData && filteredItems.length === 0 && searchQuery && (
+              <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
+                <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Results Found</h3>
                 <p className="text-gray-500">
-                  {searchQuery ? 'Try a different search term' : 'Start following accounts to see their content here'}
+                  Try a different search term
                 </p>
               </div>
             )}
 
-            {/* Combined Feed View - All Content from Followed Accounts */}
-            {filteredAccounts.length > 0 && (
+            {/* RSS Feed Content */}
+            {rssFeedData && filteredItems.length > 0 && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100">
-                  <div className="flex items-center space-x-2">
-                    <Rss className="w-6 h-6 text-[#CF3232]" />
-                    <h2 className="text-2xl font-bold text-[#101117]">Latest Content Feed</h2>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <Rss className="w-6 h-6 text-[#CF3232]" />
+                        <h2 className="text-2xl font-bold text-[#101117]">{rssFeedData.feed_title}</h2>
+                      </div>
+                      {rssFeedData.feed_description && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          {rssFeedData.feed_description}
+                        </p>
+                      )}
+                    </div>
+                    {rssFeedData.feed_url && (
+                      <a
+                        href={rssFeedData.feed_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-[#CF3232] hover:text-[#a82828] font-medium flex items-center"
+                      >
+                        View Feed
+                        <ExternalLink className="w-3 h-3 ml-1" />
+                      </a>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Combined feed from all accounts you follow
-                  </p>
+                  {stats.fetchedAt !== 'N/A' && (
+                    <p className="text-xs text-gray-400 mt-2">
+                      Last fetched: {stats.fetchedAt}
+                    </p>
+                  )}
                 </div>
 
-                {/* Combined Feed Items */}
+                {/* Feed Items */}
                 <div className="divide-y divide-gray-100">
-                  {filteredAccounts.map((account) => 
-                    account.rss_feeds.map((feed) =>
-                      feed.latest_items.map((item, itemIndex) => (
-                        <div key={`${account.id}-${feed.id}-${itemIndex}`} className="p-6 hover:bg-[#FFF9F9] transition-colors">
-                          {/* Account Info */}
-                          <div className="flex items-center space-x-3 mb-4">
-                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                              <Image 
-                                src={account.profile_picture} 
-                                alt={account.full_name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center space-x-2">
-                                <h3 className="font-semibold text-[#101117] text-sm truncate">
-                                  {account.full_name}
-                                </h3>
-                                <span className="text-gray-400">•</span>
-                                <span className="text-xs text-gray-500">@{account.username}</span>
-                              </div>
-                              <p className="text-xs text-gray-500 flex items-center mt-0.5">
-                                <Rss className="w-3 h-3 mr-1" />
-                                {feed.title}
-                              </p>
-                            </div>
-                            <div className="flex items-center text-xs text-gray-400">
+                  {filteredItems.map((item, index) => (
+                    <div key={index} className="p-6 hover:bg-[#FFF9F9] transition-colors">
+                      {/* Header with Date and Category */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          {item.pub_date && (
+                            <div className="flex items-center text-xs text-gray-500">
                               <Calendar className="w-3 h-3 mr-1" />
-                              {new Date(item.pubDate).toLocaleDateString('en-US', {
+                              {new Date(item.pub_date).toLocaleDateString('en-US', {
                                 month: 'short',
-                                day: 'numeric'
+                                day: 'numeric',
+                                year: 'numeric'
                               })}
                             </div>
-                          </div>
-
-                          {/* Content */}
-                          <div className="ml-13">
-                            <h4 className="text-lg font-semibold text-[#101117] mb-2 hover:text-[#CF3232] transition-colors">
-                              <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                {item.title}
-                              </a>
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                              {item.description}
-                            </p>
-                            <a 
-                              href={item.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center text-sm text-[#CF3232] hover:text-[#a82828] font-medium transition-colors"
-                            >
-                              Read more
-                              <ExternalLink className="w-3 h-3 ml-1" />
-                            </a>
-                          </div>
+                          )}
+                          {item.category && (
+                            <>
+                              <span className="text-gray-300">•</span>
+                              <span className="text-xs text-[#CF3232] font-medium">
+                                {item.category}
+                              </span>
+                            </>
+                          )}
                         </div>
-                      ))
-                    )
-                  )}
+                        {item.author && (
+                          <span className="text-xs text-gray-500">
+                            By {item.author}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-[#101117] mb-2 hover:text-[#CF3232] transition-colors">
+                          <a href={item.link} target="_blank" rel="noopener noreferrer">
+                            {item.title}
+                          </a>
+                        </h4>
+                        {(item.description || item.content) && (
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                            {item.content || item.description}
+                          </p>
+                        )}
+                        <a 
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-sm text-[#CF3232] hover:text-[#a82828] font-medium transition-colors"
+                        >
+                          Read full article
+                          <ExternalLink className="w-3 h-3 ml-1" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

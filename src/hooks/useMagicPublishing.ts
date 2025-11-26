@@ -115,7 +115,7 @@ export const useMagicPublishing = (
         // Create immediate UI feedback - add pending card
         const newProcessingContent: GenerationRequest = {
           id: response.content_id,
-          title: `Generating ${params.article_count} Articles...`,
+          title: params.topic || `Generating ${params.article_count || 1} Articles...`,
           slug: `generating-articles-${response.content_id}`,
           content_type: 'articles',
           status: 'processing',
@@ -124,7 +124,7 @@ export const useMagicPublishing = (
           request_id: response.request_id,
           generated_content: false,
           generated_content_json: '',
-          content_preview: `Generating ${params.article_count} articles with ${params.tone} tone...`,
+          content_preview: `Generating articles about "${params.topic || 'your topic'}"...`,
           content_summary: 'Generation in progress...',
           word_count: 0,
           error_message: '',
@@ -132,12 +132,12 @@ export const useMagicPublishing = (
           categories: [],
           // Legacy fields for backward compatibility
           duration: '0s',
-          requested_count: params.article_count,
+          requested_count: params.article_count || 1,
           generated_count: 0,
           items_with_images: 0,
           completion_percentage: 0,
           generation_params: params as unknown as Record<string, unknown>,
-          preview: `Generating ${params.article_count} articles with ${params.tone} tone...`
+          preview: `Generating articles about "${params.topic || 'your topic'}"...`
         };
 
         // Add to the beginning of the list for immediate feedback
@@ -163,7 +163,7 @@ export const useMagicPublishing = (
             console.log('[Hook] Completed content status:', content.status);
             console.log('[Hook] Completed content ID:', content.id);
             
-            // Content generation completed
+            // Content generation completed - remove from processing set
             setProcessingContentIds(prev => {
               const newSet = new Set(prev);
               newSet.delete(content.id);
@@ -171,19 +171,10 @@ export const useMagicPublishing = (
               return newSet;
             });
 
-            // Update the content in the list with completed status
+            // Remove the processing item and let fetchAllGenerationRequests add the completed one
             setGeneratedContents(prev => {
-              const updated = prev.map(item => {
-                if (item.id.toString() === content.id) {
-                  return {
-                    ...item,
-                    status: 'completed' as const
-                  };
-                }
-                return item;
-              });
-              console.log('[Hook] Updated generatedContents after completion, new status: completed');
-              return updated;
+              console.log('[Hook] Removing processing item from list, will be replaced by completed item');
+              return prev.filter(item => item.id.toString() !== content.id);
             });
 
             // Show completion toast
@@ -194,7 +185,7 @@ export const useMagicPublishing = (
 
             setIsGenerating(false);
 
-            // Fetch all generation requests to ensure we have the latest data
+            // Fetch all generation requests to get the completed content with full data
             console.log('[Hook] Fetching all generation requests after completion...');
             fetchAllGenerationRequests();
 

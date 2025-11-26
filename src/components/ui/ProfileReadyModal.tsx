@@ -100,22 +100,9 @@ export default function ProfileReadyModal({ isOpen, onClose, profileData, user }
       );
     }
 
-    // Get username from profileData or user object or localStorage
-    const getUsernameFromStorage = () => {
-      try {
-        const userDataStr = localStorage.getItem('user_data');
-        if (userDataStr) {
-          const userData = JSON.parse(userDataStr);
-          return userData.username;
-        }
-      } catch (e) {
-        console.error('Error parsing user data:', e);
-      }
-      return null;
-    };
-
-    const displayUsername = profileData.username || user?.username || getUsernameFromStorage() || 'username';
-    const displayFullName = profileData.full_name || 'User';
+    // Get username and full name from profileData (which already has fresh data from user-details API)
+    const displayUsername = profileData.username || user?.username || 'username';
+    const displayFullName = profileData.full_name || profileData.username || displayUsername;
 
     const safeProfileData = {
       full_name: displayFullName,

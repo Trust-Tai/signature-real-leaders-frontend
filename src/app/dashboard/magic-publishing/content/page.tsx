@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, Menu, Users, Sparkles, Loader2, ArrowLeft, X } from 'lucide-react';
+import { Search, Menu, Sparkles, Loader2, ArrowLeft, X } from 'lucide-react';
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import GeneratedArticlesList from './components/GeneratedContentsList';
@@ -27,7 +27,13 @@ const MagicPublishingContent = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  const { handleGenerateArticles, fetchAllGenerationRequests } = useMagicPublishing('articles', handlePollingComplete);
+  const { 
+    handleGenerateArticles, 
+    fetchAllGenerationRequests, 
+    processingContentIds,
+    generatedContents,
+    refreshContent 
+  } = useMagicPublishing('articles', handlePollingComplete);
 
   const BRAND_RED = "#E74B3B";
 
@@ -118,10 +124,9 @@ const MagicPublishingContent = () => {
 
       if (response) {
         console.log('[Content Page] Article generation started with content_id:', response.content_id);
-        toast.success('Article generation started! Check the list below for progress.', { autoClose: 3000 });
         
-        // Refresh the articles list to show processing item
-        await fetchAllGenerationRequests();
+        // Immediately trigger refresh to show processing card
+        // This will cause ArticlesList to re-render and show the processing item
         setRefreshTrigger(prev => prev + 1);
         
         // Clear the topic input
@@ -190,14 +195,7 @@ const MagicPublishingContent = () => {
               
           
               <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-               
-                </div>
-                <div className="relative">
-                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
               
-                </div>
                 <UserProfileDropdown />
               </div>
             </div>
@@ -357,7 +355,13 @@ const MagicPublishingContent = () => {
 
            
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-              <GeneratedArticlesList refreshTrigger={refreshTrigger} />
+              <GeneratedArticlesList 
+                refreshTrigger={refreshTrigger} 
+                processingContentIds={processingContentIds}
+                generatedContents={generatedContents}
+                refreshContent={refreshContent}
+                fetchAllGenerationRequests={fetchAllGenerationRequests}
+              />
             </div>
 
           </div>

@@ -42,9 +42,10 @@ interface ContentItem {
 interface ArticlesListProps {
   onArticleSelect?: (article: Article) => void;
   refreshTrigger?: number; // Add a refresh trigger prop
+  processingContentIds?: Set<string>; // Add processing content IDs from hook
 }
 
-const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
+const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger, processingContentIds }) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -241,13 +242,18 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger }) => {
 
   // Filter processing and failed items - ensure completed items are excluded
   const processingItems = contentItems.filter(item => {
-    // Strictly check for processing status only
+    // Check if item is in processing state
     const isProcessing = item.status === 'processing';
+    
     // Double check: if item has generated_content with articles, it's NOT processing
     if (item.generated_content && typeof item.generated_content === 'object' && 'articles' in item.generated_content) {
       return false;
     }
-    return isProcessing;
+    
+    // Also check if this content_id is in the processingContentIds set from hook
+    const isInProcessingSet = processingContentIds && processingContentIds.has(item.id.toString());
+    
+    return isProcessing || isInProcessingSet;
   });
   
   const failedItems = contentItems.filter(item => item.status === 'failed');

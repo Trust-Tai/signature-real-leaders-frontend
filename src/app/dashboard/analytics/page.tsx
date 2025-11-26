@@ -76,12 +76,7 @@ const AnalyticsPage = () => {
               </div>
               
               <div className="flex items-center space-x-3">
-                <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-                  <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                </button>
-                <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                </button>
+               
                 <UserProfileDropdown />
               </div>
             </div>

@@ -522,16 +522,20 @@ const ProfilePage = () => {
       });
 
       if (response.success) {
-        toast.success(response.message);
+        // Show backend success message
+        toast.success(response.message || 'Profile updated successfully');
         updateUser({
           audience_description: bio,
           profile_picture_url: profileImage || undefined
         });
       } else {
-        toast.error('Failed to update profile');
+        // Show backend error message
+        toast.error(response.message || 'Failed to update profile');
       }
-    } catch {
-      toast.error('Failed to update profile');
+    } catch (error) {
+      // Show error message from exception if available
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -626,7 +630,8 @@ const ProfilePage = () => {
       const response = await api.updateProfile(token, updateData);
 
       if (response.success) {
-        toast.success(response.message);
+        // Show backend success message
+        toast.success(response.message || 'Profile updated successfully');
         updateUser(updateData);
 
         // Fetch fresh user details after successful update
@@ -654,10 +659,13 @@ const ProfilePage = () => {
           setVerificationStatus("idle");
         }
       } else {
-        toast.error('Failed to update profile');
+        // Show backend error message
+        toast.error(response.message || 'Failed to update profile');
       }
-    } catch {
-      toast.error('Failed to update profile');
+    } catch (error) {
+      // Show error message from exception if available
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -681,16 +689,20 @@ const ProfilePage = () => {
       const response = await api.updatePassword(token, currentPassword, newPassword);
 
       if (response.success) {
-        toast.success(response.message);
+        // Show backend success message
+        toast.success(response.message || 'Password updated successfully');
         // Reset password fields
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        toast.error('Failed to update password');
+        // Show backend error message
+        toast.error(response.message || 'Failed to update password');
       }
-    } catch {
-      toast.error('Failed to update password');
+    } catch (error) {
+      // Show error message from exception if available
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update password';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -1286,6 +1298,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
         "Food & Beverage",
         "Travel",
         "Fashion",
+        "Media",
         "Other",
       ].map((industry) => (
         <label

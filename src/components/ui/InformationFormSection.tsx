@@ -315,6 +315,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
               <option value="Retail">Retail</option>
               <option value="Manufacturing">Manufacturing</option>
               <option value="Consulting">Consulting</option>
+              <option value="Media">Media</option>
               <option value="Other">Other</option>
             </select>
             <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
