@@ -244,12 +244,11 @@ export default function DynamicUserProfile() {
         try {
           setNewsletterLoading(true);
           
-          // Get user details from localStorage or user context
+          // Get visitor's details from localStorage or user context
           const userDataStr = localStorage.getItem('user_data');
           let firstName = user.first_name || '';
           let lastName = user.last_name || '';
           let email = user.email || '';
-          let userId = user.id;
           
           // Try to get more complete data from localStorage if available
           if (userDataStr) {
@@ -258,13 +257,12 @@ export default function DynamicUserProfile() {
               firstName = userData.first_name || firstName;
               lastName = userData.last_name || lastName;
               email = userData.email || email;
-              userId = userData.id || userId;
             } catch (e) {
               console.error('Error parsing user data:', e);
             }
           }
           
-          // Call the newsletter API endpoint
+          // Call the newsletter API endpoint with PROFILE OWNER's user_id
           const response = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber', {
             method: 'POST',
             headers: {
@@ -275,7 +273,7 @@ export default function DynamicUserProfile() {
               email: email,
               first_name: firstName,
               last_name: lastName,
-              user_id: userId
+              user_id: profileData?.user_id // Profile owner's user_id
             })
           });
           
@@ -320,21 +318,10 @@ export default function DynamicUserProfile() {
     try {
       setNewsletterLoading(true);
       
-      // Get auth token and user_id if available
+      // Get auth token if available
       const authToken = localStorage.getItem('auth_token');
-      const userDataStr = localStorage.getItem('user_data');
-      let userId = null;
       
-      if (userDataStr) {
-        try {
-          const userData = JSON.parse(userDataStr);
-          userId = userData.id;
-        } catch (e) {
-          console.error('Error parsing user data:', e);
-        }
-      }
-      
-      // Call the newsletter API endpoint
+      // Call the newsletter API endpoint with PROFILE OWNER's user_id
       const response = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber', {
         method: 'POST',
         headers: {
@@ -345,7 +332,7 @@ export default function DynamicUserProfile() {
           email: newsletterData.email,
           first_name: newsletterData.first_name,
           last_name: newsletterData.last_name,
-          ...(userId && { user_id: userId })
+          user_id: profileData?.user_id // Profile owner's user_id
         })
       });
       
