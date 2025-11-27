@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { images } from '@/assets';
 
@@ -210,6 +211,27 @@ export default function RedTemplate({
             {followLoading ? 'LOADING...' : (isFollowing ? 'UNFOLLOW' : 'FOLLOW')}
           </button>
         )}
+
+        {/* Claim Your Link CTA */}
+        <div className="w-full text-center mt-4">
+          <Link
+            href="/profile-verification"
+            className="text-white hover:text-white/90 font-medium text-lg transition-colors decoration-blue-400 underline underline-offset-4"
+          >
+            Claim your link
+          </Link>
+        </div>
+
+        {/* Real Leaders Impact Awards Logo */}
+        <div className="w-full flex items-center justify-center mt-6">
+          <Image
+            src={images.realLeadersWhite}
+            alt="Real Leaders Impact Awards"
+            width={200}
+            height={60}
+            className="object-contain opacity-80"
+          />
+        </div>
       </div>
 
       {/* Newsletter Modal for Non-Logged-In Users */}

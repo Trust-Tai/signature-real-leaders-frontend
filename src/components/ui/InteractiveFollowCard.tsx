@@ -1,4 +1,4 @@
-import randomGuy from "../../assets/images/random-guy.png";
+import michelle from "../../assets/images/Michelle-Cribbs.jpg";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 interface FollowCardStyles extends React.CSSProperties {
@@ -153,19 +153,19 @@ export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = ({ na
               className="w-16 h-16 rounded-full border-2 border-gray-600 overflow-hidden bg-gray-800 shadow-xl"
               style={{ transform: "translateZ(60px)" }}
             >
-              <Image src={randomGuy} alt="John Doe" className="w-full h-full object-cover" />
+              <Image src={michelle} alt="Michelle Cribbs" className="w-full h-full object-cover" />
             </div>
             <div
               className="text-lg font-bold text-white tracking-tight"
               style={{ transform: "translateZ(55px)" }}
             >
-              {name && name.trim().length > 0 ? name : "John Doe"}
+              Michelle Cribbs
             </div>
             <div
               className="text-xs text-gray-300 leading-tight"
               style={{ transform: "translateZ(50px)" }}
             >
-              Founder & CEO, NovaEdge Systems
+             Leadership Mentor with 25+ Years Experience
             </div>
           </header>
 
@@ -197,7 +197,7 @@ export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = ({ na
                 className="text-sm font-light text-gray-300 italic mb-2"
                 style={{ fontFamily: "serif" }}
               >
-                {name && name.trim().length > 0 ? name : "John Doe"}
+                Michelle Cribbs
               </div>
             </div>
 
