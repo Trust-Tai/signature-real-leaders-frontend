@@ -18,6 +18,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   const { user, clearUser } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter()
   useEffect(() => {
@@ -56,14 +57,23 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors mb-[10]"
         >
           {userImage || user?.profile_picture_url || user?.profile_template?.image_url ? (
-            <Image 
-              src={userImage || user?.profile_picture_url || user?.profile_template?.image_url || ''} 
-              alt={userName || user?.display_name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.first_name) || user?.username || 'User'}
-              className="w-8 h-8 rounded-full object-cover"
-              width={32}
-              height={32}
-              unoptimized
-            />
+            <div className="relative w-8 h-8">
+              {!imageLoaded && (
+                <div className="absolute inset-0 w-8 h-8 bg-gray-200 rounded-full animate-pulse flex items-center justify-center">
+                  <User className="w-5 h-5 text-gray-400" />
+                </div>
+              )}
+              <Image 
+                src={userImage || user?.profile_picture_url || user?.profile_template?.image_url || ''} 
+                alt={userName || user?.display_name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.first_name) || user?.username || 'User'}
+                className={`w-8 h-8 rounded-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                width={32}
+                height={32}
+                unoptimized
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageLoaded(false)}
+              />
+            </div>
           ) : (
             <div className="w-8 h-8 bg-[#CF3232] rounded-full flex items-center justify-center">
               <User className="w-5 h-5 text-white" />

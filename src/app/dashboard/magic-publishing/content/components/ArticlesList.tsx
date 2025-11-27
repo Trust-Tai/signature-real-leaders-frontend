@@ -240,7 +240,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger, processingC
     return <NewsletterPage article={selectedArticle} onBack={handleBackToList} />;
   }
 
-  // Filter processing and failed items - ensure completed items are excluded
+  // Filter processing items - ensure completed items are excluded
   const processingItems = contentItems.filter(item => {
     // Check if item is in processing state
     const isProcessing = item.status === 'processing';
@@ -255,8 +255,6 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger, processingC
     
     return isProcessing || isInProcessingSet;
   });
-  
-  const failedItems = contentItems.filter(item => item.status === 'failed');
 
   return (
     <div className="space-y-6">
@@ -465,30 +463,8 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ refreshTrigger, processingC
             </div>
           )}
 
-          {/* Failed Items */}
-          {failedItems.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-[#101117]">
-                Failed Content ({failedItems.length})
-              </h3>
-              {failedItems.map((item) => (
-                <div key={item.id} className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-red-600 text-xl">❌</div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-red-800">{item.title}</h4>
-                      <p className="text-sm text-red-600">
-                        {item.error_message || 'Content generation failed'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* No Content Found - Only show when no articles AND no processing/failed items */}
-          {articles.length === 0 && processingItems.length === 0 && failedItems.length === 0 && !isLoading && (
+          {/* No Content Found - Only show when no articles AND no processing items */}
+          {articles.length === 0 && processingItems.length === 0 && !isLoading && (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
                 <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">

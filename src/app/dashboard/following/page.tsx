@@ -262,63 +262,69 @@ const FollowingPage = () => {
                   )}
                 </div>
 
-                {/* Feed Items */}
-                <div className="divide-y divide-gray-100">
-                  {filteredItems.map((item, index) => (
-                    <div key={index} className="p-6 hover:bg-[#FFF9F9] transition-colors">
-                      {/* Header with Date and Category */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          {item.pub_date && (
-                            <div className="flex items-center text-xs text-gray-500">
-                              <Calendar className="w-3 h-3 mr-1" />
-                              {new Date(item.pub_date).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric'
-                              })}
-                            </div>
-                          )}
+                {/* Feed Items - Grid Layout */}
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredItems.map((item, index) => (
+                      <div 
+                        key={index} 
+                        className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-[#CF3232]/30 transition-all duration-200 flex flex-col"
+                      >
+                        {/* Header with Date and Category */}
+                        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                          <div className="flex items-center space-x-2">
+                            {item.pub_date && (
+                              <div className="flex items-center text-xs text-gray-500">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                {new Date(item.pub_date).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric'
+                                })}
+                              </div>
+                            )}
+                          </div>
                           {item.category && (
-                            <>
-                              <span className="text-gray-300">•</span>
-                              <span className="text-xs text-[#CF3232] font-medium">
-                                {item.category}
-                              </span>
-                            </>
+                            <span className="text-xs text-white bg-[#CF3232] px-2 py-1 rounded-full font-medium">
+                              {item.category}
+                            </span>
                           )}
                         </div>
-                        {item.author && (
-                          <span className="text-xs text-gray-500">
-                            By {item.author}
-                          </span>
-                        )}
-                      </div>
 
-                      {/* Content */}
-                      <div>
-                        <h4 className="text-lg font-semibold text-[#101117] mb-2 hover:text-[#CF3232] transition-colors">
-                          <a href={item.link} target="_blank" rel="noopener noreferrer">
-                            {item.title}
-                          </a>
-                        </h4>
-                        {(item.description || item.content) && (
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-3">
-                            {item.content || item.description}
-                          </p>
-                        )}
-                        <a 
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center text-sm text-[#CF3232] hover:text-[#a82828] font-medium transition-colors"
-                        >
-                          Read full article
-                          <ExternalLink className="w-3 h-3 ml-1" />
-                        </a>
+                        {/* Content */}
+                        <div className="flex-1 flex flex-col">
+                          <h4 className="text-lg font-semibold text-[#101117] mb-2 hover:text-[#CF3232] transition-colors line-clamp-2">
+                            <a href={item.link} target="_blank" rel="noopener noreferrer">
+                              {item.title}
+                            </a>
+                          </h4>
+                          {(item.description || item.content) && (
+                            <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">
+                              {item.content || item.description}
+                            </p>
+                          )}
+                          
+                          {/* Footer */}
+                          <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+                            {item.author && (
+                              <span className="text-xs text-gray-500">
+                                By {item.author}
+                              </span>
+                            )}
+                            <a 
+                              href={item.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-sm text-[#CF3232] hover:text-[#a82828] font-medium transition-colors ml-auto"
+                            >
+                              Read more
+                              <ExternalLink className="w-3 h-3 ml-1" />
+                            </a>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

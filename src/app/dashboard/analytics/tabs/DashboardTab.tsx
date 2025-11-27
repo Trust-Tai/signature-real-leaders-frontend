@@ -64,14 +64,12 @@ const DashboardTab = () => {
 
   const demographicsData = useMemo(() => {
     if (!statistics || !statistics.audience_demographics || statistics.audience_demographics.length === 0) {
-      return [{ country: 'No Data', device: 'No Data', age: 'No Data', role: 'No Data', percentage: '0%' }];
+      return [{ country: 'No Data', device: 'No Data', percentage: '0%' }];
     }
 
     return statistics.audience_demographics.map(demo => ({
       country: demo.countries || 'Unknown',
       device: demo.devices || 'Unknown',
-      age: demo.age_groups || 'Unknown',
-      role: demo.top_roles || 'Unknown',
       percentage: `${demo.percentage || 0}%`
     }));
   }, [statistics]);
@@ -143,8 +141,6 @@ const DashboardTab = () => {
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div><span className="text-gray-500 text-xs">Country:</span><div className="font-medium text-gray-700">{row.country}</div></div>
                 <div><span className="text-gray-500 text-xs">Device:</span><div className="font-medium text-gray-700">{row.device}</div></div>
-                <div><span className="text-gray-500 text-xs">Age:</span><div className="font-medium text-gray-700">{row.age}</div></div>
-                <div><span className="text-gray-500 text-xs">Role:</span><div className="font-medium text-gray-700">{row.role}</div></div>
                 <div className="col-span-2 mt-2"><span className="text-gray-500 text-xs">Percentage:</span><div className="font-bold text-[#CF3232] text-lg">{row.percentage}</div></div>
               </div>
             </div>
@@ -157,8 +153,6 @@ const DashboardTab = () => {
               <tr className="border-b border-gray-100" style={{ backgroundColor: '#FEE3E3CC' }}>
                 <th className="text-left py-3 px-2 text-sm font-semibold text-[#101117]">Top Countries</th>
                 <th className="text-left py-3 px-2 text-sm font-semibold text-[#101117]">Devices</th>
-                <th className="text-left py-3 px-2 text-sm font-semibold text-[#101117]">Age Groups</th>
-                <th className="text-left py-3 px-2 text-sm font-semibold text-[#101117]">Top Roles</th>
                 <th className="text-left py-3 px-2 text-sm font-semibold text-[#101117]">% of Total</th>
               </tr>
             </thead>
@@ -167,8 +161,6 @@ const DashboardTab = () => {
                 <tr key={index} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="py-4 px-2 text-sm sm:text-base font-outfit text-[#414141]">{row.country}</td>
                   <td className="py-4 px-2 text-sm sm:text-base font-outfit text-[#414141]">{row.device}</td>
-                  <td className="py-4 px-2 text-sm sm:text-base font-outfit text-[#414141]">{row.age}</td>
-                  <td className="py-4 px-2 text-sm sm:text-base font-outfit text-[#414141]">{row.role}</td>
                   <td className="py-4 px-2 text-sm font-semibold text-[#101117]">{row.percentage}</td>
                 </tr>
               ))}
