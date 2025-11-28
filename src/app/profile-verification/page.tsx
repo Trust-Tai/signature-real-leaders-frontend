@@ -696,7 +696,6 @@ const InnerProfileVerificationPage = () => {
              {currentStep !== 4 && (
     <PageHeader
       title="Become a verified Real Leader."
-      subtitle="with RealLeaders signature"
       highlightWord="Real Leader"
       className="lg:mb-[90px]"
     />

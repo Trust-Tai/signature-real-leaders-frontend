@@ -78,7 +78,6 @@ const FirstScreen = () => {
         
             <PageHeader
               title="MAKE YOUR MARK"
-              subtitle="with RealLeaders signature"
               highlightWord="MARK"
               className='lg:mb-[150px]'
             />

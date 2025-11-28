@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 
 interface PageHeaderProps {
   title: string;
-  subtitle?: string;
   highlightWord?: string;
   className?: string;
 }
@@ -38,9 +37,6 @@ const PageHeader: React.FC<PageHeaderProps> = ({
       <h1 className="header-title mb-3 sm:mb-4">
         {renderTitle()}
       </h1>
-      <p className="subtitleheader- text-gray-600 flex flex-row gap-1 justify-center items-center">
-        with <span className='font-outfit font-medium'>RealLeaders</span> signature
-      </p>
     </div>
   );
 };
