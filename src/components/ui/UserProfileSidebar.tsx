@@ -2,10 +2,11 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, Mail, SquarePlus, Users, Wand2, HelpCircle } from 'lucide-react';
+import { X, Mail, SquarePlus, Users, Wand2, HelpCircle, Lock } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/components/UserContext';
 
 interface UserProfileSidebarProps {
   sidebarOpen: boolean;
@@ -20,16 +21,21 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   currentPage 
 }) => {
   const router = useRouter();
+  const { user } = useUser();
 
   const handleLogoClick = () => {
     // Navigate to WordPress site with auto-login
     performAutoLogin('https://verified.real-leaders.com', true);
   };
 
+  // Check if user has access to beta features
+  const ALLOWED_EMAIL = 'tayeshobajo@gmail.com';
+  const hasAccess = user?.email === ALLOWED_EMAIL;
+
   const sidebarItems = [
     { icon: SquarePlus, label: 'Analytics', path: '/dashboard/analytics', page: 'analytics', tourId: 'analytics' },
     { icon: Users, label: 'Following', path: '/dashboard/following', page: 'following', tourId: 'following' },
-    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
+    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers', comingSoon: true, requiresAccess: true },
     { icon: HelpCircle, label: 'Help', path: '/dashboard/help', page: 'help', tourId: 'help' }
   ];
 
@@ -45,7 +51,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
       {/* Sidebar */}
       <aside className={`
-        bg-[#101117] w-[280px] flex flex-col fixed lg:static min-h-screen z-40 transition-transform duration-300 ease-in-out lg:transform-none
+        bg-[#101117] w-[340px] flex flex-col fixed lg:static min-h-screen z-40 transition-transform duration-300 ease-in-out lg:transform-none
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Mobile Close Button */}
@@ -77,25 +83,38 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
         </div>
 
         {/* Sidebar Nav */}
-        <div className="p-6 flex-1">
+        <div className="p-4 flex-1">
           <nav className="space-y-2">
             {/* Magic Publishing - Top Menu Item */}
             <div
               data-tour="magic-publishing"
               onClick={() => {
-                setSidebarOpen(false);
-                router.push('/dashboard/magic-publishing');
+                if (hasAccess) {
+                  setSidebarOpen(false);
+                  router.push('/dashboard/magic-publishing');
+                }
               }}
-              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
-                currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors ${
+                hasAccess 
+                  ? `cursor-pointer ${currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`
+                  : 'cursor-not-allowed opacity-50 text-gray-500'
               }`}
             >
               <div className="flex items-center space-x-3">
                 <Wand2 className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm">Magic Publishing</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
-                  Beta
-                </span>
+                {hasAccess ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
+                    Beta
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
+                      Coming Soon
+                    </span>
+                    <Lock className="w-3 h-3 text-gray-500" />
+                  </>
+                )}
               </div>
             </div>
 
@@ -103,23 +122,39 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
             <div className="border-t border-gray-700 my-4"></div>
 
             {/* Other Menu Items */}
-            {sidebarItems.map((item, index) => (
-              <div 
-                key={index}
-                data-tour={item.tourId}
-                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                  currentPage === item.page ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-                onClick={() => {
-                  setSidebarOpen(false)
-                  router.push(`${item.path}`)
-                }
-                }
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm">{item.label}</span>
-              </div>
-            ))}
+            {sidebarItems.map((item, index) => {
+              const isLocked = item.requiresAccess && !hasAccess;
+              return (
+                <div 
+                  key={index}
+                  data-tour={item.tourId}
+                  className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                    isLocked
+                      ? 'cursor-not-allowed opacity-50 text-gray-500'
+                      : `cursor-pointer ${currentPage === item.page ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`
+                  }`}
+                  onClick={() => {
+                    if (!isLocked) {
+                      setSidebarOpen(false);
+                      router.push(`${item.path}`);
+                    }
+                  }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <item.icon className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm">{item.label}</span>
+                  </div>
+                  {item.comingSoon && !hasAccess && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
+                        Coming Soon
+                      </span>
+                      <Lock className="w-3 h-3 text-gray-500" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </div>
         

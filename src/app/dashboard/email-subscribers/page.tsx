@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings } from 'lucide-react';
+import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
+import { useUser } from '@/components/UserContext';
 import { StatsCards } from '@/components';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { 
@@ -28,7 +29,12 @@ interface LocalSubscriber {
 
 const EmailSubscribers = () => {
   const router = useRouter();
+  const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Check access
+  const ALLOWED_EMAIL = 'tayeshobajo@gmail.com';
+  const hasAccess = user?.email === ALLOWED_EMAIL;
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [addSubscriberModalOpen, setAddSubscriberModalOpen] = useState(false);
   const [editSubscriberModalOpen, setEditSubscriberModalOpen] = useState(false);
@@ -299,6 +305,38 @@ const EmailSubscribers = () => {
       console.log('Connecting to ESP:', espConnection);
     }
   };
+
+  // Show Coming Soon overlay for non-allowed users
+  if (user && !hasAccess) {
+    return (
+      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <UserProfileSidebar 
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          currentPage="email-subscribers"
+        />
+        
+        {/* Full Screen Coming Soon Overlay */}
+        <div className="flex-1 flex items-center justify-center bg-white">
+          <div className="text-center space-y-4 p-8">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-yellow-100 mb-4">
+              <Lock className="w-12 h-12 text-yellow-600" />
+            </div>
+            <h2 className="text-4xl font-bold text-gray-800">Coming Soon</h2>
+            <p className="text-gray-600 max-w-md text-lg">
+              Newsletter Subscribers feature is currently in development and will be available soon.
+            </p>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="mt-6 px-6 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>

@@ -1,18 +1,26 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Bell, Menu, Users } from 'lucide-react';
+import { Search, Bell, Menu, Users, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import ContentGenerator from '@/components/ui/ContentGenerator';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { DashboardTour } from '@/components/ui/DashboardTour';
 import { WelcomeModal } from '@/components/ui/WelcomeModal';
+import { useUser } from '@/components/UserContext';
 
 const MagicPublishingPage = () => {
+  const router = useRouter();
+  const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showTour, setShowTour] = useState(false);
+
+  // Check access
+  const ALLOWED_EMAIL = 'tayeshobajo@gmail.com';
+  const hasAccess = user?.email === ALLOWED_EMAIL;
 
   // Check if user should see welcome modal and tour
   useEffect(() => {
@@ -98,6 +106,33 @@ const MagicPublishingPage = () => {
       console.error('[Magic Publishing] Error updating tour guide status:', error);
     }
   }, []);
+
+  // Show Coming Soon overlay for non-allowed users
+  if (user && !hasAccess) {
+    return (
+      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <UserProfileSidebar 
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          currentPage="magic-publishing"
+        />
+        
+        {/* Full Screen Coming Soon Overlay */}
+        <div className="flex-1 flex items-center justify-center bg-white">
+          <div className="text-center space-y-4 p-8">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-yellow-100 mb-4">
+              <Lock className="w-12 h-12 text-yellow-600" />
+            </div>
+            <h2 className="text-4xl font-bold text-gray-800">Coming Soon</h2>
+            <p className="text-gray-600 max-w-md text-lg">
+              Magic Publishing feature is currently in development and will be available soon.
+            </p>
+           
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>

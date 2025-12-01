@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/toast';
-import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2, Plus, Trash2, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { UserProfileSidebar, UserProfileDropdown, useUser, ProfileReadyModal } from '@/components';
 import Image from 'next/image';
@@ -2029,8 +2029,23 @@ const handleArrayInputChange = (field: string, value: string[]) => {
 
               {/* Step 5: Newsletter Integration */}
               {currentStep === 5 && (
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0] relative overflow-hidden">
                   <h2 className="font-semibold font-outfit text-[#333333] mb-4">Newsletter Service</h2>
+
+                  {/* Coming Soon Overlay - Only for non-allowed users */}
+                  {user?.email !== 'tayeshobajo@gmail.com' && (
+                    <div className="absolute inset-0 bg-white/98 backdrop-blur-md rounded-xl flex items-center justify-center z-50 pointer-events-auto">
+                      <div className="text-center space-y-3 p-6">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 mb-2">
+                          <Lock className="w-8 h-8 text-yellow-600" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-800">Coming Soon</h3>
+                        <p className="text-gray-600 max-w-md">
+                          Newsletter integration feature is currently in development and will be available soon.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Current Status */}
                   {user?.newsletter_service && (

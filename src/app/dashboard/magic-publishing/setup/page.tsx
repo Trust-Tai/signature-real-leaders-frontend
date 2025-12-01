@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { countries } from '@/default/countries';
 import { api } from '@/lib/api';
 import { toast } from '@/components/ui/toast';
+import FeatureAccessGuard from '@/components/ui/FeatureAccessGuard';
 import { 
   FaHandshake, 
   FaHeart, 
@@ -294,12 +295,13 @@ const MagicPublishingSetup = () => {
   }
 
   return (
-    <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
-      <UserProfileSidebar 
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        currentPage="magic-publishing-setup"
-      />
+    <FeatureAccessGuard featureName="Magic Publishing - Setup">
+      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <UserProfileSidebar 
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          currentPage="magic-publishing-setup"
+        />
 
       {/* Right Side (Header + Main Content + Footer) */}
       <div className="flex-1 flex flex-col w-full lg:w-auto h-full">
@@ -699,6 +701,7 @@ const MagicPublishingSetup = () => {
         <DashBoardFooter />
       </div>
     </div>
+    </FeatureAccessGuard>
   );
 };
 

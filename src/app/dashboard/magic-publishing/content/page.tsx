@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { generateTopics, getGeneratedContent, TopicSuggestion } from '@/lib/magicPublishingApi';
 import { toast } from '@/components/ui/toast';
 import { useMagicPublishing } from '@/hooks/useMagicPublishing';
+import FeatureAccessGuard from '@/components/ui/FeatureAccessGuard';
 
 const MagicPublishingContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -142,12 +143,13 @@ const MagicPublishingContent = () => {
 
 
   return (
-    <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
-      <UserProfileSidebar 
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        currentPage="magic-publishing-content"
-      />
+    <FeatureAccessGuard featureName="Magic Publishing - Content">
+      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <UserProfileSidebar 
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          currentPage="magic-publishing-content"
+        />
 
       {/* Right Side (Header + Main Content + Footer) */}
       <div className="flex-1 flex flex-col w-full lg:w-auto h-full">
@@ -493,6 +495,7 @@ const MagicPublishingContent = () => {
         </div>
       )}
     </div>
+    </FeatureAccessGuard>
   );
 };
 

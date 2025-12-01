@@ -6,17 +6,19 @@ import { UserProfileSidebar } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { useRouter } from 'next/navigation';
+import FeatureAccessGuard from '@/components/ui/FeatureAccessGuard';
 
 const MagicPublishingPodcasts = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter()
   return (
-    <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
-      <UserProfileSidebar 
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        currentPage="magic-publishing-podcasts"
-      />
+    <FeatureAccessGuard featureName="Magic Publishing - Podcasts">
+      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <UserProfileSidebar 
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          currentPage="magic-publishing-podcasts"
+        />
 
       {/* Right Side (Header + Main Content + Footer) */}
       <div className="flex-1 flex flex-col w-full lg:w-auto h-full">
@@ -120,6 +122,7 @@ const MagicPublishingPodcasts = () => {
         <DashBoardFooter />
       </div>
     </div>
+    </FeatureAccessGuard>
   );
 };
 

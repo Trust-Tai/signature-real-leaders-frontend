@@ -10,6 +10,7 @@ import { useMagicPublishing } from '@/hooks/useMagicPublishing';
 import CreateBookModal from '@/components/ui/CreateBookModal';
 import BooksList from './components/BooksList';
 import { GenerateBookRequest } from '@/lib/magicPublishingApi';
+import FeatureAccessGuard from '@/components/ui/FeatureAccessGuard';
 
 const MagicPublishingBooks = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -66,12 +67,13 @@ const MagicPublishingBooks = () => {
     }
   };
   return (
-    <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
-      <UserProfileSidebar 
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        currentPage="magic-publishing-books"
-      />
+    <FeatureAccessGuard featureName="Magic Publishing - Books">
+      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <UserProfileSidebar 
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          currentPage="magic-publishing-books"
+        />
 
       {/* Right Side (Header + Main Content + Footer) */}
       <div className="flex-1 flex flex-col w-full lg:w-auto h-full">
@@ -214,6 +216,7 @@ const MagicPublishingBooks = () => {
         isGenerating={isGenerating}
       />
     </div>
+    </FeatureAccessGuard>
   );
 };
 

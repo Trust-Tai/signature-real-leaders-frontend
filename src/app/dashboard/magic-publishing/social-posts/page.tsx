@@ -10,6 +10,7 @@ import { useMagicPublishing } from '@/hooks/useMagicPublishing';
 import CreateSocialPostModal from './components/CreateSocialPostModal';
 import SocialPostsList from './components/SocialPostsList';
 import { GenerateSocialPostsRequest } from '@/lib/magicPublishingApi';
+import FeatureAccessGuard from '@/components/ui/FeatureAccessGuard';
 
 const MagicPublishingSocialPosts = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -67,8 +68,9 @@ const MagicPublishingSocialPosts = () => {
   };
 
   return (
-    <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
-      <UserProfileSidebar 
+    <FeatureAccessGuard featureName="Magic Publishing - Social Posts">
+      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <UserProfileSidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         currentPage="magic-publishing-social-posts"
@@ -216,6 +218,7 @@ const MagicPublishingSocialPosts = () => {
         isGenerating={isGenerating}
       />
     </div>
+    </FeatureAccessGuard>
   );
 };
 
