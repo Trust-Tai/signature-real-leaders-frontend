@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, Mail, SquarePlus, Users, Wand2, HelpCircle, Lock } from 'lucide-react';
+import { X, Mail, SquarePlus, Users, Wand2, HelpCircle } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { useRouter } from 'next/navigation';
@@ -89,15 +89,11 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
             <div
               data-tour="magic-publishing"
               onClick={() => {
-                if (hasAccess) {
-                  setSidebarOpen(false);
-                  router.push('/dashboard/magic-publishing');
-                }
+                setSidebarOpen(false);
+                router.push('/dashboard/magic-publishing');
               }}
-              className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors ${
-                hasAccess 
-                  ? `cursor-pointer ${currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`
-                  : 'cursor-not-allowed opacity-50 text-gray-500'
+              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
+                currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
               }`}
             >
               <div className="flex items-center space-x-3">
@@ -108,12 +104,9 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                     Beta
                   </span>
                 ) : (
-                  <>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
-                      Coming Soon
-                    </span>
-                    <Lock className="w-3 h-3 text-gray-500" />
-                  </>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
+                    Coming Soon
+                  </span>
                 )}
               </div>
             </div>
@@ -123,21 +116,16 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
             {/* Other Menu Items */}
             {sidebarItems.map((item, index) => {
-              const isLocked = item.requiresAccess && !hasAccess;
               return (
                 <div 
                   key={index}
                   data-tour={item.tourId}
-                  className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                    isLocked
-                      ? 'cursor-not-allowed opacity-50 text-gray-500'
-                      : `cursor-pointer ${currentPage === item.page ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`
+                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                    currentPage === item.page ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                   onClick={() => {
-                    if (!isLocked) {
-                      setSidebarOpen(false);
-                      router.push(`${item.path}`);
-                    }
+                    setSidebarOpen(false);
+                    router.push(`${item.path}`);
                   }}
                 >
                   <div className="flex items-center space-x-3">
@@ -145,12 +133,9 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                     <span className="text-sm">{item.label}</span>
                   </div>
                   {item.comingSoon && !hasAccess && (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
-                        Coming Soon
-                      </span>
-                      <Lock className="w-3 h-3 text-gray-500" />
-                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
+                      Coming Soon
+                    </span>
                   )}
                 </div>
               );

@@ -318,20 +318,15 @@ const EmailSubscribers = () => {
         
         {/* Full Screen Coming Soon Overlay */}
         <div className="flex-1 flex items-center justify-center bg-white">
-          <div className="text-center space-y-4 p-8">
+          <div className="text-center space-y-4 p-8 max-w-lg">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-yellow-100 mb-4">
               <Lock className="w-12 h-12 text-yellow-600" />
             </div>
-            <h2 className="text-4xl font-bold text-gray-800">Coming Soon</h2>
-            <p className="text-gray-600 max-w-md text-lg">
+            <h2 className="text-5xl font-bold text-gray-800 mb-4">Coming Soon</h2>
+            <p className="text-gray-600 text-xl leading-relaxed">
               Newsletter Subscribers feature is currently in development and will be available soon.
             </p>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="mt-6 px-6 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              Back to Dashboard
-            </button>
+          
           </div>
         </div>
       </div>
