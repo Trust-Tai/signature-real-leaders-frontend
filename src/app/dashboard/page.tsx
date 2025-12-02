@@ -7,8 +7,8 @@ const Dashboard = () => {
   const router = useRouter();
   
   useEffect(() => {
-    // Redirect to Magic Publishing as default dashboard
-    router.replace('/dashboard/magic-publishing');
+    // Redirect to Analytics as default dashboard
+    router.replace('/dashboard/analytics');
   }, [router]);
 
   return null;

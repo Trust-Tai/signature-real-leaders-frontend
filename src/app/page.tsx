@@ -15,7 +15,7 @@ const Home = () => {
         
         if (token) {
           // User is authenticated, redirect to dashboard
-          router.replace('/dashboard');
+          router.replace('/dashboard/analytics');
         } else {
           // User is not authenticated, redirect to login
           router.replace('/login');

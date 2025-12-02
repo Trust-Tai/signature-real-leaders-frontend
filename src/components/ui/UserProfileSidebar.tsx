@@ -33,7 +33,6 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   const hasAccess = user?.email === ALLOWED_EMAIL;
 
   const sidebarItems = [
-    { icon: SquarePlus, label: 'Analytics', path: '/dashboard/analytics', page: 'analytics', tourId: 'analytics' },
     { icon: Users, label: 'Following', path: '/dashboard/following', page: 'following', tourId: 'following' },
     { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers', comingSoon: true, requiresAccess: true },
     { icon: HelpCircle, label: 'Help', path: '/dashboard/help', page: 'help', tourId: 'help' }
@@ -85,7 +84,24 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
         {/* Sidebar Nav */}
         <div className="p-4 flex-1">
           <nav className="space-y-2">
-            {/* Magic Publishing - Top Menu Item */}
+            {/* Analytics - Top Menu Item */}
+            <div
+              data-tour="analytics"
+              onClick={() => {
+                setSidebarOpen(false);
+                router.push('/dashboard/analytics');
+              }}
+              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
+                currentPage === 'analytics' ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <SquarePlus className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm">Analytics</span>
+              </div>
+            </div>
+
+            {/* Magic Publishing - Second Menu Item */}
             <div
               data-tour="magic-publishing"
               onClick={() => {
@@ -112,7 +128,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
             </div>
 
             {/* Divider */}
-            <div className="border-t border-gray-700 my-4"></div>
+            {/* <div className="border-t border-gray-700 my-4"></div> */}
 
             {/* Other Menu Items */}
             {sidebarItems.map((item, index) => {
