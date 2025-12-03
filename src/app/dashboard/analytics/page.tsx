@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Bell, Users, Menu } from 'lucide-react';
+import { Search, Menu } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';

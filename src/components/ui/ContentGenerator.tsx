@@ -30,7 +30,7 @@ export default function ContentGenerator() {
       description: "Generate long-form thought leadership articles tailored to your audience",
       path: "/dashboard/magic-publishing/content",
       bgImage: articlesImg,
-      status: "beta"
+      status: "coming-soon"
     },
     {
       icon: <BookOpen className="h-8 w-8" />,
@@ -38,7 +38,7 @@ export default function ContentGenerator() {
       description: "Outline book chapters and develop thought leadership content",
       path: "/dashboard/magic-publishing/books",
       bgImage: booksImg,
-      status: "beta"
+      status: "coming-soon"
     },
     {
       icon: <Mic className="h-8 w-8" />,
@@ -46,7 +46,7 @@ export default function ContentGenerator() {
       description: "Develop podcast outlines, interview questions, and episode scripts",
       path: "/dashboard/magic-publishing/podcasts",
       bgImage: podcastImg,
-      status: "beta"
+      status: "coming-soon"
     },
     {
       icon: <MessageSquare className="h-8 w-8" />,
@@ -54,7 +54,7 @@ export default function ContentGenerator() {
       description: "Create engaging social media content for LinkedIn, Twitter, and more",
       path: "/dashboard/magic-publishing/social-posts",
       bgImage: socialImg,
-      status: "beta"
+      status: "coming-soon"
     },
     {
       icon: <Megaphone className="h-8 w-8" />,

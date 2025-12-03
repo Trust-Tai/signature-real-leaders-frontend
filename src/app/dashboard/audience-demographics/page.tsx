@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import {  Bell, User, Menu,  Calendar, Users, Globe, Monitor, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import {  Menu,  Calendar, Users, Globe, Monitor, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { UserProfileSidebar, StatsCards } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';

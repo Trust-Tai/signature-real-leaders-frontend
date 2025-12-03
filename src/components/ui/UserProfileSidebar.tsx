@@ -21,16 +21,11 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   currentPage 
 }) => {
   const router = useRouter();
-  const { user } = useUser();
 
   const handleLogoClick = () => {
     // Navigate to WordPress site with auto-login
     performAutoLogin('https://verified.real-leaders.com', true);
   };
-
-  // Check if user has access to beta features
-  const ALLOWED_EMAIL = 'tayeshobajo@gmail.com';
-  const hasAccess = user?.email === ALLOWED_EMAIL;
 
   const sidebarItems = [
     { icon: Users, label: 'Following', path: '/dashboard/following', page: 'following', tourId: 'following' },
@@ -115,16 +110,10 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
               <div className="flex items-center space-x-3">
                 <Wand2 className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm">Magic Publishing</span>
-                {hasAccess ? (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
-                    Beta
-                  </span>
-                ) : (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
-                    Coming Soon
-                  </span>
-                )}
               </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
+                Coming Soon
+              </span>
             </div>
 
             {/* Divider */}
@@ -148,7 +137,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm">{item.label}</span>
                   </div>
-                  {item.comingSoon && !hasAccess && (
+                  {item.comingSoon && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
                       Coming Soon
                     </span>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Bell, User, ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings, Lock } from 'lucide-react';
+import { Search,  ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
