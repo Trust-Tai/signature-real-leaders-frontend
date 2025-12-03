@@ -1,4 +1,4 @@
-import michelle from "../../assets/images/Michelle-Cribbs.jpg";
+import michelle from "../../assets/images/Michelle-Cribbs.jpeg";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 interface FollowCardStyles extends React.CSSProperties {

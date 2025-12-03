@@ -6,7 +6,6 @@ import { X, Mail, SquarePlus, Users, Wand2, HelpCircle } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/components/UserContext';
 
 interface UserProfileSidebarProps {
   sidebarOpen: boolean;

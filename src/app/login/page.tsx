@@ -798,7 +798,24 @@ const SignInPage: FC = () => {
               // Check account status
               if (response.user.account_status === "pending_review") {
                 console.log('[Social Callback] Account pending review, redirecting to profile verification step 2 (Experience)');
-                toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+                
+                // Store user data for autofill in profile verification
+                if (response.user.first_name || response.user.last_name) {
+                  localStorage.setItem("profile_first_name", response.user.first_name || "");
+                  localStorage.setItem("profile_last_name", response.user.last_name || "");
+                  console.log('[Social Callback] Stored first_name and last_name for autofill:', {
+                    first_name: response.user.first_name,
+                    last_name: response.user.last_name
+                  });
+                }
+                
+                // Store profile picture URL for autofill
+                if (response.user.profile_picture_url) {
+                  localStorage.setItem("profile_picture_url", response.user.profile_picture_url);
+                  console.log('[Social Callback] Stored profile_picture_url for autofill:', response.user.profile_picture_url);
+                }
+                
+                toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
                 localStorage.setItem("redirect_to_step", "2");
                 router.replace('/profile-verification');
                 return;
@@ -817,13 +834,38 @@ const SignInPage: FC = () => {
             // New signup - account pending review
             console.log('[Social Callback] New signup - pending review, redirecting to profile verification step 2 (Experience)');
             
-            // Store user data
-            if (tempToken && userId) {
+            // Fetch user details to get first_name, last_name, and profile_picture_url
+            const { api } = await import('@/lib/api');
+            const response = await api.getUserDetailsWithToken(tempToken);
+            
+            if (response.success && response.user) {
+              // Store user data for autofill in profile verification
+              if (response.user.first_name || response.user.last_name) {
+                localStorage.setItem("profile_first_name", response.user.first_name || "");
+                localStorage.setItem("profile_last_name", response.user.last_name || "");
+                console.log('[Social Callback] Stored first_name and last_name for autofill:', {
+                  first_name: response.user.first_name,
+                  last_name: response.user.last_name
+                });
+              }
+              
+              // Store profile picture URL for autofill
+              if (response.user.profile_picture_url) {
+                localStorage.setItem("profile_picture_url", response.user.profile_picture_url);
+                console.log('[Social Callback] Stored profile_picture_url for autofill:', response.user.profile_picture_url);
+              }
+              
+              // Store auth data
+              localStorage.setItem("auth_token", response.token || tempToken);
+              localStorage.setItem("user_data", JSON.stringify(response.user));
+              localStorage.setItem("user_id", response.user.id.toString());
+            } else if (tempToken && userId) {
+              // Fallback if API call fails
               localStorage.setItem("temp_auth_token", tempToken);
               localStorage.setItem("user_id", userId);
             }
             
-            toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+            toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
             localStorage.setItem("redirect_to_step", "2");
             router.replace('/profile-verification');
           } else if (accountStatus === "approved") {
@@ -919,7 +961,7 @@ const SignInPage: FC = () => {
 
         if (data?.user?.account_status === "pending_review") {
           console.log('[Password Login] Account pending review, redirecting to profile verification step 2 (Experience)');
-          toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+          toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
           localStorage.setItem("redirect_to_step", "2");
           router.replace('/profile-verification');
           return;
@@ -969,7 +1011,7 @@ const SignInPage: FC = () => {
 
           if (data?.user?.account_status === "pending_review") {
             console.log('[OTP Verify] Account pending review, redirecting to profile verification step 2 (Experience)');
-            toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+            toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
             localStorage.setItem("redirect_to_step", "2");
             router.replace('/profile-verification');
             return;

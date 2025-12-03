@@ -78,6 +78,35 @@ const InnerProfileVerificationPage = () => {
   const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined);
   const [resendResponseMessage, setResendResponseMessage] = useState<string | undefined>(undefined);
 
+  // Load first_name, last_name, and profile_picture from localStorage (set by login page for pending_review users)
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const firstName = localStorage.getItem('profile_first_name');
+      const lastName = localStorage.getItem('profile_last_name');
+      const profilePictureUrl = localStorage.getItem('profile_picture_url');
+      
+      if (firstName || lastName || profilePictureUrl) {
+        console.log('[Profile Verification] Loading user data from localStorage:', {
+          first_name: firstName,
+          last_name: lastName,
+          profile_picture_url: profilePictureUrl
+        });
+        
+        setState(prev => ({
+          ...prev,
+          first_name: firstName || prev.first_name,
+          last_name: lastName || prev.last_name,
+          profilePicture: profilePictureUrl || prev.profilePicture
+        }));
+        
+        // Clear from localStorage after loading
+        localStorage.removeItem('profile_first_name');
+        localStorage.removeItem('profile_last_name');
+        localStorage.removeItem('profile_picture_url');
+      }
+    }
+  }, [setState]);
+
   const steps: Step[] = [
     { id: 1, title: 'Email & Code Verification', status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
     { id: 2, title: 'Experience', status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
@@ -162,7 +191,8 @@ const InnerProfileVerificationPage = () => {
               email: response.user.email,
               auth_token: response.token,
               first_name: response.user.first_name,
-              last_name: response.user.last_name
+              last_name: response.user.last_name,
+              profilePicture: response.user.profile_picture_url
             }));
             
             // Store in localStorage
@@ -181,14 +211,14 @@ const InnerProfileVerificationPage = () => {
               console.log('[Social Callback] Account pending review, navigating to step 2 (Experience)...');
               // Navigate to step 2 (Experience) for pending review users
               setCurrentStep(2);
-              toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+              toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
               // Clean up URL
               window.history.replaceState({}, document.title, '/profile-verification');
             } else {
               console.log('[Social Callback] Unknown status, navigating to step 2 (Experience)...');
               // Navigate to step 2 for unknown status
               setCurrentStep(2);
-              toast.warning('Your account is pending review. Please complete your profile.', { autoClose: 5000 });
+              toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
               window.history.replaceState({}, document.title, '/profile-verification');
             }
           }
@@ -365,7 +395,8 @@ const InnerProfileVerificationPage = () => {
             initialData={{
               firstName: state.first_name,
               lastName: state.last_name,
-              email: state.email
+              email: state.email,
+              profilePicture: state.profilePicture
             }}
           />
         );
@@ -516,10 +547,18 @@ const InnerProfileVerificationPage = () => {
                     // Use update-profile API for social login users with pending_review
                     console.log('[Step 3] Social login user detected, using update-profile API');
                     result = await api.updateProfileWithFiles(authToken, formData);
+                    localStorage.removeItem("auth_token")
+                    localStorage.removeItem("temp_auth_token")
+                    localStorage.removeItem("user_data")
+                    localStorage.removeItem("user_id")
                   } else {
                     // Use submit-user-info API for regular users
                     console.log('[Step 3] Regular user, using submit-user-info API');
                     result = await api.submitUserInfoWithFiles(authToken, formData);
+                    localStorage.removeItem("auth_token")
+                    localStorage.removeItem("temp_auth_token")
+                    localStorage.removeItem("user_data")
+                    localStorage.removeItem("user_id")
                   }
                   
                   if (result.success) {
