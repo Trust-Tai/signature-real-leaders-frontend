@@ -815,9 +815,16 @@ const SignInPage: FC = () => {
                   console.log('[Social Callback] Stored profile_picture_url for autofill:', response.user.profile_picture_url);
                 }
                 
-                toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
+                // Set redirect step before navigation
                 localStorage.setItem("redirect_to_step", "2");
-                router.replace('/profile-verification');
+                console.log('[Social Callback] Set redirect_to_step = 2, navigating to profile-verification...');
+                
+                toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
+                
+                // Small delay to ensure localStorage is written
+                setTimeout(() => {
+                  router.replace('/profile-verification');
+                }, 100);
                 return;
               }
               
@@ -865,9 +872,16 @@ const SignInPage: FC = () => {
               localStorage.setItem("user_id", userId);
             }
             
-            toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
+            // Set redirect step before navigation
             localStorage.setItem("redirect_to_step", "2");
-            router.replace('/profile-verification');
+            console.log('[Social Callback - New Signup] Set redirect_to_step = 2, navigating to profile-verification...');
+            
+            toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
+            
+            // Small delay to ensure localStorage is written
+            setTimeout(() => {
+              router.replace('/profile-verification');
+            }, 100);
           } else if (accountStatus === "approved") {
             // Account approved but not logged in yet - fetch token
             console.log('[Social Callback] Account approved, fetching token...');
@@ -961,9 +975,17 @@ const SignInPage: FC = () => {
 
         if (data?.user?.account_status === "pending_review") {
           console.log('[Password Login] Account pending review, redirecting to profile verification step 2 (Experience)');
-          toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
+          
+          // Set redirect step before navigation
           localStorage.setItem("redirect_to_step", "2");
-          router.replace('/profile-verification');
+          console.log('[Password Login] Set redirect_to_step = 2, navigating to profile-verification...');
+          
+          toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
+          
+          // Small delay to ensure localStorage is written
+          setTimeout(() => {
+            router.replace('/profile-verification');
+          }, 100);
           return;
         }
 
@@ -1011,9 +1033,17 @@ const SignInPage: FC = () => {
 
           if (data?.user?.account_status === "pending_review") {
             console.log('[OTP Verify] Account pending review, redirecting to profile verification step 2 (Experience)');
-            toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
+            
+            // Set redirect step before navigation
             localStorage.setItem("redirect_to_step", "2");
-            router.replace('/profile-verification');
+            console.log('[OTP Verify] Set redirect_to_step = 2, navigating to profile-verification...');
+            
+            toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
+            
+            // Small delay to ensure localStorage is written
+            setTimeout(() => {
+              router.replace('/profile-verification');
+            }, 100);
             return;
           }
 

@@ -61,7 +61,7 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle initial data and auto-prefill first name, last name, email, and profile picture
+  // Handle initial data and auto-prefill first name, last name, and email only (NOT profile picture)
   useEffect(() => {
     if (initialData) {
       // If both firstName and lastName are provided separately, use them directly
@@ -70,8 +70,8 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           ...prev,
           firstName: initialData.firstName || '',
           lastName: initialData.lastName || '',
-          email: initialData.email || '',
-          profilePicture: initialData.profilePicture || prev.profilePicture
+          email: initialData.email || ''
+          // Profile picture is NOT prefilled
         }));
       } 
       // If only firstName is provided (from the name field), split it by spaces
@@ -84,15 +84,8 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           ...prev,
           firstName,
           lastName,
-          email: initialData.email || '',
-          profilePicture: initialData.profilePicture || prev.profilePicture
-        }));
-      }
-      // If only profilePicture is provided
-      else if (initialData.profilePicture) {
-        setFormData(prev => ({
-          ...prev,
-          profilePicture: initialData.profilePicture || prev.profilePicture
+          email: initialData.email || ''
+          // Profile picture is NOT prefilled
         }));
       }
     }
