@@ -83,7 +83,16 @@ export default function DynamicUserProfile() {
   const router = useRouter();
   const params = useParams();
   const username = params.username as string;
-  const { user } = useUser();
+  
+  // Try to get user context, but don't fail if not available (public page)
+  let user = null;
+  try {
+    const userContext = useUser();
+    user = userContext.user;
+  } catch (error) {
+    // User context not available - this is fine for public pages
+    user = null;
+  }
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
