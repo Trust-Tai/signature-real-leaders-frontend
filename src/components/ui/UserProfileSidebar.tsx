@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, Mail, SquarePlus, Users, Wand2, HelpCircle } from 'lucide-react';
+import { X, Mail, SquarePlus, Users,UserPlus, Wand2, HelpCircle } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { useRouter } from 'next/navigation';
@@ -29,6 +29,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   const sidebarItems = [
     { icon: Users, label: 'Following', path: '/dashboard/following', page: 'following', tourId: 'following' },
     { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers', comingSoon: true, requiresAccess: true },
+    { icon: UserPlus, label: 'Followers', path: '/dashboard/followers', page: 'followers' },
     { icon: HelpCircle, label: 'Help', path: '/dashboard/help', page: 'help', tourId: 'help' }
   ];
 
