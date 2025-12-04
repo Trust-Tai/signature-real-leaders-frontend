@@ -60,8 +60,12 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Track the original profile picture URL from API (for social login users)
+  const [originalProfilePictureUrl, setOriginalProfilePictureUrl] = useState<string>('');
+  const [isProfilePictureChanged, setIsProfilePictureChanged] = useState(false);
 
-  // Handle initial data and auto-prefill first name, last name, and email only (NOT profile picture)
+  // Handle initial data and auto-prefill first name, last name, email, and profile picture
   useEffect(() => {
     if (initialData) {
       // If both firstName and lastName are provided separately, use them directly
@@ -70,9 +74,13 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           ...prev,
           firstName: initialData.firstName || '',
           lastName: initialData.lastName || '',
-          email: initialData.email || ''
-          // Profile picture is NOT prefilled
+          email: initialData.email || '',
+          profilePicture: initialData.profilePicture || ''
         }));
+        // Store original profile picture URL
+        if (initialData.profilePicture) {
+          setOriginalProfilePictureUrl(initialData.profilePicture);
+        }
       } 
       // If only firstName is provided (from the name field), split it by spaces
       else if (initialData.firstName && !initialData.lastName) {
@@ -84,9 +92,13 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
           ...prev,
           firstName,
           lastName,
-          email: initialData.email || ''
-          // Profile picture is NOT prefilled
+          email: initialData.email || '',
+          profilePicture: initialData.profilePicture || ''
         }));
+        // Store original profile picture URL
+        if (initialData.profilePicture) {
+          setOriginalProfilePictureUrl(initialData.profilePicture);
+        }
       }
     }
   }, [initialData]);
@@ -117,6 +129,8 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
       reader.onload = (e) => {
         const result = e.target?.result as string;
         handleInputChange('profilePicture', result);
+        // Mark that user has changed the profile picture
+        setIsProfilePictureChanged(true);
       };
       reader.readAsDataURL(file);
     }
@@ -127,7 +141,15 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
   };
 
   const handleSubmit = () => {
-    onSubmit(formData);
+    // Smart profile picture handling:
+    // - If user hasn't changed the picture and we have original URL, use that URL
+    // - If user changed/uploaded new picture, use the new data
+    const finalFormData = {
+      ...formData,
+      profilePicture: isProfilePictureChanged ? formData.profilePicture : originalProfilePictureUrl
+    };
+    
+    onSubmit(finalFormData);
   };
 
   const isFormValid = () => {
@@ -176,7 +198,10 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
             {formData.profilePicture && (
               <button
                 type="button"
-                onClick={() => handleInputChange('profilePicture', '')}
+                onClick={() => {
+                  handleInputChange('profilePicture', '');
+                  setIsProfilePictureChanged(true); // Mark as changed when removed
+                }}
                 className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
               >
                 ×

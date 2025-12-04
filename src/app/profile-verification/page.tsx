@@ -21,14 +21,17 @@ import { toast } from '@/components/ui/toast';
 import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
 
 const InnerProfileVerificationPage = () => {
+  // Track if we've already processed redirect_to_step
+  const hasProcessedRedirect = React.useRef(false);
+  
   // Initialize currentStep from localStorage if available
   const [currentStep, setCurrentStep] = useState(() => {
     if (typeof window !== 'undefined') {
       const redirectStep = localStorage.getItem('redirect_to_step');
       
-      if (redirectStep) {
-        console.log('[Profile Verification Init] Using redirect_to_step:', redirectStep);
-        localStorage.removeItem('redirect_to_step');
+      if (redirectStep && !hasProcessedRedirect.current) {
+        hasProcessedRedirect.current = true;
+        // Don't remove yet - will remove in useEffect after component mounts
         // Clear saved step when using redirect_to_step (fresh social login)
         localStorage.removeItem('profile_verification_current_step');
         return parseInt(redirectStep, 10);
@@ -36,14 +39,25 @@ const InnerProfileVerificationPage = () => {
       
       // Don't restore saved step - always start fresh at step 1
       // This ensures user starts from beginning when manually accessing profile-verification
-      console.log('[Profile Verification Init] Starting at step 1');
-      localStorage.removeItem('profile_verification_current_step');
+      if (!redirectStep) {
+        localStorage.removeItem('profile_verification_current_step');
+      }
     }
     return 1; // Default to step 1
   });
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showCodeVerification, setShowCodeVerification] = useState(false);
+  
+  // Clean up redirect_to_step after component mounts
+  React.useEffect(() => {
+    if (hasProcessedRedirect.current) {
+      // Small delay to ensure state is set before clearing
+      setTimeout(() => {
+        localStorage.removeItem('redirect_to_step');
+      }, 100);
+    }
+  }, []);
   
   // Don't save current step to localStorage
   // User should always start fresh when accessing profile-verification
@@ -505,10 +519,23 @@ const InnerProfileVerificationPage = () => {
                   
                   // Add profile picture if exists
                   if (state.profilePicture) {
-                    const response = await fetch(state.profilePicture);
-                    const blob = await response.blob();
-                    const file = new File([blob], 'profile-picture.png', { type: 'image/png' });
-                    formData.append('profilePicture', file);
+                    // Check if it's a URL (starts with http/https) or a data URL (base64)
+                    const isExternalUrl = state.profilePicture.startsWith('http://') || state.profilePicture.startsWith('https://');
+                    const isDataUrl = state.profilePicture.startsWith('data:');
+                    
+                    if (isExternalUrl) {
+                      // External URL (like Gravatar) - send as-is, don't convert to File
+                      formData.append('profilePictureUrl', state.profilePicture);
+                    } else if (isDataUrl) {
+                      // Data URL (user uploaded new image) - convert to File
+                      const response = await fetch(state.profilePicture);
+                      const blob = await response.blob();
+                      const file = new File([blob], 'profile-picture.png', { type: 'image/png' });
+                      formData.append('profilePicture', file);
+                    } else {
+                      // Fallback - treat as URL
+                      formData.append('profilePictureUrl', state.profilePicture);
+                    }
                   } else {
                     formData.append('profilePicture', '');
                   }

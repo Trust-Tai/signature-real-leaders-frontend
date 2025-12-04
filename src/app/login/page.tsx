@@ -817,7 +817,6 @@ const SignInPage: FC = () => {
                 
                 // Set redirect step before navigation
                 localStorage.setItem("redirect_to_step", "2");
-                console.log('[Social Callback] Set redirect_to_step = 2, navigating to profile-verification...');
                 
                 toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
                 
@@ -874,7 +873,6 @@ const SignInPage: FC = () => {
             
             // Set redirect step before navigation
             localStorage.setItem("redirect_to_step", "2");
-            console.log('[Social Callback - New Signup] Set redirect_to_step = 2, navigating to profile-verification...');
             
             toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
             
@@ -978,7 +976,6 @@ const SignInPage: FC = () => {
           
           // Set redirect step before navigation
           localStorage.setItem("redirect_to_step", "2");
-          console.log('[Password Login] Set redirect_to_step = 2, navigating to profile-verification...');
           
           toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
           
@@ -1036,7 +1033,6 @@ const SignInPage: FC = () => {
             
             // Set redirect step before navigation
             localStorage.setItem("redirect_to_step", "2");
-            console.log('[OTP Verify] Set redirect_to_step = 2, navigating to profile-verification...');
             
             toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
             

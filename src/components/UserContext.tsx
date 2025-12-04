@@ -132,6 +132,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       
       if (response.success) {
         const userData = response.user as Record<string, unknown>;
+        
+        // Check if account is pending review
+        if (response.user.account_status === 'pending_review') {
+          localStorage.setItem('redirect_to_step', '2');
+          router.replace('/profile-verification');
+          setIsInitialLoading(false);
+          return;
+        }
+        
         setUser({
           ...response.user,
           rss_feed_url: (userData.rss_feed_url as string) || '',
