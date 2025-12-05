@@ -28,9 +28,8 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
   const sidebarItems = [
     { icon: Users, label: 'Following', path: '/dashboard/following', page: 'following', tourId: 'following' },
-    { icon: Mail, label: 'Newsletter Subscribers', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers', comingSoon: true, requiresAccess: true },
     { icon: UserPlus, label: 'Followers', path: '/dashboard/followers', page: 'followers' },
-    { icon: HelpCircle, label: 'Help', path: '/dashboard/help', page: 'help', tourId: 'help' }
+    { icon: Mail, label: 'Leads', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers', isPro: true, requiresAccess: true }
   ];
 
   return (
@@ -79,7 +78,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
         {/* Sidebar Nav */}
         <div className="p-4 flex-1">
           <nav className="space-y-2">
-            {/* Analytics - Top Menu Item */}
+            {/* Dashboard - Top Menu Item */}
             <div
               data-tour="analytics"
               onClick={() => {
@@ -92,32 +91,9 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
             >
               <div className="flex items-center space-x-3">
                 <SquarePlus className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm">Analytics</span>
+                <span className="text-sm">Dashboard</span>
               </div>
             </div>
-
-            {/* Magic Publishing - Second Menu Item */}
-            <div
-              data-tour="magic-publishing"
-              onClick={() => {
-                setSidebarOpen(false);
-                router.push('/dashboard/magic-publishing');
-              }}
-              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
-                currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <Wand2 className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm">Magic Publishing</span>
-              </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
-                Coming Soon
-              </span>
-            </div>
-
-            {/* Divider */}
-            {/* <div className="border-t border-gray-700 my-4"></div> */}
 
             {/* Other Menu Items */}
             {sidebarItems.map((item, index) => {
@@ -137,14 +113,51 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm">{item.label}</span>
                   </div>
-                  {item.comingSoon && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
-                      Coming Soon
+                  {item.isPro && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
+                      Pro
                     </span>
                   )}
                 </div>
               );
             })}
+
+            {/* Magic Studio - After other items */}
+            <div
+              data-tour="magic-publishing"
+              onClick={() => {
+                setSidebarOpen(false);
+                router.push('/dashboard/magic-publishing');
+              }}
+              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
+                currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <Wand2 className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm">Magic Studio</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
+                Pro
+              </span>
+            </div>
+
+            {/* Help - Last Menu Item */}
+            <div
+              data-tour="help"
+              onClick={() => {
+                setSidebarOpen(false);
+                router.push('/dashboard/help');
+              }}
+              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
+                currentPage === 'help' ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <HelpCircle className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm">Help</span>
+              </div>
+            </div>
           </nav>
         </div>
         

@@ -49,28 +49,28 @@ export const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete }) => {
     // Define tour steps for sidebar menu items - Updated structure
     tg.addSteps([
       {
-        title: 'Magic Publishing - Your Default Dashboard',
-        content: 'Welcome! This is your new default landing page. Create AI-powered content, articles, books, and podcasts to grow your brand. This is your personal content creation engine!',
-        target: '[data-tour="magic-publishing"]',
+        title: 'Dashboard - Your Analytics Hub',
+        content: 'Your complete analytics center with 4 powerful tabs: Dashboard (overview), Page Views (traffic), Page Clicks (link performance), and Members (follower management). All your insights in one place!',
+        target: '[data-tour="analytics"]',
         order: 1,
-      },
-      {
-        title: 'Newsletter Subscribers',
-        content: 'Manage and view all the people who have joined your mailing list. Build and engage with your email audience.',
-        target: '[data-tour="subscribers"]',
-        order: 4,
       },
       {
         title: 'Following',
         content: 'See the RSS feeds and profiles you are following. Stay updated with content from your network.',
         target: '[data-tour="following"]',
+        order: 2,
+      },
+      {
+        title: 'Leads',
+        content: 'Manage and view all the people who have joined your mailing list. Build and engage with your email audience. This is a Pro feature!',
+        target: '[data-tour="subscribers"]',
         order: 3,
       },
       {
-        title: 'Analytics Hub',
-        content: 'Your complete analytics center with 4 powerful tabs: Dashboard (overview), Page Views (traffic), Page Clicks (link performance), and Members (follower management). All your insights in one place!',
-        target: '[data-tour="analytics"]',
-        order: 2,
+        title: 'Magic Studio - Your Content Creation Engine',
+        content: 'Create AI-powered content, articles, books, and podcasts to grow your brand. This is your personal content creation studio! This is a Pro feature!',
+        target: '[data-tour="magic-publishing"]',
+        order: 4,
       },
       {
         title: 'Help Center',
