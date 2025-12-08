@@ -145,7 +145,7 @@ export default function ContentGenerator() {
                 {contentType.status && (
                   <div className="absolute top-4 right-4 z-10">
                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold rounded-full text-gray-800">
-                      {contentType.status === 'beta' ? 'Beta' : 'Coming Soon'}
+                      {contentType.status === 'beta' ? 'Beta' : 'Pro'}
                     </span>
                   </div>
                 )}
