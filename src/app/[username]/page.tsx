@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { useRouter, useParams } from "next/navigation";
 import { api } from '@/lib/api';
+import { addSubscriberToUser } from '@/lib/newsletterApi';
 import { toast } from '@/components/ui/toast';
 import { LoadingScreen } from '@/components';
 import { useUser } from '@/components/UserContext';
@@ -253,6 +254,12 @@ export default function DynamicUserProfile() {
         try {
           setNewsletterLoading(true);
           
+          if (!profileData) {
+            toast.error('Profile data not available');
+            setOptIn(false);
+            return;
+          }
+          
           // Get visitor's details from localStorage or user context
           const userDataStr = localStorage.getItem('user_data');
           let firstName = user.first_name || '';
@@ -271,28 +278,18 @@ export default function DynamicUserProfile() {
             }
           }
           
-          // Call the newsletter API endpoint with PROFILE OWNER's user_id
-          const response = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({
-              email: email,
-              first_name: firstName,
-              last_name: lastName,
-              user_id: profileData?.user_id // Profile owner's user_id
-            })
+          // Call the newsletter API using the helper function
+          const response = await addSubscriberToUser(profileData.user_id, {
+            email: email,
+            first_name: firstName,
+            last_name: lastName
           });
           
-          const data = await response.json();
-          
-          if (data.success) {
-            toast.success(data.message || 'Successfully subscribed to newsletter!');
+          if (response.success) {
+            toast.success(response.message || 'Successfully subscribed to newsletter!');
             setOptIn(true);
           } else {
-            toast.error(data.message || 'Failed to subscribe to newsletter');
+            toast.error(response.message || 'Failed to subscribe to newsletter');
             setOptIn(false);
           }
         } catch (error) {
@@ -327,33 +324,25 @@ export default function DynamicUserProfile() {
     try {
       setNewsletterLoading(true);
       
-      // Get auth token if available
-      const authToken = localStorage.getItem('auth_token');
+      if (!profileData) {
+        toast.error('Profile data not available');
+        return;
+      }
       
-      // Call the newsletter API endpoint with PROFILE OWNER's user_id
-      const response = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-        },
-        body: JSON.stringify({
-          email: newsletterData.email,
-          first_name: newsletterData.first_name,
-          last_name: newsletterData.last_name,
-          user_id: profileData?.user_id // Profile owner's user_id
-        })
+      // Call the newsletter API using the helper function
+      const response = await addSubscriberToUser(profileData.user_id, {
+        email: newsletterData.email,
+        first_name: newsletterData.first_name,
+        last_name: newsletterData.last_name
       });
       
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(data.message || 'Successfully subscribed to newsletter!');
+      if (response.success) {
+        toast.success(response.message || 'Successfully subscribed to newsletter!');
         setOptIn(true);
         setShowNewsletterModal(false);
         setNewsletterData({ first_name: '', last_name: '', email: '' });
       } else {
-        toast.error(data.message || 'Failed to subscribe to newsletter');
+        toast.error(response.message || 'Failed to subscribe to newsletter');
       }
     } catch (error) {
       console.error('Error subscribing to newsletter:', error);

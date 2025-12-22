@@ -1,11 +1,12 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { X, Mail, SquarePlus, Users,UserPlus, Wand2, HelpCircle } from 'lucide-react';
+import { X, Mail, SquarePlus, Users,UserPlus, Wand2, HelpCircle, Download } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { useRouter } from 'next/navigation';
+import { exportSubscribersCSV } from '@/lib/newsletterApi';
 
 interface UserProfileSidebarProps {
   sidebarOpen: boolean;
@@ -20,10 +21,35 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   currentPage 
 }) => {
   const router = useRouter();
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleLogoClick = () => {
     // Navigate to WordPress site with auto-login
     performAutoLogin('https://verified.real-leaders.com', true);
+  };
+
+  const handleExportCSV = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation to leads page
+    
+    if (isExporting) return;
+    
+    try {
+      setIsExporting(true);
+      
+      const response = await exportSubscribersCSV();
+      
+      if (response.success && response.data.download_url) {
+        // Open download URL in new tab
+        window.open(response.data.download_url, '_blank');
+      } else {
+        alert('Export failed: ' + (response.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      alert('Failed to export subscribers. Please try again. Error: ' + (error as Error).message);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const sidebarItems = [
@@ -97,6 +123,8 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
             {/* Other Menu Items */}
             {sidebarItems.map((item, index) => {
+              const isLeadsItem = item.page === 'email-subscribers';
+              
               return (
                 <div 
                   key={index}
@@ -113,11 +141,23 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm">{item.label}</span>
                   </div>
-                  {item.isPro && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
-                      Pro
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isLeadsItem && (
+                      <button
+                        onClick={handleExportCSV}
+                        disabled={isExporting}
+                        className="p-1 rounded hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={isExporting ? "Exporting..." : "Export subscribers as CSV"}
+                      >
+                        <Download className={`w-4 h-4 ${isExporting ? 'animate-pulse text-blue-400' : ''}`} />
+                      </button>
+                    )}
+                    {item.isPro && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
+                        Pro
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}

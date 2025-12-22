@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search,  ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings, Lock } from 'lucide-react';
+import { Search,  ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
@@ -12,7 +12,9 @@ import {
   getNewsletterStats, 
   getNewsletterSubscribers, 
   getDateRange,
-  addNewsletterSubscriber,
+  addSubscriberToUser,
+  activateSubscriber,
+  deactivateSubscriber,
   type NewsletterStats,
   type SubscriberFilters 
 } from '@/lib/newsletterApi';
@@ -27,14 +29,14 @@ interface LocalSubscriber {
   list_name?: string;
 }
 
+
+
 const EmailSubscribers = () => {
   const router = useRouter();
   const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Check access
-  const ALLOWED_EMAIL = 'tayeshobajo@gmail.com';
-  const hasAccess = user?.email === ALLOWED_EMAIL;
+
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [addSubscriberModalOpen, setAddSubscriberModalOpen] = useState(false);
   const [editSubscriberModalOpen, setEditSubscriberModalOpen] = useState(false);
@@ -48,7 +50,8 @@ const EmailSubscribers = () => {
     dateTo: ''
   });
   const [newSubscriber, setNewSubscriber] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     status: 'Active'
   });
@@ -71,6 +74,7 @@ const EmailSubscribers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [exportLoading, setExportLoading] = useState(false);
 
   // Fetch newsletter stats
   const fetchStats = useCallback(async () => {
@@ -79,11 +83,19 @@ const EmailSubscribers = () => {
       setStats(statsData);
     } catch (err) {
       console.error('Error fetching stats:', err);
-      if (err instanceof Error && err.message === 'NO_NEWSLETTER_SERVICE') {
-        setError('NO_NEWSLETTER_SERVICE');
-      } else {
-        setError('Failed to load newsletter statistics');
-      }
+      // Set default stats instead of showing error
+      setStats({
+        success: true,
+        data: {
+          marketing_platform: 'Not Connected',
+          account_name: 'No Account',
+          total_subscribers: 0,
+          active_subscribers: 0,
+          unsubscribed_users: 0,
+          monthly_growth_rate: 0,
+          last_updated: new Date().toISOString()
+        }
+      });
     }
   }, []);
 
@@ -137,15 +149,21 @@ const EmailSubscribers = () => {
       }
     } catch (err) {
       console.error('Error fetching subscribers:', err);
-      if (err instanceof Error && err.message === 'NO_NEWSLETTER_SERVICE') {
-        setError('NO_NEWSLETTER_SERVICE');
-      } else {
-        setError('Failed to load subscribers');
-      }
+      // Set empty data instead of showing error
+      setSubscribersData([]);
+      setPagination({
+        page: 1,
+        per_page: 20,
+        total: 0,
+        total_pages: 0
+      });
+      setCurrentPage(1);
     } finally {
       setLoading(false);
     }
   }, [filters]);
+
+
 
   // Initial data fetch
   useEffect(() => {
@@ -194,22 +212,34 @@ const EmailSubscribers = () => {
   const [addingSubscriber, setAddingSubscriber] = useState(false);
 
   const handleAddSubscriber = async () => {
-    if (newSubscriber.name && newSubscriber.email) {
+    if (newSubscriber.first_name && newSubscriber.last_name && newSubscriber.email) {
       try {
         setAddingSubscriber(true);
         
-        // Split name into first and last name
-        const nameParts = newSubscriber.name.trim().split(' ');
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts.slice(1).join(' ') || '';
+        // Get current user's ID from user context or localStorage
+        const userDataStr = localStorage.getItem('user_data');
+        let userId = user?.id;
         
-        const payload = {
+        if (!userId && userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            userId = userData.id;
+          } catch (e) {
+            console.error('Error parsing user data:', e);
+          }
+        }
+        
+        if (!userId) {
+          toast.error('User ID not found. Please log in again.');
+          return;
+        }
+        
+        // Use the new API endpoint with user's own ID
+        const response = await addSubscriberToUser(userId, {
           email: newSubscriber.email,
-          first_name: firstName,
-          last_name: lastName
-        };
-        
-        const response = await addNewsletterSubscriber(payload);
+          first_name: newSubscriber.first_name,
+          last_name: newSubscriber.last_name
+        });
         
         if (response.success) {
           toast.success(response.message || 'Subscriber added successfully!');
@@ -220,7 +250,7 @@ const EmailSubscribers = () => {
             fetchSubscribers(currentPage)
           ]);
           
-          setNewSubscriber({ name: '', email: '', status: 'Active' });
+          setNewSubscriber({ first_name: '', last_name: '', email: '', status: 'Active' });
           setAddSubscriberModalOpen(false);
         }
       } catch (error) {
@@ -235,18 +265,49 @@ const EmailSubscribers = () => {
     }
   };
 
+  const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+
   const handleEditSubscriber = (subscriber: LocalSubscriber) => {
     setEditingSubscriber(subscriber);
     setEditSubscriberModalOpen(true);
   };
 
-  const handleUpdateSubscriber = () => {
+  const handleUpdateSubscriber = async () => {
     if (editingSubscriber) {
-      // In a real implementation, you would call an API to update the subscriber
-      // For now, we'll just refresh the data
-      fetchSubscribers(currentPage);
-      setEditSubscriberModalOpen(false);
-      setEditingSubscriber(null);
+      try {
+        setStatusUpdating(editingSubscriber.email);
+        
+        // Check what status user has selected in the modal
+        const selectedStatus = editingSubscriber.status.toLowerCase();
+        
+        if (selectedStatus === 'active') {
+          // User wants to activate subscriber
+          const response = await activateSubscriber({ email: editingSubscriber.email });
+          if (response.success) {
+            toast.success(response.message || 'Subscriber activated successfully!');
+            // Refresh subscribers list
+            await fetchSubscribers(currentPage);
+            setEditSubscriberModalOpen(false);
+            setEditingSubscriber(null);
+          }
+        } else {
+          // User wants to deactivate subscriber (inactive/unsubscribed)
+          const response = await deactivateSubscriber({ email: editingSubscriber.email });
+          if (response.success) {
+            toast.success(response.message || 'Subscriber deactivated successfully!');
+            // Refresh subscribers list
+            await fetchSubscribers(currentPage);
+            setEditSubscriberModalOpen(false);
+            setEditingSubscriber(null);
+          }
+        }
+      } catch (error) {
+        console.error('Error updating subscriber status:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to update subscriber status';
+        toast.error(errorMessage);
+      } finally {
+        setStatusUpdating(null);
+      }
     }
   };
 
@@ -269,32 +330,57 @@ const EmailSubscribers = () => {
     });
   };
 
-  const handleExportSubscribers = () => {
-    if (subscribersData.length === 0) {
-      alert('No subscribers to export');
-      return;
-    }
+  const handleExportSubscribers = async () => {
+    if (exportLoading) return;
+    
+    try {
+      setExportLoading(true);
+      
+      // Import the export function
+      const { exportSubscribersCSV } = await import('@/lib/newsletterApi');
+      
+      const response = await exportSubscribersCSV();
+      
+      if (response.success && response.data.download_url) {
+        // Open download URL in new tab
+        window.open(response.data.download_url, '_blank');
+      } else {
+        alert('Export failed: ' + (response.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      
+      // Fallback to static export if API fails
+      if (subscribersData.length === 0) {
+        alert('No subscribers to export');
+        return;
+      }
 
-    const exportData = subscribersData.map(sub => ({
-      Name: sub.name,
-      Email: sub.email,
-      Status: sub.status,
-      'Date Joined': sub.date,
-      'List Name': sub.list_name || ''
-    }));
-    
-    const csvContent = [
-      Object.keys(exportData[0]).join(','),
-      ...exportData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+      const exportData = subscribersData.map(sub => ({
+        Name: sub.name,
+        Email: sub.email,
+        Status: sub.status,
+        'Date Joined': sub.date,
+        'List Name': sub.list_name || ''
+      }));
+      
+      const csvContent = [
+        Object.keys(exportData[0]).join(','),
+        ...exportData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+      alert('API export failed, downloaded local data instead. Error: ' + (error as Error).message);
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   const handleEspConnection = () => {
@@ -306,32 +392,7 @@ const EmailSubscribers = () => {
     }
   };
 
-  // Show Coming Soon overlay for non-allowed users
-  if (user && !hasAccess) {
-    return (
-      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
-        <UserProfileSidebar 
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          currentPage="email-subscribers"
-        />
-        
-        {/* Full Screen Coming Soon Overlay */}
-        <div className="flex-1 flex items-center justify-center bg-white">
-          <div className="text-center space-y-4 p-8 max-w-lg">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-yellow-100 mb-4">
-              <Lock className="w-12 h-12 text-yellow-600" />
-            </div>
-            <h2 className="text-5xl font-bold text-gray-800 mb-4">Coming Soon</h2>
-            <p className="text-gray-600 text-xl leading-relaxed">
-              Newsletter Subscribers feature is currently in development and will be available soon.
-            </p>
-          
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Remove access restriction - show data for all users
 
   return (
     <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
@@ -406,8 +467,7 @@ const EmailSubscribers = () => {
             )}
 
             {/* Action Buttons */}
-            {error !== 'NO_NEWSLETTER_SERVICE' && (
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button 
                 onClick={() => setAddSubscriberModalOpen(true)}
                 className="bg-[#CF3232] text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center space-x-2"
@@ -428,10 +488,15 @@ const EmailSubscribers = () => {
               </button>
               <button 
                 onClick={handleExportSubscribers}
-                className="bg-white text-[#CF3232] border border-[#CF3232] px-4 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center space-x-2"
+                disabled={exportLoading}
+                className="bg-white text-[#CF3232] border border-[#CF3232] px-4 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Download className="w-4 h-4" />
-                <span>Export List</span>
+                {exportLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                <span>{exportLoading ? 'Exporting...' : 'Export List'}</span>
               </button>
               <button 
                 onClick={() => setFilterModalOpen(true)}
@@ -441,50 +506,8 @@ const EmailSubscribers = () => {
                 <span>Filter</span>
               </button>
             </div>
-            )}
 
-            {/* Error Display */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                {error === 'NO_NEWSLETTER_SERVICE' ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Settings className="w-5 h-5 text-red-600" />
-                      <div>
-                        <div className="text-red-800 text-sm font-medium">
-                          Newsletter Service Not Configured
-                        </div>
-                        <div className="text-red-600 text-sm">
-                          Please add your newsletter service to view subscriber data
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => router.push('/dashboard/profile?step=5')}
-                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                    >
-                      Setup Newsletter Service
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <div className="text-red-800 text-sm font-medium">
-                      {error}
-                    </div>
-                    <button
-                      onClick={() => {
-                        setError(null);
-                        fetchStats();
-                        fetchSubscribers(currentPage);
-                      }}
-                      className="ml-auto text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Retry
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+
 
             {/* Active Filters Display */}
             {(filters.status !== 'all' || filters.dateRange !== 'all' || filters.searchTerm || filters.dateFrom || filters.dateTo) && (
@@ -551,8 +574,7 @@ const EmailSubscribers = () => {
             )}
 
             {/* Subscribers Table */}
-            {error !== 'NO_NEWSLETTER_SERVICE' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">
@@ -591,9 +613,17 @@ const EmailSubscribers = () => {
                           </span>
                         </div>
                         <p className="text-gray-600 text-sm mb-2">{subscriber.email}</p>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>Joined: {subscriber.date}</span>
-                          {subscriber.list_name && <span>List: {subscriber.list_name}</span>}
+                        <div className="flex justify-between items-center">
+                          <div className="text-xs text-gray-500">
+                            <div>Joined: {subscriber.date}</div>
+                            {subscriber.list_name && <div>List: {subscriber.list_name}</div>}
+                          </div>
+                          <button 
+                            onClick={() => handleEditSubscriber(subscriber)}
+                            className="text-[#CF3232] hover:text-red-600 text-xs font-medium"
+                          >
+                            Edit
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -690,7 +720,6 @@ const EmailSubscribers = () => {
                 </div>
               )}
             </div>
-            )}
           </div>
           
           {/* Filter Modal */}
@@ -851,16 +880,30 @@ const EmailSubscribers = () => {
 
                 {/* Modal Body */}
                 <div className="p-6 space-y-6">
-                  {/* Name */}
+                  {/* First Name */}
                   <div>
                     <label className="block text-sm font-medium text-[#101117] mb-3">
-                      Full Name
+                      First Name
                     </label>
                     <input
                       type="text"
-                      placeholder="Enter full name..."
-                      value={newSubscriber.name}
-                      onChange={(e) => setNewSubscriber({...newSubscriber, name: e.target.value})}
+                      placeholder="Enter first name..."
+                      value={newSubscriber.first_name}
+                      onChange={(e) => setNewSubscriber({...newSubscriber, first_name: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                    />
+                  </div>
+
+                  {/* Last Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#101117] mb-3">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter last name..."
+                      value={newSubscriber.last_name}
+                      onChange={(e) => setNewSubscriber({...newSubscriber, last_name: e.target.value})}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
                     />
                   </div>
@@ -953,35 +996,35 @@ const EmailSubscribers = () => {
 
                 {/* Modal Body */}
                 <div className="p-6 space-y-6">
-                  {/* Name */}
+                  {/* Name - Read Only */}
                   <div>
                     <label className="block text-sm font-medium text-[#101117] mb-3">
                       Full Name
                     </label>
                     <input
                       type="text"
-                      placeholder="Enter full name..."
                       value={editingSubscriber.name}
-                      onChange={(e) => setEditingSubscriber({...editingSubscriber, name: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-[#101117] cursor-not-allowed"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Name cannot be changed</p>
                   </div>
 
-                  {/* Email */}
+                  {/* Email - Read Only */}
                   <div>
                     <label className="block text-sm font-medium text-[#101117] mb-3">
                       Email Address
                     </label>
                     <input
                       type="email"
-                      placeholder="Enter email address..."
                       value={editingSubscriber.email}
-                      onChange={(e) => setEditingSubscriber({...editingSubscriber, email: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-[#101117] cursor-not-allowed"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                   </div>
 
-                  {/* Status */}
+                  {/* Status - Editable */}
                   <div>
                     <label className="block text-sm font-medium text-[#101117] mb-3">
                       Status
@@ -992,9 +1035,9 @@ const EmailSubscribers = () => {
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
                     >
                       <option value="Active">Active</option>
-                      <option value="Unsubscribed">Unsubscribed</option>
-                      <option value="Pending">Pending</option>
+                      <option value="Inactive">Inactive</option>
                     </select>
+                    <p className="text-xs text-gray-500 mt-1">Change subscriber status</p>
                   </div>
 
                   
@@ -1004,15 +1047,24 @@ const EmailSubscribers = () => {
                 <div className="p-6 border-t border-gray-200 flex gap-3">
                   <button
                     onClick={() => setEditSubscriberModalOpen(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    disabled={statusUpdating === editingSubscriber.email}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleUpdateSubscriber}
-                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors"
+                    disabled={statusUpdating === editingSubscriber.email}
+                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
-                    Update Newsletter Subscriber
+                    {statusUpdating === editingSubscriber.email ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Updating...</span>
+                      </>
+                    ) : (
+                      <span>Update Status</span>
+                    )}
                   </button>
                 </div>
               </div>

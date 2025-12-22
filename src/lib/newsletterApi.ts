@@ -241,3 +241,189 @@ export const addNewsletterSubscriber = async (payload: AddSubscriberPayload): Pr
     throw error;
   }
 };
+
+// Export subscribers as CSV
+export interface ExportCSVPayload {
+  date_from?: string; // YYYY-MM-DD format
+  date_to?: string; // YYYY-MM-DD format
+  search?: string; // specific export by search
+  selected_emails?: string[]; // Array of selected email addresses to export
+}
+
+export interface ExportCSVResponse {
+  success: boolean;
+  message: string;
+  data: {
+    download_url: string;
+    total_subscribers: number;
+    export_type: string;
+    selected_count: number | null;
+    filters_applied: {
+      status: string;
+      date_from: string;
+      date_to: string;
+      search: string;
+      selected_emails: string[] | null;
+    };
+    generated_at: string;
+  };
+}
+
+export const exportSubscribersCSV = async (payload: ExportCSVPayload = {}): Promise<ExportCSVResponse> => {
+  try {
+    const authToken = localStorage.getItem('auth_token');
+    
+    const response = await authFetch(`${BASE_URL}/export-csv`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error exporting subscribers CSV:', error);
+    throw error;
+  }
+};
+
+// Add subscriber to specific user's newsletter (for public profiles)
+export interface AddSubscriberToUserPayload {
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface AddSubscriberToUserResponse {
+  success: boolean;
+  message: string;
+  data: {
+    platform: string;
+    subscriber_id: number;
+    email: string;
+    status: string;
+    list_name: string;
+    created_at: string;
+  };
+}
+
+export const addSubscriberToUser = async (userId: number, payload: AddSubscriberToUserPayload): Promise<AddSubscriberToUserResponse> => {
+  try {
+    const authToken = localStorage.getItem('auth_token');
+    
+    const response = await fetch(`https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error adding subscriber to user:', error);
+    throw error;
+  }
+};
+
+// Activate a subscriber
+export interface ActivateSubscriberPayload {
+  email: string;
+}
+
+export interface ActivateSubscriberResponse {
+  success: boolean;
+  message: string;
+  data: {
+    platform: string;
+    subscriber_id: number;
+    email: string;
+    status: string;
+    name: string;
+  };
+}
+
+export const activateSubscriber = async (payload: ActivateSubscriberPayload): Promise<ActivateSubscriberResponse> => {
+  try {
+    const authToken = localStorage.getItem('auth_token');
+    
+    const response = await authFetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/activate-subscriber', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error activating subscriber:', error);
+    throw error;
+  }
+};
+
+// Deactivate a subscriber
+export interface DeactivateSubscriberPayload {
+  email: string;
+}
+
+export interface DeactivateSubscriberResponse {
+  success: boolean;
+  message: string;
+  data: {
+    platform: string;
+    subscriber_id: number;
+    email: string;
+    status: string;
+    name: string;
+  };
+}
+
+export const deactivateSubscriber = async (payload: DeactivateSubscriberPayload): Promise<DeactivateSubscriberResponse> => {
+  try {
+    const authToken = localStorage.getItem('auth_token');
+    
+    const response = await authFetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/deactivate-subscriber', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error deactivating subscriber:', error);
+    throw error;
+  }
+};
+

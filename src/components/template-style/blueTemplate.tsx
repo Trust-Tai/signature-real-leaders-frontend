@@ -172,8 +172,8 @@ export default function BlueTemplate({
           </div>
         </div>
 
-        {/* Newsletter Section - Show only if newsletter_service is configured and user is viewing someone else's profile */}
-        {profileData.newsletter_service && profileData.newsletter_service.trim() !== '' && (!user || user.username !== profileData.username) && (
+        {/* Newsletter Section - Always show when user is viewing someone else's profile */}
+        {(!user || user.username !== profileData.username) && (
           <div className="flex items-start mb-6 px-2">
             {newsletterLoading ? (
               <div className="w-5 h-5 mt-1 flex-shrink-0">
