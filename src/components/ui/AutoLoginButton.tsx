@@ -15,7 +15,7 @@ interface AutoLoginButtonProps {
 }
 
 const AutoLoginButton: React.FC<AutoLoginButtonProps> = ({
-  redirectUrl = 'https://verified.real-leaders.com/about-us',
+  redirectUrl = 'https://real-leaders.com/about-us',
   children = 'Go to WordPress',
   className = '',
   variant = 'primary',

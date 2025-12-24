@@ -1,6 +1,6 @@
 import { authFetch } from './authUtils';
 
-export const API_BASE_URL = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1';
+export const API_BASE_URL = 'https://real-leaders.com/wp-json/verified-real-leaders/v1';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -405,7 +405,7 @@ export const api = {
           'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          redirect_url: redirectUrl || 'https://verified.real-leaders.com/about-us'
+          redirect_url: redirectUrl || 'https://real-leaders.com/about-us'
         }),
       }
     );
@@ -465,7 +465,7 @@ export const api = {
 
   async followUser(userId: number, optIn: boolean = false) {
     const authToken = localStorage.getItem('auth_token');
-    const url = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/follow-user';
+    const url = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/follow-user';
     const response = await authFetch(url, {
       method: 'POST',
       headers: {
@@ -497,7 +497,7 @@ export const api = {
 
   async unfollowUser(userId: number) {
     const authToken = localStorage.getItem('auth_token');
-    const url = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/unfollow-user';
+    const url = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/unfollow-user';
     const response = await authFetch(url, {
       method: 'POST',
       headers: {
@@ -524,7 +524,7 @@ export const api = {
 
   async checkFollowStatus(userId: number) {
     const authToken = localStorage.getItem('auth_token');
-    const url = `https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/check-follow-status?user_id=${userId}`;
+    const url = `https://real-leaders.com/wp-json/verified-real-leaders/v1/check-follow-status?user_id=${userId}`;
     const response = await authFetch(url, {
       method: 'GET',
       headers: {

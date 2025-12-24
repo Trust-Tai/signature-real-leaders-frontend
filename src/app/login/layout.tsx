@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     title: "Login | Real Leaders",
     description: "Sign in to your Real Leaders account to access your verified profile and leadership tools.",
     type: "website",
-    url: "https://verified.real-leaders.com/login",
+    url: "https://real-leaders.com/login",
   },
   twitter: {
     card: "summary",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://verified.real-leaders.com/login",
+    canonical: "https://real-leaders.com/login",
   }
 };
 
@@ -41,7 +41,7 @@ export default function LoginLayout({
             "@type": "WebPage",
             "name": "Login",
             "description": "Sign in to your Real Leaders account",
-            "url": "https://verified.real-leaders.com/login"
+            "url": "https://real-leaders.com/login"
           })
         }}
       />

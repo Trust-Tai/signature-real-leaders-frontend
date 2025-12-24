@@ -1,7 +1,7 @@
 // Newsletter API functions for managing subscribers
 import { authFetch } from './authUtils';
 
-const BASE_URL = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter';
+const BASE_URL = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/newsletter';
 
 export interface NewsletterStats {
   success: boolean;
@@ -319,7 +319,7 @@ export const addSubscriberToUser = async (userId: number, payload: AddSubscriber
   try {
     const authToken = localStorage.getItem('auth_token');
     
-    const response = await fetch(`https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber/${userId}`, {
+    const response = await fetch(`https://real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/add-subscriber/${userId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -362,7 +362,7 @@ export const activateSubscriber = async (payload: ActivateSubscriberPayload): Pr
   try {
     const authToken = localStorage.getItem('auth_token');
     
-    const response = await authFetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/activate-subscriber', {
+    const response = await authFetch('https://real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/activate-subscriber', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -405,7 +405,7 @@ export const deactivateSubscriber = async (payload: DeactivateSubscriberPayload)
   try {
     const authToken = localStorage.getItem('auth_token');
     
-    const response = await authFetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/deactivate-subscriber', {
+    const response = await authFetch('https://real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/deactivate-subscriber', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

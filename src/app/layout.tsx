@@ -9,7 +9,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://verified.real-leaders.com'),
+  metadataBase: new URL('https://real-leaders.com'),
   title: {
     default: "Real Leaders - Build Your Leadership Brand",
     template: "%s | Real Leaders"
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://verified.real-leaders.com",
+    url: "https://real-leaders.com",
     siteName: "Real Leaders",
     title: "Real Leaders - Build Your Leadership Brand",
     description: "Build your leadership brand, grow your influence, and amplify your impact with Real Leaders.",

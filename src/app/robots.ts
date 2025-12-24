@@ -15,6 +15,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://verified.real-leaders.com/sitemap.xml',
+    sitemap: 'https://real-leaders.com/sitemap.xml',
   }
 }

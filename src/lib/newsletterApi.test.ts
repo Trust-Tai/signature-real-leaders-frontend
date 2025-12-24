@@ -17,7 +17,7 @@ ranges.forEach(range => {
 
 // Test API URL construction
 console.log('\nTesting API URL construction:');
-const baseUrl = 'https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/subscribers';
+const baseUrl = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/newsletter/subscribers';
 const url = new URL(baseUrl);
 url.searchParams.append('status', 'active');
 url.searchParams.append('search', 'John');

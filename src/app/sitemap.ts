@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
  
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://verified.real-leaders.com'
+  const baseUrl = 'https://real-leaders.com'
   
   return [
     {

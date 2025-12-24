@@ -104,7 +104,7 @@
 //     try {
 //       setIsSubmitting(true);
 //       // API call to send verification code to email
-//       const res = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code', {
+//       const res = await fetch('https://real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code', {
 //         method: 'POST',
 //         headers: { 'Content-Type': 'application/json' },
 //         body: JSON.stringify({ email: formData.email })
@@ -134,7 +134,7 @@
 //     }
 //     try {
 //       setIsSubmitting(true);
-//       const res = await fetch('https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/login/verify-code-and-login', {
+//       const res = await fetch('https://real-leaders.com/wp-json/verified-real-leaders/v1/login/verify-code-and-login', {
 //         method: 'POST',
 //         headers: { 'Content-Type': 'application/json' },
 //         body: JSON.stringify({ 
@@ -927,7 +927,7 @@ const SignInPage: FC = () => {
     try {
       setIsSubmitting(true);
       const res = await fetch(
-        "https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code",
+        "https://real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1009,7 +1009,7 @@ const SignInPage: FC = () => {
     try {
       setIsSubmitting(true);
       const res = await fetch(
-        "https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/login/verify-code-and-login",
+        "https://real-leaders.com/wp-json/verified-real-leaders/v1/login/verify-code-and-login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1084,7 +1084,7 @@ const SignInPage: FC = () => {
     try {
       setIsResending(true);
       const res = await fetch(
-        "https://verified.real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code",
+        "https://real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

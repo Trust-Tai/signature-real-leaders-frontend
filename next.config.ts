@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'verified.real-leaders.com',
+        hostname: 'real-leaders.com',
         port: '',
         pathname: '/**',
       },

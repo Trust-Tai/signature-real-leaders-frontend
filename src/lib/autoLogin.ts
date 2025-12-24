@@ -5,13 +5,13 @@ import { toast } from '@/components/ui/toast';
  * Common WordPress URLs for auto-login
  */
 export const WORDPRESS_URLS = {
-  ABOUT_US: 'https://verified.real-leaders.com/about-us',
-  DASHBOARD: 'https://verified.real-leaders.com/wp-admin',
-  PROFILE: 'https://verified.real-leaders.com/wp-admin/profile.php',
-  POSTS: 'https://verified.real-leaders.com/wp-admin/edit.php',
-  MEDIA: 'https://verified.real-leaders.com/wp-admin/upload.php',
-  USERS: 'https://verified.real-leaders.com/wp-admin/users.php',
-  SETTINGS: 'https://verified.real-leaders.com/wp-admin/options-general.php',
+  ABOUT_US: 'https://real-leaders.com/about-us',
+  DASHBOARD: 'https://real-leaders.com/wp-admin',
+  PROFILE: 'https://real-leaders.com/wp-admin/profile.php',
+  POSTS: 'https://real-leaders.com/wp-admin/edit.php',
+  MEDIA: 'https://real-leaders.com/wp-admin/upload.php',
+  USERS: 'https://real-leaders.com/wp-admin/users.php',
+  SETTINGS: 'https://real-leaders.com/wp-admin/options-general.php',
 } as const;
 
 /**
