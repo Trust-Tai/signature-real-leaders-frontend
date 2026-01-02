@@ -790,6 +790,39 @@ export const api = {
       }
     );
   },
+
+  async claimProfile(payload: {
+    id: number;
+    ceo: string;
+    website: string;
+    linkedin: string;
+    share: string;
+    email: string;
+    location: string;
+  }) {
+    // Use the external API endpoint for claim profile
+    const url = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/claim-profile';
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to claim profile');
+      }
+
+      return data as { success: boolean; message?: string };
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 
