@@ -44,8 +44,27 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   const handleLogoutConfirm = () => {
     // Clear user data and token
     clearUser();
+    
+    // Clear all user-related data from localStorage
     localStorage.removeItem('auth_token');
-    // Redirect to home page
+    localStorage.removeItem('user_data');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('username');
+    localStorage.removeItem('user_profile');
+    localStorage.removeItem('user_settings');
+    localStorage.removeItem('user_preferences');
+    
+    // Clear any other user-related localStorage items
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('user_') || key.startsWith('profile_') || key.includes('auth'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // Redirect to login page
     window.location.href = '/login';
   };
 

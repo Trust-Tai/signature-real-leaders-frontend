@@ -208,12 +208,6 @@ export default function DefaultTemplate({
                   <p className="text-white font-semibold">{profileData.links?.length || 0}</p>
                 </div>
               </div>
-              {profileData.newsletter_service && (
-                <div className="mt-3 text-center">
-                  <p className="text-white text-sm opacity-80">Newsletter Service</p>
-                  <p className="text-white font-semibold capitalize">{profileData.newsletter_service}</p>
-                </div>
-              )}
             </div>
           </div>
 
@@ -346,6 +340,8 @@ export default function DefaultTemplate({
                 </label>
               </div>
             )}
+
+
 
             {/* Follow/Dashboard Button */}
             {user && user.username === profileData.username ? (
@@ -485,6 +481,7 @@ export default function DefaultTemplate({
           </div>
         </div>
       )}
+
     </div>
   );
 }

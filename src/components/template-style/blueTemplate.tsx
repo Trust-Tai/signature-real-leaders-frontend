@@ -194,6 +194,8 @@ export default function BlueTemplate({
           </div>
         )}
 
+
+
         {/* Follow/Dashboard Button */}
         {user && user.username === profileData.username ? (
           <button
@@ -320,6 +322,7 @@ export default function BlueTemplate({
           </div>
         </div>
       )}
+
     </div>
   );
 }

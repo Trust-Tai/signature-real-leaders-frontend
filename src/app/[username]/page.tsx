@@ -112,7 +112,7 @@ export default function DynamicUserProfile() {
   // Check follow status
   const checkFollowStatus = useCallback(async (userId: number) => {
     const authToken = localStorage.getItem('auth_token');
-    if (!authToken || !user) return;
+    if (!authToken) return;
 
     try {
       const response = await api.checkFollowStatus(userId);
@@ -122,7 +122,7 @@ export default function DynamicUserProfile() {
     } catch (err) {
       console.error('[Profile] Error checking follow status:', err);
     }
-  }, [user]);
+  }, []);
 
   // Fetch profile data on component mount
   useEffect(() => {
@@ -163,6 +163,7 @@ export default function DynamicUserProfile() {
           setProfileData(transformedProfile);
           
           // Record profile visit only if it's not the user's own profile
+          const authToken = localStorage.getItem('auth_token');
           const isOwnProfile = user && user.username === response.profile.username;
           if (!isOwnProfile) {
             try {
@@ -175,7 +176,7 @@ export default function DynamicUserProfile() {
           }
           
           // Check follow status if user is logged in and viewing someone else's profile
-          if (user && response.profile.user_id !== user.id) {
+          if (authToken && (!user || response.profile.user_id !== user.id)) {
             checkFollowStatus(response.profile.user_id);
           }
         } else {
@@ -194,13 +195,13 @@ export default function DynamicUserProfile() {
     };
 
     fetchProfile();
-  }, [username, user, checkFollowStatus]);
+  }, [username, checkFollowStatus]);
 
   // Handle follow/unfollow button click
   const handleFollowToggle = async () => {
     // Check if user is logged in first
     const authToken = localStorage.getItem('auth_token');
-    if (!authToken || !user) {
+    if (!authToken) {
       toast.error('You are not logged in');
       return;
     }
@@ -241,69 +242,80 @@ export default function DynamicUserProfile() {
 
   // Handle newsletter checkbox click
   const handleNewsletterCheckboxChange = async (checked: boolean) => {
-    // If user is not logged in, show modal
+    // Check if user is logged in first
     const authToken = localStorage.getItem('auth_token');
-    if (!authToken || !user) {
+    
+    if (!authToken) {
+      // Non-logged in user - show modal only when checking
       if (checked) {
         setShowNewsletterModal(true);
       }
       setOptIn(false); // Keep checkbox unchecked for non-logged users
-    } else {
-      // Logged in user - make API call with their details
-      if (checked) {
-        try {
-          setNewsletterLoading(true);
-          
-          if (!profileData) {
-            toast.error('Profile data not available');
-            setOptIn(false);
-            return;
-          }
-          
-          // Get visitor's details from localStorage or user context
-          const userDataStr = localStorage.getItem('user_data');
-          let firstName = user.first_name || '';
-          let lastName = user.last_name || '';
-          let email = user.email || '';
-          
-          // Try to get more complete data from localStorage if available
-          if (userDataStr) {
-            try {
-              const userData = JSON.parse(userDataStr);
-              firstName = userData.first_name || firstName;
-              lastName = userData.last_name || lastName;
-              email = userData.email || email;
-            } catch (e) {
-              console.error('Error parsing user data:', e);
-            }
-          }
-          
-          // Call the newsletter API using the helper function
-          const response = await addSubscriberToUser(profileData.user_id, {
-            email: email,
-            first_name: firstName,
-            last_name: lastName
-          });
-          
-          if (response.success) {
-            toast.success(response.message || 'Successfully subscribed to newsletter!');
-            setOptIn(true);
-          } else {
-            toast.error(response.message || 'Failed to subscribe to newsletter');
-            setOptIn(false);
-          }
-        } catch (error) {
-          console.error('Error subscribing to newsletter:', error);
-          const errorMessage = error instanceof Error ? error.message : 'Failed to subscribe to newsletter';
-          toast.error(errorMessage);
+      return;
+    }
+
+    // Logged in user - handle directly without popup
+    if (checked) {
+      // Subscribe to newsletter
+      try {
+        setNewsletterLoading(true);
+        
+        if (!profileData) {
+          toast.error('Profile data not available');
           setOptIn(false);
-        } finally {
-          setNewsletterLoading(false);
+          return;
         }
-      } else {
-        // Unchecking - just update state (no unsubscribe API for now)
+        
+        // Get visitor's details from localStorage or user context
+        const userDataStr = localStorage.getItem('user_data');
+        let firstName = '';
+        let lastName = '';
+        let email = '';
+        
+        // Try to get data from user context first, then localStorage
+        if (user) {
+          firstName = user.first_name || '';
+          lastName = user.last_name || '';
+          email = user.email || '';
+        }
+        
+        // Try to get more complete data from localStorage if available
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            firstName = userData.first_name || firstName;
+            lastName = userData.last_name || lastName;
+            email = userData.email || email;
+          } catch (e) {
+            console.error('Error parsing user data:', e);
+          }
+        }
+        
+        // Call the newsletter API using the helper function
+        const response = await addSubscriberToUser(profileData.user_id, {
+          email: email,
+          first_name: firstName,
+          last_name: lastName
+        });
+        
+        if (response.success) {
+          toast.success(response.message || 'Successfully subscribed to newsletter!');
+          setOptIn(true);
+        } else {
+          toast.error(response.message || 'Failed to subscribe to newsletter');
+          setOptIn(false);
+        }
+      } catch (error) {
+        console.error('Error subscribing to newsletter:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to subscribe to newsletter';
+        toast.error(errorMessage);
         setOptIn(false);
+      } finally {
+        setNewsletterLoading(false);
       }
+    } else {
+      // Unchecking - just update state (no unsubscribe API for now)
+      setOptIn(false);
     }
   };
 

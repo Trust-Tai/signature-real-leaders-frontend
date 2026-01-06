@@ -5,11 +5,24 @@
  * This function should be called whenever a 401 unauthorized error occurs
  */
 export const handleUnauthorized = () => {
-  // Clear auth token from localStorage
+  // Clear all user-related data from localStorage
   localStorage.removeItem('auth_token');
-  
-  // Clear any other auth-related data if needed
   localStorage.removeItem('user_data');
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('username');
+  localStorage.removeItem('user_profile');
+  localStorage.removeItem('user_settings');
+  localStorage.removeItem('user_preferences');
+  
+  // Clear any other user-related localStorage items
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.startsWith('user_') || key.startsWith('profile_') || key.includes('auth'))) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
   
   // Redirect to login page
   if (typeof window !== 'undefined') {
