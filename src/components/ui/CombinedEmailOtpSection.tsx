@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import SocialLoginButtons from './SocialLoginButtons';
 import { toast } from '@/components/ui/toast';
@@ -190,6 +191,19 @@ const CombinedEmailOtpSection: React.FC<CombinedEmailOtpSectionProps> = ({
               onLinkedInLogin={onLinkedInLogin}
               isLoading={isLoading}
             />
+
+            {/* Already a member link */}
+            <div className="text-center mt-6">
+              <p className="text-gray-600 font-outfit text-sm">
+                Already a member?{' '}
+                <Link 
+                  href="/login" 
+                  className="text-custom-red hover:text-red-700 font-medium transition-colors duration-200 underline"
+                >
+                  Login here
+                </Link>
+              </p>
+            </div>
           </div>
         </>
       )}

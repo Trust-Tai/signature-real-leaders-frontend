@@ -3,10 +3,10 @@ import Image from "next/image";
 import type { StaticImageData } from "next/image";
 
 // Import images directly from @/assets/images
-import mg1Image from "@/assets/images/mg-1.jpg";
-import mg2Image from "@/assets/images/mg-2.jpeg";
-import mg3Image from "@/assets/images/mg-3.jpeg";
-import mg4Image from "@/assets/images/mg-4.jpeg";
+import mg1Image from "@/assets/images/new1.png";
+import mg2Image from "@/assets/images/new2.png";
+import mg3Image from "@/assets/images/new3.png";
+import mg4Image from "@/assets/images/new4.png";
 import mg5Image from "@/assets/images/mg-5.jpeg";
 
 // Define the Card interface for type safety
@@ -16,7 +16,6 @@ interface Card {
   badge: string;
   title: string;
   subtitle: string;
-  cta: string;
   link: string;
   position: string;
 }
@@ -29,7 +28,6 @@ const cards: Card[] = [
     badge: "MAGAZINE",
     title: "Purpose-Driven Business Stories",
     subtitle: "Read the latest from Real Leaders.",
-    cta: "Read",
     link: "https://real-leaders.com/",
     position: "pos1",
   },
@@ -39,7 +37,6 @@ const cards: Card[] = [
     badge: "AWARDS",
     title: "Real Leaders Impact Awards",
     subtitle: "Celebrating companies using business for good.",
-    cta: "Explore",
     link: "https://real-leaders.com/awards/",
     position: "pos2",
   },
@@ -49,7 +46,6 @@ const cards: Card[] = [
     badge: "SIGNIFY",
     title: "Follow Signify Leaders",
     subtitle: "Insights and reels from leaders you trust.",
-    cta: "Follow",
     link: "https://real-leaders.com/signify/",
     position: "pos3",
   },
@@ -59,7 +55,6 @@ const cards: Card[] = [
     badge: "EVENTS",
     title: "Book Speakers & Advisors",
     subtitle: "Bring impact leaders to your next event.",
-    cta: "Book",
     link: "https://real-leaders.com/events/",
     position: "pos4",
   },
@@ -69,7 +64,6 @@ const cards: Card[] = [
     badge: "SUBSCRIBE",
     title: "Get the Magazine",
     subtitle: "Insights delivered to your inbox & door.",
-    cta: "Subscribe",
     link: "https://real-leaders.com/subscribe/",
     position: "pos5",
   },
@@ -130,14 +124,6 @@ export const InteractiveMagazineCards: React.FC = () => {
       card.addEventListener('pointerenter', onEnter);
       card.addEventListener('pointermove', onMove);
       card.addEventListener('pointerleave', onLeave);
-
-      card.addEventListener('click', (e: MouseEvent) => {
-        const cta = card.querySelector('.card-cta') as HTMLAnchorElement;
-        const interactive = (e.target as Element).closest('a, button');
-        if (!interactive && cta) {
-          window.open(cta.href, '_blank');
-        }
-      });
 
       const resizeObserver = new ResizeObserver(() => {
         rect = card.getBoundingClientRect();
@@ -307,25 +293,7 @@ export const InteractiveMagazineCards: React.FC = () => {
           opacity: 0.8;
         }
 
-        .card-cta {
-          position: absolute;
-          right: 12px;
-          bottom: 12px;
-          padding: 6px 8px;
-          border-radius: 8px;
-          font-size: 11px;
-          background: var(--rl-red);
-          color: #fff;
-          text-decoration: none;
-          font-weight: 700;
-          transform: translateZ(80px);
-          box-shadow: 0 8px 18px rgba(198, 31, 39, 0.45);
-        }
-
-        .card-cta:hover {
-          transform: translateZ(80px) translateY(-1px);
-          box-shadow: 0 12px 22px rgba(198, 31, 39, 0.55);
-        }
+      
 
         .pos1 { left: 8%; top: 5%; transform: rotate(-9deg) translateZ(0); }
         .pos2 { left: 35%; top: 15%; transform: rotate(6deg) translateZ(0); }
@@ -386,14 +354,7 @@ export const InteractiveMagazineCards: React.FC = () => {
               <h3 className="card-title">{card.title}</h3>
               <p className="card-subtitle">{card.subtitle}</p>
             </div>
-            <a
-              className="card-cta"
-              href={card.link}
-              target="_blank"
-              rel="noopener"
-            >
-              {card.cta}
-            </a>
+           
           </article>
         ))}
       </div>
