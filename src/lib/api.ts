@@ -56,7 +56,7 @@ export const api = {
   },
 
   async verifyNewsletterCredentials(payload: JsonRecord) {
-    console.log("payload",payload)
+   
     return request<{ success: boolean; message?: string }>(
       '/user/verify-api-key',
       {
@@ -92,7 +92,7 @@ export const api = {
     const url = `${API_BASE_URL}/user/submit-user-info`;
     
     // Log FormData contents for debugging
-    console.log('[API] Sending FormData to:', url);
+   
     console.log('[API] FormData entries:');
     for (const [key, value] of formData.entries()) {
       if (value instanceof File) {
@@ -112,7 +112,7 @@ export const api = {
     });
     
     const data = await response.json();
-    console.log('[API] Response:', data);
+   
     
     if (!response.ok) {
       throw new Error(data.message || 'Failed to submit user info');
@@ -124,7 +124,7 @@ export const api = {
   // Removed uploadSignature – signature is now included in submit-user-info payload
 
   async getUserDetails(authToken: string) {
-    console.log("authToken",authToken)
+    
     return request<{
       success: boolean;
       user: {

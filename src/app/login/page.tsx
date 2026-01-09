@@ -757,24 +757,14 @@ const SignInPage: FC = () => {
       const isLoggedIn = urlParams.get("is_logged_in");
       const userId = urlParams.get("user_id");
 
-      console.log('[Social Callback] URL Params:', {
-        status,
-        tempToken: tempToken ? 'present' : 'missing',
-        message,
-        accountStatus,
-        isLoggedIn,
-        userId
-      });
+     
 
       if (status === "success" && tempToken) {
         try {
           setIsSubmitting(true);
           setIsCheckingAuth(false);
           
-          console.log('[Social Callback] Processing successful auth...');
-          console.log('[Social Callback] is_logged_in:', isLoggedIn);
-          console.log('[Social Callback] account_status:', accountStatus);
-
+        
           // Check if user is already logged in (existing user)
           if (isLoggedIn === "1") {
             console.log('[Social Callback] User is logged in, fetching permanent token...');
@@ -783,12 +773,7 @@ const SignInPage: FC = () => {
             const { api } = await import('@/lib/api');
             const response = await api.getUserDetailsWithToken(tempToken);
             
-            console.log('[Social Callback] API Response:', {
-              success: response.success,
-              hasToken: !!response.token,
-              hasUser: !!response.user,
-              accountStatus: response.user?.account_status
-            });
+          
 
             if (response.success && response.token) {
               localStorage.setItem("auth_token", response.token);
