@@ -51,6 +51,7 @@ const ProfilePage = () => {
   const [informationData, setInformationData] = useState<{
     firstName: string;
     lastName: string;
+    username: string;
     date_of_birth: string;
     occupation: string;
     companyName: string;
@@ -426,11 +427,18 @@ const ProfilePage = () => {
   // Initialize form data from user context
   useEffect(() => {
     if (user) {
+      console.log('[Profile] Initializing form data with user:', {
+        username: user.username,
+        firstName: user.first_name,
+        lastName: user.last_name
+      });
+      
       setBio(user.audience_description || '');
       setProfileImage(user.profile_picture_url || null);
       setInformationData({
         firstName: user.first_name || '',
         lastName: user.last_name || '',
+        username: user.username || '',
         date_of_birth: user.date_of_birth || '',
         occupation: user.occupation || '',
         companyName: user.company_name || '',
@@ -557,6 +565,7 @@ const ProfilePage = () => {
         // Use exact same keys as profile-verification
         updateData.firstName = informationData.firstName;
         updateData.lastName = informationData.lastName;
+        updateData.username = informationData.username;
         updateData.date_of_birth = informationData.date_of_birth;
         updateData.occupation = informationData.occupation;
         updateData.companyName = informationData.companyName;
@@ -913,6 +922,13 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               {/* Information Section (from verification) */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
                 <h2 className="font-semibold font-outift text-[#333333] mb-4">Your Information</h2>
+                
+                {/* Debug info */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+                    <strong>Debug:</strong> Username = &quot;{informationData?.username || 'empty'}&quot;
+                  </div>
+                )}
 
                 {/* Inline Information Form */}
                 <div className="space-y-6">
@@ -936,6 +952,23 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                         className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
                         style={{ color: '#949494' }}
                         placeholder="Last Name"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 1.5: Username */}
+                  <div className="mb-[10]">
+                    <div className='firstVerifyScreen group'>
+                      <input
+                        type="text"
+                        value={informationData?.username || ''}
+                        onChange={(e) => {
+                          console.log('[Profile] Username changed to:', e.target.value);
+                          setInformationData(prev => prev ? { ...prev, username: e.target.value } : null);
+                        }}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Username (e.g., johndoe)"
                       />
                     </div>
                   </div>

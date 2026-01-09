@@ -370,13 +370,40 @@ export default function DynamicUserProfile() {
     console.log('[Profile] Link clicked:', link);
     
     // Check if user is logged in and viewing their own profile
-    const isOwnProfile = user && user.username === profileData?.username;
+    const authToken = localStorage.getItem('auth_token');
+    let isOwnProfile = false;
+    
+    // Determine if this is user's own profile
+    if (authToken && user && profileData) {
+      // If user object is available, compare usernames
+      isOwnProfile = user.username === profileData.username;
+    } else if (authToken && profileData) {
+      // If user object is not available but authToken exists, 
+      // try to get user data from localStorage
+      try {
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          isOwnProfile = userData.username === profileData.username;
+        }
+      } catch (error) {
+        console.error('[Profile] Error parsing user data from localStorage:', error);
+      }
+    }
+    
+    console.log('[Profile] Profile ownership check:', {
+      hasAuthToken: !!authToken,
+      hasUser: !!user,
+      hasProfileData: !!profileData,
+      userUsername: user?.username,
+      profileUsername: profileData?.username,
+      isOwnProfile
+    });
     
     // If user is viewing their own profile and account status is pending review
     if (isOwnProfile && user) {
       try {
         // Fetch current user details to check account status
-        const authToken = localStorage.getItem('auth_token');
         if (authToken) {
           const userDetails = await api.getUserDetails(authToken);
           
@@ -392,15 +419,18 @@ export default function DynamicUserProfile() {
       }
     }
     
-    // Record link click only if it's not the user's own profile
-    if (profileData && user && user.username !== profileData.username) {
+    // Record link click ONLY if it's NOT the user's own profile
+    if (profileData && !isOwnProfile) {
       try {
+        console.log('[Profile] Recording link click for user_id:', profileData.user_id, 'link:', link.url);
         const clickResponse = await recordLinkClick(profileData.user_id, link.url);
-        console.log('[Profile] Link click recorded:', clickResponse);
+        console.log('[Profile] Link click recorded successfully:', clickResponse);
       } catch (error) {
         console.error('[Profile] Error recording link click:', error);
         // Don't show error to user as this is background tracking
       }
+    } else {
+      console.log('[Profile] Skipping link click tracking - user viewing own profile');
     }
     
     // Open the link
