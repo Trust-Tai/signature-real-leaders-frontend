@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ToastProvider from "@/components/ui/ToastProvider";
+import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -62,9 +63,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+
   return (
     <html lang="en">
+      <head>
+        {gtmId && <GoogleTagManager gtmId={gtmId} />}
+      </head>
       <body className="antialiased">
+        {gtmId && <GoogleTagManagerNoScript gtmId={gtmId} />}
         <ToastProvider />
         {children}
       </body>
