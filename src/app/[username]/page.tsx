@@ -87,12 +87,25 @@ export default function DynamicUserProfile() {
   
   // Try to get user context, but don't fail if not available (public page)
   let user = null;
+  let userContextAvailable = false;
+  
   try {
     const userContext = useUser();
     user = userContext.user;
+    userContextAvailable = true;
   } catch (error) {
-    // User context not available - this is fine for public pages
-    user = null;
+    try {
+      const authToken = localStorage.getItem('auth_token');
+      const userDataStr = localStorage.getItem('user_data');
+      
+      if (authToken && userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        user = userData;
+      }
+    } catch (localStorageError) {
+      console.log('[Profile] No user data available from localStorage');
+    }
+    userContextAvailable = false;
   }
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);

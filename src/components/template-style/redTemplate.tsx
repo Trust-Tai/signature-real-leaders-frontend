@@ -255,14 +255,16 @@ export default function RedTemplate({
         )}
 
         {/* Claim Your Link CTA */}
-        <div className="w-full text-center mt-4">
-          <Link
-            href="/profile-verification"
-            className="text-white hover:text-white/90 font-medium text-lg transition-colors decoration-blue-400 underline underline-offset-4"
-          >
-            Claim your link
-          </Link>
-        </div>
+        {!user && (
+          <div className="w-full text-center mt-4">
+            <Link
+              href="/profile-verification"
+              className="text-white hover:text-white/90 font-medium text-lg transition-colors decoration-blue-400 underline underline-offset-4"
+            >
+              Claim your link
+            </Link>
+          </div>
+        )}
 
         {/* Real Leaders Impact Awards Logo */}
         <div className="w-full flex items-center justify-center mt-6">
