@@ -63,7 +63,16 @@ export default function RedTemplate({
   handleNewsletterCheckboxChange
 }: RedTemplateProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-600 to-red-500 flex items-center justify-center px-4 py-8">
+    <>
+      <style jsx>{`
+        @keyframes ripple {
+          to {
+            transform: scale(4);
+            opacity: 0;
+          }
+        }
+      `}</style>
+      <div className="min-h-screen bg-gradient-to-br from-red-600 to-red-500 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         {/* Profile Card */}
         <div className="text-center mb-8">
@@ -111,15 +120,46 @@ export default function RedTemplate({
               <button
                 key={index}
                 onClick={() => handleLinkClick(link)}
-                className="w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-medium py-4 px-6 rounded-xl transition-all border border-white/30 flex items-center justify-between"
+                className="w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 border border-white/30 flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:shadow-white/10 active:shadow-inner group"
+                onMouseDown={(e) => {
+                  // Add ripple effect
+                  const button = e.currentTarget;
+                  const rect = button.getBoundingClientRect();
+                  const ripple = document.createElement('span');
+                  const size = Math.max(rect.width, rect.height);
+                  const x = e.clientX - rect.left - size / 2;
+                  const y = e.clientY - rect.top - size / 2;
+                  
+                  ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                    z-index: 1;
+                  `;
+                  
+                  button.style.position = 'relative';
+                  button.style.overflow = 'hidden';
+                  button.appendChild(ripple);
+                  
+                  setTimeout(() => {
+                    ripple.remove();
+                  }, 600);
+                }}
               >
-                <div className="flex items-center space-x-3">
-                  <div className="text-2xl flex items-center justify-center w-8 h-8">
+                <div className="flex items-center space-x-3 relative z-10">
+                  <div className="text-2xl flex items-center justify-center w-8 h-8 transform group-hover:scale-110 transition-transform duration-200">
                     {getIconForLink(link.name)}
                   </div>
-                  <span>{link.display_name || link.name}</span>
+                  <span className="group-hover:text-white/90 transition-colors duration-200">{link.display_name || link.name}</span>
                 </div>
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
               </button>
             ))
           ) : (
@@ -324,5 +364,6 @@ export default function RedTemplate({
       )}
 
     </div>
+    </>
   );
 }

@@ -186,7 +186,7 @@ export default function UserProfile() {
                 key={index}
                 className="w-full backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-between group px-4"
                 style={{
-                  height: button.isFirst ? '126px' : '70px',
+                  height: button.isFirst ? '126px' : '80px',
                   borderRadius: '10px',
                   opacity: 1
                 }}

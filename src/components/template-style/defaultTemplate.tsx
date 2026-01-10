@@ -66,7 +66,29 @@ export default function DefaultTemplate({
   handleNewsletterCheckboxChange
 }: DefaultTemplateProps) {
   return (
-    <div className="min-h-screen text-white relative overflow-x-hidden overflow-y-auto">
+    <>
+      <style jsx>{`
+        @keyframes ripple {
+          to {
+            transform: scale(4);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+        
+        .link-button:active {
+          animation: pulse 0.2s ease-in-out;
+        }
+      `}</style>
+      <div className="min-h-screen text-white relative overflow-x-hidden overflow-y-auto">
       <div className="absolute inset-0">
         <div className="w-full h-full bg-cover bg-center bg-no-repeat">
           <Image src={images.profileBgImage} alt='' className='w-full' style={{ height: "1440px" }} />
@@ -219,29 +241,60 @@ export default function DefaultTemplate({
                 <button
                   key={index}
                   onClick={() => handleLinkClick(link)}
-                  className="w-full backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-between group px-4 hover:bg-white/30 transition-colors"
+                  className="w-full backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-between group px-4 hover:bg-white/30 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:shadow-white/10 active:shadow-inner"
                   style={{
-                    height: '70px',
+                    height: '80px',
                     borderRadius: '10px',
                     opacity: 1
                   }}
+                  onMouseDown={(e) => {
+                    // Add ripple effect
+                    const button = e.currentTarget;
+                    const rect = button.getBoundingClientRect();
+                    const ripple = document.createElement('span');
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                      position: absolute;
+                      width: ${size}px;
+                      height: ${size}px;
+                      left: ${x}px;
+                      top: ${y}px;
+                      background: rgba(255, 255, 255, 0.3);
+                      border-radius: 50%;
+                      transform: scale(0);
+                      animation: ripple 0.6s linear;
+                      pointer-events: none;
+                      z-index: 1;
+                    `;
+                    
+                    button.style.position = 'relative';
+                    button.style.overflow = 'hidden';
+                    button.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                      ripple.remove();
+                    }, 600);
+                  }}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl flex items-center justify-center w-8 h-8">
+                  <div className="flex items-center space-x-3 relative z-10">
+                    <div className="text-2xl flex items-center justify-center w-8 h-8 transform group-hover:scale-110 transition-transform duration-200">
                       {getIconForLink(link.name)}
                     </div>
                     <div className="text-left">
-                      <span className="text-white font-outfit block" style={{ fontSize: 18, fontWeight: 500 }}>
+                      <span className="text-white font-outfit block group-hover:text-white/90 transition-colors duration-200" style={{ fontSize: 18, fontWeight: 500 }}>
                         {link.display_name || link.name || 'Link'}
                       </span>
                       {link.url && (
-                        <span className="text-white/70 font-outfit text-sm block">
+                        <span className="text-white/70 font-outfit text-sm block group-hover:text-white/80 transition-colors duration-200">
                           {link.url.length > 30 ? link.url.substring(0, 30) + '...' : link.url}
                         </span>
                       )}
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all duration-200 relative z-10" />
                 </button>
               ))
             ) : (
@@ -483,5 +536,6 @@ export default function DefaultTemplate({
       )}
 
     </div>
+    </>
   );
 }
