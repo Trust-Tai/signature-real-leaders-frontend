@@ -117,10 +117,13 @@ export default function BlueTemplate({
         <div className="space-y-4 mb-6">
           {profileData.links && profileData.links.length > 0 ? (
             profileData.links.map((link, index) => (
-              <button
+              <a
                 key={index}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => handleLinkClick(link)}
-                className="w-full bg-purple-700/40 backdrop-blur-sm hover:bg-purple-700/60 text-white font-semibold text-lg py-5 px-6 rounded-2xl transition-all duration-300 border border-purple-500/30 shadow-lg flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-purple-500/20 active:shadow-inner group"
+                className="w-full bg-purple-700/40 backdrop-blur-sm hover:bg-purple-700/60 text-white font-semibold text-lg py-5 px-6 rounded-2xl transition-all duration-300 border border-purple-500/30 shadow-lg flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-purple-500/20 active:shadow-inner group block"
                 onMouseDown={(e) => {
                   // Add ripple effect
                   const button = e.currentTarget;
@@ -160,7 +163,7 @@ export default function BlueTemplate({
                   <span className="group-hover:text-purple-100 transition-colors duration-200">{link.display_name || link.name}</span>
                 </div>
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
-              </button>
+              </a>
             ))
           ) : (
             <div className="text-center text-purple-200/70 py-8">

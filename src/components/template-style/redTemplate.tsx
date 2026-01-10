@@ -117,10 +117,13 @@ export default function RedTemplate({
         <div className="space-y-3 mb-6">
           {profileData.links && profileData.links.length > 0 ? (
             profileData.links.map((link, index) => (
-              <button
+              <a
                 key={index}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => handleLinkClick(link)}
-                className="w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 border border-white/30 flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:shadow-white/10 active:shadow-inner group"
+                className="w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 border border-white/30 flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:shadow-white/10 active:shadow-inner group block"
                 onMouseDown={(e) => {
                   // Add ripple effect
                   const button = e.currentTarget;
@@ -160,7 +163,7 @@ export default function RedTemplate({
                   <span className="group-hover:text-white/90 transition-colors duration-200">{link.display_name || link.name}</span>
                 </div>
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
-              </button>
+              </a>
             ))
           ) : (
             <div className="text-center text-white/70 py-8">

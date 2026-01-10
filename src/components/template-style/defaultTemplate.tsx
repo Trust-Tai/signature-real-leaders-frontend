@@ -238,10 +238,13 @@ export default function DefaultTemplate({
             {/* Dynamic Links from API */}
             {profileData.links && profileData.links.length > 0 ? (
               profileData.links.map((link, index) => (
-                <button
+                <a
                   key={index}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={() => handleLinkClick(link)}
-                  className="w-full backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-between group px-4 hover:bg-white/30 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:shadow-white/10 active:shadow-inner"
+                  className="w-full backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-between group px-4 hover:bg-white/30 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:shadow-white/10 active:shadow-inner block"
                   style={{
                     height: '80px',
                     borderRadius: '10px',
@@ -295,7 +298,7 @@ export default function DefaultTemplate({
                     </div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all duration-200 relative z-10" />
-                </button>
+                </a>
               ))
             ) : (
               <div className="w-full backdrop-blur-[20px] bg-white/10 rounded-lg flex items-center justify-center px-4 py-8">

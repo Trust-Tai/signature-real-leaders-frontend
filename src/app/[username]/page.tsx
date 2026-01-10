@@ -445,9 +445,6 @@ export default function DynamicUserProfile() {
     } else {
       console.log('[Profile] Skipping link click tracking - user viewing own profile');
     }
-    
-    // Open the link
-    window.open(link.url, '_blank', 'noopener,noreferrer');
   };
 
 
