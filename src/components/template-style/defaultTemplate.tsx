@@ -343,7 +343,9 @@ export default function DefaultTemplate({
             )}
 
             {/* Signature Box */}
-            <div
+            {
+              profileData.signature_url ? 
+               <div
               className="w-full profilesignimagediv backdrop-blur-[20px] bg-white/20 rounded-lg flex items-center justify-center mb-4"
               style={{
                 height: '126px',
@@ -352,17 +354,17 @@ export default function DefaultTemplate({
               }}
             >
               <Image
-                src={profileData.signature_url || images.profileSinature}
+                src={profileData.signature_url }
                 alt={`${profileData.full_name} Signature`}
                 width={300}
                 height={100}
                 className="w-full max-h-full signimage object-contain"
                 style={{ mixBlendMode: 'multiply', filter: 'brightness(0) invert(1)' }}
-                onError={(e) => {
-                  e.currentTarget.src = images.profileSinature.src;
-                }}
+               
               />
-            </div>
+            </div> : null
+            }
+           
 
             {/* Newsletter Opt-in - Always show when user is viewing someone else's profile */}
             {(!user || user.username !== profileData.username) && (

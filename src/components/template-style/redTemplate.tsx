@@ -199,21 +199,22 @@ export default function RedTemplate({
         )}
 
         {/* Signature Section */}
-        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 mb-4 border border-white/30">
+        {
+          profileData.signature_url ? 
+           <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 mb-4 border border-white/30">
           <div className="rounded-lg p-4 h-24 flex items-center justify-center">
             <Image
-              src={profileData.signature_url || images.profileSinature}
+              src={profileData.signature_url}
               alt={`${profileData.full_name} Signature`}
               width={200}
               height={60}
               className="max-w-full max-h-full object-contain"
               style={{ mixBlendMode: 'multiply', filter: 'brightness(0) invert(1)' }}
-              onError={(e) => {
-                e.currentTarget.src = images.profileSinature.src;
-              }}
             />
           </div>
-        </div>
+        </div> : null
+        }
+       
 
         {/* Newsletter Text - Always show when user is viewing someone else's profile */}
         {(!user || user.username !== profileData.username) && (
