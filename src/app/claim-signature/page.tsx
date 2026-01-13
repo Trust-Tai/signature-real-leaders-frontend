@@ -17,6 +17,7 @@ const FirstScreen = () => {
   const router = useRouter();
   const [name, setName] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const handleVerify = (inputName: string) => {
     console.log('Verifying name:', inputName);
@@ -53,7 +54,7 @@ const FirstScreen = () => {
     <div className="min-h-screen bg-black flex flex-col xl:flex-row relative">
       {/* Mobile Sidebar Toggle - Only show when sidebar is closed */}
       {!isMobileMenuOpen && (
-        <MobileSidebarToggle onToggle={toggleMobileMenu} />
+        <MobileSidebarToggle onToggle={toggleMobileMenu} isScrolled={isScrolled} />
       )}
 
       {/* Section 1: Left Sidebar - Hidden on mobile/tablet, shown on desktop */}
@@ -72,7 +73,14 @@ const FirstScreen = () => {
 
       {/* Section 2: Middle Content - Takes remaining width */}
       <MainContent>
-        <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
+        <div 
+          className="h-full overflow-y-auto scrollbar-hide"
+          onScroll={(e) => {
+            const scrollTop = e.currentTarget.scrollTop;
+            setIsScrolled(scrollTop > 50);
+          }}
+        >
+          <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
           <div className="max-w-2xl w-full mt-16 sm:mt-20 lg:mt-[40px]">
             {/* Header */}
         
@@ -92,6 +100,7 @@ const FirstScreen = () => {
               buttonText="VERIFY"
             />
           </div>
+        </div>
         </div>
       </MainContent>
 

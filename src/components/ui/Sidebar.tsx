@@ -398,7 +398,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Steps */}
         <div className="space-y-4 sm:space-y-6 relative mt-[30px]">
           {/* Gray line */}
-          <div className="absolute left-3 sm:left-4 top-3 sm:top-4 bottom-0 w-0.5 bg-gray-600"></div>
+          <div className="absolute left-3 sm:left-4 top-3 sm:top-4 bottom-10 w-0.5 bg-gray-600"></div>
 
           {/* Green line for completed steps */}
           {(() => {
@@ -409,7 +409,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               const lastCompletedIndex = steps.findIndex(
                 (step) => step.status === "completed"
               );
-              const height = (lastCompletedIndex + 1) * 96;
+              const height = (lastCompletedIndex +1) * 96;
               return (
                 <div
                   className="absolute left-3 sm:left-4 top-3 sm:top-4 w-0.5 bg-green-500 z-10"

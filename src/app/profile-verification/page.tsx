@@ -24,6 +24,9 @@ const InnerProfileVerificationPage = () => {
   // Track if we've already processed redirect_to_step
   const hasProcessedRedirect = React.useRef(false);
   
+  // Scroll state for MobileSidebarToggle
+  const [isScrolled, setIsScrolled] = useState(false);
+  
   // Initialize currentStep from localStorage if available
   const [currentStep, setCurrentStep] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -734,7 +737,7 @@ const InnerProfileVerificationPage = () => {
     <div className="h-screen bg-black flex overflow-hidden">
       {/* Mobile Sidebar Toggle - Only show when sidebar is closed */}
       {!isMobileMenuOpen && (
-        <MobileSidebarToggle onToggle={toggleMobileMenu} />
+        <MobileSidebarToggle onToggle={toggleMobileMenu} isScrolled={isScrolled} />
       )}
 
       {/* Section 1: Left Sidebar - Fixed position */}
@@ -754,7 +757,13 @@ const InnerProfileVerificationPage = () => {
       {/* Section 2: Middle Content - Scrollable */}
       <MainContent>
         {/* Scrollable Content with hidden scrollbar */}
-        <div className="h-full overflow-y-auto scrollbar-hide">
+        <div 
+          className="h-full overflow-y-auto scrollbar-hide"
+          onScroll={(e) => {
+            const scrollTop = e.currentTarget.scrollTop;
+            setIsScrolled(scrollTop > 50);
+          }}
+        >
           <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
 
             <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] max-w-2xl`}>
