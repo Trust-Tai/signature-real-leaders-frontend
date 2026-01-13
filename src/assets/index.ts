@@ -21,6 +21,7 @@ import successMetrixRightSideImage from './images/successRightImage.png'
 import linkRightSideImge from "./images/linksRightImage.png"
 import signRightImage from "./images/signrightImage.png"
 import realLeadersTitle from "./images/realLeadersTitle.png"
+import realLeadersBlack from "./images/realLeadersBlack.png"
 import goArrowIcon from "./icons/Arrow.png"
 import emailIcon from "./icons/emailIcon.png"
 import linkedinIcon from "./icons/linkedinIcon.png"
@@ -57,6 +58,7 @@ export const images ={
   userProfileImage:userProfileImage,
   profileBgImage:profileBgImage,
 verifyPageLefBgImage: verifyPageLefBgImage,
+realLeadersBlack:realLeadersBlack,
 heroLine:heroLine,
 h1Third:h1Third,
 h1Fourth:h1Fourth,

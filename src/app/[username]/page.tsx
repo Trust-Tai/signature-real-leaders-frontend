@@ -70,6 +70,8 @@ const getIconForLink = (linkName: string) => {
     { label: 'Maps', icon: <FaMapMarkedAlt style={{ color: '#34A853' }} /> },
   ];
 
+  
+
   // Find matching icon based on link name (case insensitive)
   const matchedItem = suggestedItems.find(item => 
     item.label.toLowerCase() === linkName.toLowerCase() ||
@@ -80,10 +82,15 @@ const getIconForLink = (linkName: string) => {
   return matchedItem ? matchedItem.icon : '🔗';
 };
 
+
+
 export default function DynamicUserProfile() {
   const router = useRouter();
   const params = useParams();
-  const username = params.username as string;
+  const rawUsername = params.username as string;
+  
+  // Decode the username to handle special characters and spaces
+  const username = rawUsername ? decodeURIComponent(rawUsername) : '';
   
   // Try to get user context, but don't fail if not available (public page)
   let user = null;
@@ -146,6 +153,8 @@ export default function DynamicUserProfile() {
         setLoading(true);
         setError(null);
         
+        console.log('[Profile] Raw username from URL:', rawUsername);
+        console.log('[Profile] Decoded username:', username);
         console.log('[Profile] Fetching profile for username:', username);
         const response = await api.getPublicProfile(username);
         console.log("response>>>>", response);
