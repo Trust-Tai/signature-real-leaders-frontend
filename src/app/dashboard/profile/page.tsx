@@ -957,21 +957,83 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                     </div>
                   </div>
 
-                  {/* Row 1.5: Username */}
+                  {/* Row 1.5: Username - Special Field */}
                   <div className="mb-[10]">
                     <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Username</label>
-                    <div className='firstVerifyScreen group'>
-                      <input
-                        type="text"
-                        value={informationData?.username || ''}
-                        onChange={(e) => {
-                          console.log('[Profile] Username changed to:', e.target.value);
-                          setInformationData(prev => prev ? { ...prev, username: e.target.value } : null);
-                        }}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="e.g., johndoe"
-                      />
+                    <div className='relative'>
+                      <div className='firstVerifyScreen group' style={{ 
+                        border: '2px solid #CF3232', 
+                        borderRadius: '8px',
+                        backgroundColor: '#FFF5F5'
+                      }}>
+                        <input
+                          type="text"
+                          value={informationData?.username || ''}
+                          onChange={(e) => {
+                            console.log('[Profile] Username changed to:', e.target.value);
+                            setInformationData(prev => prev ? { ...prev, username: e.target.value } : null);
+                          }}
+                          className="w-full px-4 py-3 bg-transparent rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput"
+                          style={{ color: '#CF3232', fontWeight: '500' }}
+                          placeholder="e.g., johndoe"
+                        />
+                      </div>
+                      
+                      {/* Warning Note */}
+                      <div className="mt-2 flex items-start space-x-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-sm text-yellow-800">
+                          <strong>Warning:</strong> Changing this will update your profile URL. Your current URL: <span className="font-mono text-yellow-900">/{user?.username}</span>
+                        </p>
+                      </div>
+
+                      {/* Update Username Button - Show only if username changed */}
+                      {informationData?.username && informationData.username !== user?.username && (
+                        <button
+                          onClick={async () => {
+                            setIsLoading(true);
+                            try {
+                              const token = localStorage.getItem('auth_token');
+                              if (!token) {
+                                toast.error('Authentication token not found');
+                                return;
+                              }
+
+                              const response = await api.updateProfile(token, {
+                                username: informationData.username
+                              });
+
+                              if (response.success) {
+                                toast.success('Username updated successfully!');
+                                updateUser({ username: informationData.username });
+                              } else {
+                                toast.error(response.message || 'Failed to update username');
+                              }
+                            } catch (error) {
+                              const errorMessage = error instanceof Error ? error.message : 'Failed to update username';
+                              toast.error(errorMessage);
+                            } finally {
+                              setIsLoading(false);
+                            }
+                          }}
+                          disabled={isLoading}
+                          className="mt-3 w-full sm:w-auto px-6 py-2.5 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
+                        >
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Updating...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Save className="w-4 h-4" />
+                              <span>Update Username</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
 
