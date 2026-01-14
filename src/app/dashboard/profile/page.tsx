@@ -923,41 +923,43 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
                 <h2 className="font-semibold font-outift text-[#333333] mb-4">Your Information</h2>
                 
-                {/* Debug info */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
-                    <strong>Debug:</strong> Username = &quot;{informationData?.username || 'empty'}&quot;
-                  </div>
-                )}
+               
 
                 {/* Inline Information Form */}
                 <div className="space-y-6">
                   {/* Row 1: First Name & Last Name */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-                    <div className='firstVerifyScreen group'>
-                      <input
-                        type="text"
-                        value={informationData?.firstName || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, firstName: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="First Name"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                      <div className='firstVerifyScreen group'>
+                        <input
+                          type="text"
+                          value={informationData?.firstName || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, firstName: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                          placeholder="Enter your first name"
+                        />
+                      </div>
                     </div>
-                    <div className='firstVerifyScreen group'>
-                      <input
-                        type="text"
-                        value={informationData?.lastName || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, lastName: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Last Name"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                      <div className='firstVerifyScreen group'>
+                        <input
+                          type="text"
+                          value={informationData?.lastName || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, lastName: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                          placeholder="Enter your last name"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   {/* Row 1.5: Username */}
                   <div className="mb-[10]">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Username</label>
                     <div className='firstVerifyScreen group'>
                       <input
                         type="text"
@@ -968,67 +970,80 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                         }}
                         className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
                         style={{ color: '#949494' }}
-                        placeholder="Username (e.g., johndoe)"
+                        placeholder="e.g., johndoe"
                       />
                     </div>
                   </div>
 
                   {/* Row 2: Date of Birth & Occupation */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-                    <div className='firstVerifyScreen group relative'>
-                      <input
-                        type="text"
-                        value={informationData?.date_of_birth || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, date_of_birth: e.target.value } : null)}
-                        onFocus={(e) => e.target.type = 'date'}
-                        onBlur={(e) => {
-                          if (!e.target.value) {
-                            e.target.type = 'text';
-                          }
-                        }}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Date of Birth"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Date of Birth</label>
+                      <div className='firstVerifyScreen group relative'>
+                        <input
+                          type="text"
+                          value={informationData?.date_of_birth || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, date_of_birth: e.target.value } : null)}
+                          onFocus={(e) => e.target.type = 'date'}
+                          onBlur={(e) => {
+                            if (!e.target.value) {
+                              e.target.type = 'text';
+                            }
+                          }}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                          placeholder="Select date"
+                        />
+                      </div>
                     </div>
-                    <div className='firstVerifyScreen group'>
-                      <input
-                        type="text"
-                        value={informationData?.occupation || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, occupation: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Role"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Role</label>
+                      <div className='firstVerifyScreen group'>
+                        <input
+                          type="text"
+                          value={informationData?.occupation || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, occupation: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                          placeholder="Enter your job title"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   {/* Row 3: Company Name & Company Website */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-                    <div className='firstVerifyScreen group'>
-                      <input
-                        type="text"
-                        value={informationData?.companyName || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, companyName: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Company Name"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Company Name</label>
+                      <div className='firstVerifyScreen group'>
+                        <input
+                          type="text"
+                          value={informationData?.companyName || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, companyName: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                          placeholder="Enter company name"
+                        />
+                      </div>
                     </div>
-                    <div className='firstVerifyScreen group'>
-                      <input
-                        type="url"
-                        value={informationData?.companyWebsite || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, companyWebsite: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Company Website"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Company Website</label>
+                      <div className='firstVerifyScreen group'>
+                        <input
+                          type="url"
+                          value={informationData?.companyWebsite || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, companyWebsite: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                          placeholder="https://example.com"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   {/* Row 4: RSS Feed URL */}
                   <div className="mb-[10]">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">RSS Feed URL</label>
                     <div className='firstVerifyScreen group relative'>
                       <FaRss className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#FF6600] z-10" />
                       <input
@@ -1037,202 +1052,244 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                         onChange={(e) => setInformationData(prev => prev ? { ...prev, rss_feed_url: e.target.value } : null)}
                         className="w-full pl-12 pr-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
                         style={{ color: '#949494' }}
-                        placeholder="Add your RSS feed URL so followers can see your latest content"
+                        placeholder="Add your RSS feed URL"
                       />
                     </div>
                   </div>
 
                   {/* Row 5: Industry & Number of Employees */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-                    <div className="relative firstVerifyScreen group">
-                      <select
-                        value={informationData?.industry || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, industry: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      >
-                        <option value="">Industry</option>
-                        <option value="Technology">Technology</option>
-                        <option value="Healthcare">Healthcare</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Education">Education</option>
-                        <option value="Retail">Retail</option>
-                        <option value="Manufacturing">Manufacturing</option>
-                        <option value="Consulting">Consulting</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Industry</label>
+                      <div className="relative firstVerifyScreen group">
+                        <select
+                          value={informationData?.industry || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, industry: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        >
+                          <option value="">Select industry</option>
+                          <option value="Technology">Technology</option>
+                          <option value="Healthcare">Healthcare</option>
+                          <option value="Finance">Finance</option>
+                          <option value="Education">Education</option>
+                          <option value="Retail">Retail</option>
+                          <option value="Manufacturing">Manufacturing</option>
+                          <option value="Consulting">Consulting</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                      </div>
                     </div>
 
-                    <div className="relative firstVerifyScreen group">
-                      <select
-                        value={informationData?.numberOfEmployees || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, numberOfEmployees: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      >
-                        <option value="">Number of Employees</option>
-                        <option value="1-10">1-10</option>
-                        <option value="11-50">11-50</option>
-                        <option value="51-200">51-200</option>
-                        <option value="201-500">201-500</option>
-                        <option value="501-1000">501-1000</option>
-                        <option value="1000+">1000+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Number of Employees</label>
+                      <div className="relative firstVerifyScreen group">
+                        <select
+                          value={informationData?.numberOfEmployees || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, numberOfEmployees: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        >
+                          <option value="">Select range</option>
+                          <option value="1-10">1-10</option>
+                          <option value="11-50">11-50</option>
+                          <option value="51-200">51-200</option>
+                          <option value="201-500">201-500</option>
+                          <option value="501-1000">501-1000</option>
+                          <option value="1000+">1000+</option>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                      </div>
                     </div>
                   </div>
 
                   {/* Row 4: Contact Email List Size */}
-                  <div className="relative firstVerifyScreen group">
-                    <select
-                      value={informationData?.contactEmailListSize || ''}
-                      onChange={(e) => setInformationData(prev => prev ? { ...prev, contactEmailListSize: e.target.value } : null)}
-                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                    >
-                      <option value="">Contact email list size</option>
-                      <option value="0-100">0-100</option>
-                      <option value="101-500">101-500</option>
-                      <option value="501-1000">501-1000</option>
-                      <option value="1001-5000">1001-5000</option>
-                      <option value="5001-10000">5001-10000</option>
-                      <option value="10000+">10000+</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                  <div className="mb-[10]">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Contact Email List Size</label>
+                    <div className="relative firstVerifyScreen group">
+                      <select
+                        value={informationData?.contactEmailListSize || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, contactEmailListSize: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                      >
+                        <option value="">Select size</option>
+                        <option value="0-100">0-100</option>
+                        <option value="101-500">101-500</option>
+                        <option value="501-1000">501-1000</option>
+                        <option value="1001-5000">1001-5000</option>
+                        <option value="5001-10000">5001-10000</option>
+                        <option value="10000+">10000+</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                    </div>
                   </div>
 
-                  <div className="firstVerifyScreen group" style={{ height: "200px" }}>
-                    <textarea
-                      value={informationData?.about || ''}
-                      onChange={(e) => {
-                        setInformationData(prev => prev ? { ...prev, about: e.target.value } : null);
-                        setBio(e.target.value);
-                      }}
-                      className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
-                      style={{ color: '#949494', height: "180px" }}
-                      placeholder="Brief summary about yourself..."
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Brief Summary About Yourself</label>
+                    <div className="firstVerifyScreen group" style={{ height: "200px" }}>
+                      <textarea
+                        value={informationData?.about || ''}
+                        onChange={(e) => {
+                          setInformationData(prev => prev ? { ...prev, about: e.target.value } : null);
+                          setBio(e.target.value);
+                        }}
+                        className="firstVerifyScreenInput w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+                        style={{ color: '#949494', height: "180px" }}
+                        placeholder="Tell us about yourself..."
+                      />
+                    </div>
                   </div>
 
                   {/* Billing Address Section */}
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">Billing Address</h3>
 
                   {/* Street Address 1 */}
-                  <div className="firstVerifyScreen group">
-                    <input
-                      type="text"
-                      value={informationData?.billing_address_1 || ''}
-                      onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_address_1: e.target.value } : null)}
-                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      style={{ color: '#949494' }}
-                      placeholder="Street Address 1"
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Street Address 1</label>
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="text"
+                        value={informationData?.billing_address_1 || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_address_1: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Enter street address"
+                      />
+                    </div>
                   </div>
 
                   {/* Street Address 2 */}
-                  <div className="firstVerifyScreen group">
-                    <input
-                      type="text"
-                      value={informationData?.billing_address_2 || ''}
-                      onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_address_2: e.target.value } : null)}
-                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      style={{ color: '#949494' }}
-                      placeholder="Street Address 2 (Optional)"
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Street Address 2 (Optional)</label>
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="text"
+                        value={informationData?.billing_address_2 || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_address_2: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Apartment, suite, etc."
+                      />
+                    </div>
                   </div>
 
                   {/* City, Postcode, Country */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-[10]">
-                    <div className="firstVerifyScreen group">
-                      <input
-                        type="text"
-                        value={informationData?.billing_city || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_city: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="City"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">City</label>
+                      <div className="firstVerifyScreen group">
+                        <input
+                          type="text"
+                          value={informationData?.billing_city || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_city: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                          placeholder="Enter city"
+                        />
+                      </div>
                     </div>
-                    <div className="firstVerifyScreen group">
-                      <input
-                        type="text"
-                        value={informationData?.billing_postcode || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_postcode: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Postcode"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Postcode</label>
+                      <div className="firstVerifyScreen group">
+                        <input
+                          type="text"
+                          value={informationData?.billing_postcode || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_postcode: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          style={{ color: '#949494' }}
+                          placeholder="Enter postcode"
+                        />
+                      </div>
                     </div>
-                    <div className="relative firstVerifyScreen group">
-                      <select
-                        value={informationData?.billing_country || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_country: e.target.value } : null)}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      >
-                        <option value="">Country</option>
-                        {countries.map((country) => (
-                          <option key={country.code} value={country.code}>
-                            {country.name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Country</label>
+                      <div className="relative firstVerifyScreen group">
+                        <select
+                          value={informationData?.billing_country || ''}
+                          onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_country: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        >
+                          <option value="">Select country</option>
+                          {countries.map((country) => (
+                            <option key={country.code} value={country.code}>
+                              {country.name}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                      </div>
                     </div>
                   </div>
 
                   {/* Phone */}
-                  <div className="firstVerifyScreen group">
-                    <input
-                      type="tel"
-                      value={informationData?.billing_phone || ''}
-                      onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_phone: e.target.value } : null)}
-                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      style={{ color: '#949494' }}
-                      placeholder="Phone Number"
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Phone Number</label>
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="tel"
+                        value={informationData?.billing_phone || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, billing_phone: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Enter phone number"
+                      />
+                    </div>
                   </div>
 
                   {/* Brand Voice */}
-                  <div className="firstVerifyScreen group" style={{ height: "auto" }}>
-                    <textarea
-                      value={informationData?.brand_voice || ''}
-                      onChange={(e) => setInformationData(prev => prev ? { ...prev, brand_voice: e.target.value } : null)}
-                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
-                      style={{ color: '#949494' }}
-                      placeholder="Describe your brand voice and tone..."
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Brand Voice</label>
+                    <div className="firstVerifyScreen group" style={{ height: "auto" }}>
+                      <textarea
+                        value={informationData?.brand_voice || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, brand_voice: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+                        style={{ color: '#949494' }}
+                        placeholder="Describe your brand voice and tone..."
+                      />
+                    </div>
                   </div>
 
                   {/* Unique Differentiation */}
-                  <div className="firstVerifyScreen group" style={{ height: "auto" }}>
-                    <textarea
-                      value={informationData?.unique_differentiation || ''}
-                      onChange={(e) => setInformationData(prev => prev ? { ...prev, unique_differentiation: e.target.value } : null)}
-                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
-                      style={{ color: '#949494' }}
-                      placeholder="What makes you unique? How do you differentiate from competitors?"
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Unique Differentiation</label>
+                    <div className="firstVerifyScreen group" style={{ height: "auto" }}>
+                      <textarea
+                        value={informationData?.unique_differentiation || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, unique_differentiation: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+                        style={{ color: '#949494' }}
+                        placeholder="What makes you unique?"
+                      />
+                    </div>
                   </div>
 
                   {/* Top Pain Points */}
-                  <div className="firstVerifyScreen group" style={{ height: "auto" }}>
-                    <textarea
-                      value={informationData?.top_pain_points || ''}
-                      onChange={(e) => setInformationData(prev => prev ? { ...prev, top_pain_points: e.target.value } : null)}
-                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
-                      style={{ color: '#949494' }}
-                      placeholder="What are the top pain points your audience faces?"
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Top Pain Points</label>
+                    <div className="firstVerifyScreen group" style={{ height: "auto" }}>
+                      <textarea
+                        value={informationData?.top_pain_points || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, top_pain_points: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput resize-none min-h-[100px] transform hover:scale-[1.02] hover:shadow-lg"
+                        style={{ color: '#949494' }}
+                        placeholder="What are the top pain points your audience faces?"
+                      />
+                    </div>
                   </div>
 
                   {/* Primary Call to Action */}
-                  <div className="firstVerifyScreen group">
-                    <input
-                      type="text"
-                      value={informationData?.primary_call_to_action || ''}
-                      onChange={(e) => setInformationData(prev => prev ? { ...prev, primary_call_to_action: e.target.value } : null)}
-                      className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                      style={{ color: '#949494' }}
-                      placeholder="What is your primary call to action?"
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Primary Call to Action</label>
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="text"
+                        value={informationData?.primary_call_to_action || ''}
+                        onChange={(e) => setInformationData(prev => prev ? { ...prev, primary_call_to_action: e.target.value } : null)}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="e.g., Book a consultation"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1245,36 +1302,42 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                 {targetAudience.map((audience, index) => (
                   <div key={index} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="firstVerifyScreen group">
-                        <input
-                          type="text"
-                          value={audience.role}
-                          onChange={(e) => updateAudienceRow(index, 'role', e.target.value)}
-                          placeholder="People / Role (e.g., Startup founders)"
-                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                          style={{ color: '#949494' }}
-                        />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">People / Role</label>
+                        <div className="firstVerifyScreen group">
+                          <input
+                            type="text"
+                            value={audience.role}
+                            onChange={(e) => updateAudienceRow(index, 'role', e.target.value)}
+                            placeholder="e.g., Startup founders"
+                            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                            style={{ color: '#949494' }}
+                          />
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="relative firstVerifyScreen group flex-1">
-                          <select
-                            value={audience.ageRange}
-                            onChange={(e) => updateAudienceRow(index, 'ageRange', e.target.value)}
-                            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                          >
-                            <option value="">Select age group</option>
-                            {ageGroups.map((ageGroup) => (
-                              <option key={ageGroup} value={ageGroup}>
-                                {ageGroup}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                      <div className="flex items-end space-x-2">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Age Range</label>
+                          <div className="relative firstVerifyScreen group">
+                            <select
+                              value={audience.ageRange}
+                              onChange={(e) => updateAudienceRow(index, 'ageRange', e.target.value)}
+                              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                            >
+                              <option value="">Select age group</option>
+                              {ageGroups.map((ageGroup) => (
+                                <option key={ageGroup} value={ageGroup}>
+                                  {ageGroup}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+                          </div>
                         </div>
                         {targetAudience.length > 1 && (
                           <button
                             onClick={() => removeAudienceRow(index)}
-                            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors mb-1"
                             title="Remove audience"
                           >
                             <Trash2 className="w-5 h-5" />
@@ -1282,8 +1345,10 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                         )}
                       </div>
                     </div>
-                    <div className="firstVerifyScreen group">
-                      <input
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Demographics</label>
+                      <div className="firstVerifyScreen group">
+                        <input
                         type="text"
                         value={audience.demographics}
                         onChange={(e) => updateAudienceRow(index, 'demographics', e.target.value)}
@@ -1292,6 +1357,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                         style={{ color: '#949494' }}
                       />
                     </div>
+                  </div>
                   </div>
                 ))}
                 
