@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, Mail, SquarePlus, Users,UserPlus, Wand2, HelpCircle } from 'lucide-react';
+import { X, Mail, SquarePlus, Users,UserPlus, Wand2, HelpCircle, Share2 } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { useRouter } from 'next/navigation';
@@ -153,6 +153,25 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                 <span className="text-sm">Help</span>
               </div>
             </div>
+
+            {/* Share Profile - After Help */}
+            <div
+              data-tour="share-profile"
+              onClick={() => {
+                setSidebarOpen(false);
+                router.push('/dashboard/share-profile');
+              }}
+              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
+                currentPage === 'share-profile' ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <Share2 className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm">Share Profile</span>
+              </div>
+            </div>
+
+            
           </nav>
         </div>
         

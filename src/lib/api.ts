@@ -454,7 +454,7 @@ export const api = {
         last_updated: string;
       };
     }>(
-      `/profile/${username}`,
+      `/profile?username=${username}`,
       {
         method: 'GET',
         headers: {
