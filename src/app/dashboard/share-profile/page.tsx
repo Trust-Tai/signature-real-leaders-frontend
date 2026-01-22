@@ -12,9 +12,9 @@ const ShareProfilePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Generate profile URL
-  const profileUrl = user?.username 
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/${user.username}`
-    : '';
+  const profileUrl = user?.username
+  ? `https://real-leaders.com/${user.username}`
+  : '';
 
   const handleCopy = async (text: string, field: string) => {
     try {

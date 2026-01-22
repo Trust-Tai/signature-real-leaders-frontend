@@ -83,6 +83,7 @@ export default function BlueTemplate({
               alt={`${profileData.full_name} Profile`}
               width={144}
               height={144}
+              unoptimized
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.src = images.userProfileImage.src;

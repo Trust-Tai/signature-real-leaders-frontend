@@ -124,6 +124,7 @@ export default function DefaultTemplate({
               alt={`${profileData.full_name} Profile`}
               width={180}
               height={180}
+              unoptimized
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.src = images.userProfileImage.src;

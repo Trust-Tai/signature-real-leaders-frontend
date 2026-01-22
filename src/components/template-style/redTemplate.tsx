@@ -83,6 +83,7 @@ export default function RedTemplate({
               alt={`${profileData.full_name} Profile`}
               width={128}
               height={128}
+              unoptimized
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.src = images.userProfileImage.src;
