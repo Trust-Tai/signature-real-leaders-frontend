@@ -452,7 +452,7 @@ const InnerProfileVerificationPage = () => {
                   if (state.num_employees) formData.append('numEmployees', state.num_employees);
                   if (state.about) formData.append('about', state.about);
                   if (state.occupation) formData.append('occupation', state.occupation);
-                  if (state.phone) formData.append('phone', state.phone);
+                  if (state.phone) formData.append('billing_phone', state.phone);
                   
                   // Add signature - prioritize file objects over data URLs
                   console.log('[Step 4] Signature data:', {
