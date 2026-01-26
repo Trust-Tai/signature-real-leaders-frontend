@@ -131,6 +131,10 @@ const ProfilePage = () => {
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
 
+  // Webhook URLs state
+  const [webhookUrls, setWebhookUrls] = useState<string[]>([]);
+  const [newWebhookUrl, setNewWebhookUrl] = useState('');
+
 
 
   // Age groups for target audience
@@ -500,6 +504,12 @@ const ProfilePage = () => {
         }));
       }
 
+      // Initialize webhook URLs from user data
+      const userWithWebhook = user as unknown as Record<string, unknown>;
+      if (userWithWebhook.webhook_url && Array.isArray(userWithWebhook.webhook_url)) {
+        setWebhookUrls(userWithWebhook.webhook_url as string[]);
+      }
+
     }
   }, [user]);
 
@@ -636,6 +646,11 @@ const ProfilePage = () => {
         }
       }
 
+      // Webhook URLs - save if there are any
+      if (webhookUrls && webhookUrls.length > 0) {
+        updateData.webhookUrl = webhookUrls.filter(url => url.trim() !== '');
+      }
+
       const response = await api.updateProfile(token, updateData);
 
       if (response.success) {
@@ -767,6 +782,22 @@ const handleArrayInputChange = (field: string, value: string[]) => {
 
   const skipStep = () => {
     nextStep();
+  };
+
+  // Webhook URL functions
+  const addWebhookUrl = () => {
+    if (newWebhookUrl.trim() && !webhookUrls.includes(newWebhookUrl.trim())) {
+      setWebhookUrls(prev => [...prev, newWebhookUrl.trim()]);
+      setNewWebhookUrl('');
+    }
+  };
+
+  const removeWebhookUrl = (index: number) => {
+    setWebhookUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateWebhookUrl = (index: number, value: string) => {
+    setWebhookUrls(prev => prev.map((url, i) => i === index ? value : url));
   };
 
 
@@ -1353,6 +1384,76 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                       />
                     </div>
                   </div>
+
+                  {/* Webhook URLs Section */}
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">Webhook URLs</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Add webhook URLs to receive subscription notifications when users subscribe to your profile. 
+                    When someone subscribes, we&apos;ll send the subscription data to all your webhook URLs.
+                  </p>
+
+                  {/* Existing Webhook URLs */}
+                  {webhookUrls.length > 0 && (
+                    <div className="space-y-3 mb-4">
+                      {webhookUrls.map((url, index) => (
+                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                         
+                          <div className="flex-1">
+                            <input
+                              type="url"
+                              value={url}
+                              onChange={(e) => updateWebhookUrl(index, e.target.value)}
+                              className="w-full px-3 py-2 bg-white rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300"
+                              style={{ color: '#333333' }}
+                              placeholder="https://your-webhook-endpoint.com/webhook"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeWebhookUrl(index)}
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-300"
+                            title="Remove webhook URL"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add New Webhook URL */}
+                  <div className="space-y-3">
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="url"
+                        value={newWebhookUrl}
+                        onChange={(e) => setNewWebhookUrl(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addWebhookUrl();
+                          }
+                        }}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Enter webhook URL (e.g., https://your-site.com/webhook)"
+                      />
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={addWebhookUrl}
+                      disabled={!newWebhookUrl.trim() || webhookUrls.includes(newWebhookUrl.trim())}
+                      className="w-full px-4 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add More URL</span>
+                    </button>
+                    
+                
+                  </div>
+
+                
                 </div>
               </div>
 

@@ -76,6 +76,8 @@ interface User {
   date_of_birth: string;
   occupation: string;
   profile_privacy: boolean;
+  webhookUrl?: string[];
+  webhook_url?: string[];
 }
 
 interface UserContextType {

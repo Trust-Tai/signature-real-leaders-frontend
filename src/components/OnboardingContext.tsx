@@ -58,6 +58,7 @@ export interface OnboardingState {
   profile_template_id?: number;
   links?: Array<{ name: string; url: string }>;
   profilePicture?: string;
+  webhookUrl?: string[];
 }
 
 interface OnboardingContextValue {

@@ -175,6 +175,8 @@ export const api = {
         occupation: string;
         profile_privacy: boolean;
         tour_guide: boolean;
+        webhookUrl?: string[];
+        webhook_url?: string[];
       };
       profile_completion?: {
         percentage: number;
@@ -613,6 +615,8 @@ export const api = {
         date_of_birth: string;
         occupation: string;
         profile_privacy: boolean;
+        webhookUrl?: string[];
+        webhook_url?: string[];
       };
       token: string;
     };
