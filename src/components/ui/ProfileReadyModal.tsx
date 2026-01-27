@@ -22,9 +22,10 @@ interface ProfileReadyModalProps {
     [key: string]: unknown;
   } | null;
   user: { username?: string } | null;
+  onChangeTemplate?: () => void; // Add callback for template change
 }
 
-export default function ProfileReadyModal({ isOpen, onClose, profileData, user }: ProfileReadyModalProps) {
+export default function ProfileReadyModal({ isOpen, onClose, profileData, user, onChangeTemplate }: ProfileReadyModalProps) {
   const router = useRouter();
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -45,9 +46,19 @@ export default function ProfileReadyModal({ isOpen, onClose, profileData, user }
   };
 
   const handleChangeTemplate = () => {
+    console.log('[ProfileReadyModal] Change template clicked');
     onClose();
-    // Navigate to template selection step in profile page (step 4)
-    router.push('/dashboard/profile?step=4');
+    
+    // Call the callback if provided (for direct step change)
+    if (onChangeTemplate) {
+      onChangeTemplate();
+    } else {
+      // Fallback to URL navigation
+      setTimeout(() => {
+        console.log('[ProfileReadyModal] Navigating to step 4 (Template)');
+        router.replace('/dashboard/profile?step=4');
+      }, 200);
+    }
   };
 
   const templateId = profileData?.profile_template?.id;
@@ -151,7 +162,7 @@ export default function ProfileReadyModal({ isOpen, onClose, profileData, user }
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm">
       {/* Confetti Effect */}
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-[10000]">
@@ -210,9 +221,9 @@ export default function ProfileReadyModal({ isOpen, onClose, profileData, user }
         </div>
 
         {/* Profile Preview Section */}
-        <div className="relative pb-48">
-          {/* Template Preview - Full Width with bottom padding */}
-          <div className="w-full mb-32">
+        <div className="relative">
+          {/* Template Preview - Natural Content Flow */}
+          <div className="w-full pb-40">
             {renderTemplatePreview()}
           </div>
 

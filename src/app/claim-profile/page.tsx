@@ -16,6 +16,7 @@ interface ClaimProfileFormData {
   share: string;
   email: string;
   location: string;
+  industry: string;
 }
 
 const InnerClaimProfilePage = () => {
@@ -29,8 +30,40 @@ const InnerClaimProfilePage = () => {
     linkedin: '',
     share: '',
     email: '',
-    location: ''
+    location: '',
+    industry: ''
   });
+
+  const [customIndustry, setCustomIndustry] = useState('');
+
+  // Industry options list (same as profile-verification and dashboard profile)
+  const industryOptions = [
+    "Construction",
+    "Energy & Facilities",
+    "Consumer Packed Goods (CPG)",
+    "Education/Training",
+    "Fashion/Apparel",
+    "Financial services",
+    "Food & Beverage (Non-CPG)",
+    "Healthcare",
+    "Home & Lifestyle",
+    "Insurance",
+    "Manufacturing/Industrial",
+    "Marketing & Media",
+    "Membership/Community",
+    "Personal Care & Wellness",
+    "Professional/Advisory and Consulting Services",
+    "Real Estate",
+    "Social Enterprise & Education",
+    "Staffing/Recruiting",
+    "Travel and Hospitality",
+    "Technology"
+  ];
+
+  // Check if current industry is in predefined options
+  const isCustomIndustry = (industry: string) => {
+    return industry && !industryOptions.includes(industry) && industry !== "Other" && industry !== "";
+  };
 
   // Redirect if no ID provided
   useEffect(() => {
@@ -57,7 +90,7 @@ const InnerClaimProfilePage = () => {
     }
 
     // Validate required fields
-    const requiredFields: (keyof ClaimProfileFormData)[] = ['ceo', 'website', 'linkedin', 'share', 'email', 'location'];
+    const requiredFields: (keyof ClaimProfileFormData)[] = ['ceo', 'website', 'linkedin', 'share', 'email', 'location', 'industry'];
     const missingFields = requiredFields.filter(field => !formData[field].trim());
     
     if (missingFields.length > 0) {
@@ -82,8 +115,10 @@ const InnerClaimProfilePage = () => {
           linkedin: '',
           share: '',
           email: '',
-          location: ''
+          location: '',
+          industry: ''
         });
+        setCustomIndustry('');
       } else {
         toast.error(result.message || 'Failed to submit profile claim');
       }
@@ -223,6 +258,59 @@ const InnerClaimProfilePage = () => {
                   </select>
                   <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
                 </div>
+              </div>
+
+              {/* Industry */}
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="industry" className="block text-sm font-medium text-gray-200 mb-2">
+                    Industry *
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="industry"
+                      value={isCustomIndustry(formData.industry) ? 'Other' : formData.industry}
+                      onChange={(e) => {
+                        if (e.target.value === 'Other') {
+                          handleInputChange('industry', 'Other');
+                          if (!customIndustry && isCustomIndustry(formData.industry)) {
+                            setCustomIndustry(formData.industry);
+                          }
+                        } else {
+                          handleInputChange('industry', e.target.value);
+                          setCustomIndustry('');
+                        }
+                      }}
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 appearance-none pr-10"
+                      required
+                    >
+                      <option value="">Select Industry</option>
+                      {industryOptions.map((industry) => (
+                        <option key={industry} value={industry}>{industry}</option>
+                      ))}
+                      <option value="Other">Other</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                  </div>
+                </div>
+                
+                {/* Custom Industry Input - Shows when "Other" is selected OR when user has custom industry */}
+                {(formData.industry === 'Other' || isCustomIndustry(formData.industry)) && (
+                  <div>
+                    <input
+                      type="text"
+                      value={customIndustry || (isCustomIndustry(formData.industry) ? formData.industry : '')}
+                      onChange={(e) => setCustomIndustry(e.target.value)}
+                      onBlur={() => {
+                        if (customIndustry.trim()) {
+                          handleInputChange('industry', customIndustry.trim());
+                        }
+                      }}
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      placeholder="Enter your industry"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Submit Button */}

@@ -27,7 +27,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   };
 
   const sidebarItems = [
-    { icon: Users, label: 'Following', path: '/dashboard/following', page: 'following', tourId: 'following' },
+    { icon: Users, label: 'RSS Feed', path: '/dashboard/rss-feed', page: 'rss-feed', tourId: 'rss-feed' },
     { icon: UserPlus, label: 'Followers', path: '/dashboard/followers', page: 'followers' },
     { icon: Mail, label: 'Leads', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' }
   ];
@@ -69,9 +69,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                 <Image src="https://real-leaders.com/wp-content/uploads/sites/5/2025/11/menu-logo.png" width={200} height={60} alt='Real Leaders Logo' />
               </button>
             </div>
-            <div className="lg:hidden">
-              <UserProfileDropdown />
-            </div>
+           
           </div>
         </div>
 

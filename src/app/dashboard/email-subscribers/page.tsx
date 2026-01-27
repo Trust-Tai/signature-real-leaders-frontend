@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search,  ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Link as LinkIcon, Loader2, Settings } from 'lucide-react';
+import { Search,  ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Loader2, Settings, Link } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
@@ -18,6 +18,7 @@ import {
   type NewsletterStats,
   type SubscriberFilters 
 } from '@/lib/newsletterApi';
+import { api } from '@/lib/api';
 import { toast } from '@/components/ui/toast';
 
 interface LocalSubscriber {
@@ -40,7 +41,7 @@ const EmailSubscribers = () => {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [addSubscriberModalOpen, setAddSubscriberModalOpen] = useState(false);
   const [editSubscriberModalOpen, setEditSubscriberModalOpen] = useState(false);
-  const [espModalOpen, setEspModalOpen] = useState(false);
+  const [webhookModalOpen, setWebhookModalOpen] = useState(false);
   const [editingSubscriber, setEditingSubscriber] = useState<LocalSubscriber | null>(null);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -55,12 +56,9 @@ const EmailSubscribers = () => {
     email: '',
     status: 'Active'
   });
-  const [espConnection, setEspConnection] = useState({
-    provider: '',
-    apiKey: '',
-    listId: '',
-    connected: false
-  });
+  const [webhookUrls, setWebhookUrls] = useState<string[]>([]);
+  const [newWebhookUrl, setNewWebhookUrl] = useState('');
+  const [webhookLoading, setWebhookLoading] = useState(false);
 
   // API State
   const [stats, setStats] = useState<NewsletterStats | null>(null);
@@ -383,14 +381,139 @@ const EmailSubscribers = () => {
     }
   };
 
-  const handleEspConnection = () => {
-    if (espConnection.provider && espConnection.apiKey && espConnection.listId) {
-      setEspConnection({...espConnection, connected: true});
-      setEspModalOpen(false);
-      // Here you would typically make an API call to connect to the ESP
-      console.log('Connecting to ESP:', espConnection);
+  // Fetch current webhook URLs
+  const fetchWebhookUrls = useCallback(async () => {
+    try {
+      setWebhookLoading(true);
+      // Get user data from localStorage or context
+      const userDataStr = localStorage.getItem('user_data');
+      let userData = user;
+      
+      if (!userData && userDataStr) {
+        try {
+          userData = JSON.parse(userDataStr);
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+      }
+      
+      if (userData?.webhook_url) {
+        setWebhookUrls(Array.isArray(userData.webhook_url) ? userData.webhook_url : [userData.webhook_url]);
+      } else {
+        setWebhookUrls([]);
+      }
+    } catch (error) {
+      console.error('Error fetching webhook URLs:', error);
+      setWebhookUrls([]);
+    } finally {
+      setWebhookLoading(false);
+    }
+  }, [user]);
+
+  // Add new webhook URL
+  const handleAddWebhookUrl = async () => {
+    if (!newWebhookUrl.trim()) {
+      toast.error('Please enter a valid webhook URL');
+      return;
+    }
+
+    try {
+      setWebhookLoading(true);
+      
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        toast.error('Authentication token not found. Please log in again.');
+        return;
+      }
+
+      // Update webhook URLs
+      const updatedUrls = [...webhookUrls, newWebhookUrl.trim()];
+      
+      // Call update profile API using the same method as profile page
+      const response = await api.updateProfile(token, {
+        webhookUrl: updatedUrls
+      });
+
+      if (response.success) {
+        setWebhookUrls(updatedUrls);
+        setNewWebhookUrl('');
+        toast.success(response.message || 'Webhook URL added successfully!');
+        
+        // Update localStorage
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            userData.webhook_url = updatedUrls;
+            localStorage.setItem('user_data', JSON.stringify(userData));
+          } catch (e) {
+            console.error('Error updating localStorage:', e);
+          }
+        }
+      } else {
+        toast.error(response.message || 'Failed to add webhook URL');
+      }
+    } catch (error) {
+      console.error('Error adding webhook URL:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add webhook URL';
+      toast.error(errorMessage);
+    } finally {
+      setWebhookLoading(false);
     }
   };
+
+  // Remove webhook URL
+  const handleRemoveWebhookUrl = async (indexToRemove: number) => {
+    try {
+      setWebhookLoading(true);
+      
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        toast.error('Authentication token not found. Please log in again.');
+        return;
+      }
+
+      // Update webhook URLs
+      const updatedUrls = webhookUrls.filter((_, index) => index !== indexToRemove);
+      
+      // Call update profile API using the same method as profile page
+      const response = await api.updateProfile(token, {
+        webhookUrl: updatedUrls
+      });
+
+      if (response.success) {
+        setWebhookUrls(updatedUrls);
+        toast.success(response.message || 'Webhook URL removed successfully!');
+        
+        // Update localStorage
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            userData.webhook_url = updatedUrls;
+            localStorage.setItem('user_data', JSON.stringify(userData));
+          } catch (e) {
+            console.error('Error updating localStorage:', e);
+          }
+        }
+      } else {
+        toast.error(response.message || 'Failed to remove webhook URL');
+      }
+    } catch (error) {
+      console.error('Error removing webhook URL:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to remove webhook URL';
+      toast.error(errorMessage);
+    } finally {
+      setWebhookLoading(false);
+    }
+  };
+
+  // Fetch webhook URLs when modal opens
+  useEffect(() => {
+    if (webhookModalOpen) {
+      fetchWebhookUrls();
+    }
+  }, [webhookModalOpen, fetchWebhookUrls]);
 
   // Remove access restriction - show data for all users
 
@@ -476,15 +599,11 @@ const EmailSubscribers = () => {
                 <span>Add New Newsletter Subscriber</span>
               </button>
               <button 
-                onClick={() => setEspModalOpen(true)}
-                className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2 ${
-                  espConnection.connected 
-                    ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200' 
-                    : 'bg-white text-[#CF3232] border border-[#CF3232] hover:bg-red-50'
-                }`}
+                onClick={() => setWebhookModalOpen(true)}
+                className="bg-white text-[#CF3232] border border-[#CF3232] px-4 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center space-x-2"
               >
-                <LinkIcon className="w-4 h-4" />
-                <span>{espConnection.connected ? 'ESP Connected' : 'Link ESP'}</span>
+                <Link className="w-4 h-4" />
+                <span>Webhook URLs</span>
               </button>
               <button 
                 onClick={handleExportSubscribers}
@@ -1071,11 +1190,11 @@ const EmailSubscribers = () => {
             </div>
           )}
 
-          {/* ESP Connection Modal */}
-          {espModalOpen && (
+          {/* Webhook URLs Modal */}
+          {webhookModalOpen && (
             <div 
               className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
-              onClick={() => setEspModalOpen(false)}
+              onClick={() => setWebhookModalOpen(false)}
             >
               <div 
                 className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
@@ -1085,10 +1204,10 @@ const EmailSubscribers = () => {
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
-                      Link Email Service Provider
+                      Manage Webhook URLs
                     </h2>
                     <button
-                      onClick={() => setEspModalOpen(false)}
+                      onClick={() => setWebhookModalOpen(false)}
                       className="text-gray-400 hover:text-gray-600 transition-colors"
                     >
                       <X className="w-6 h-6" />
@@ -1098,81 +1217,99 @@ const EmailSubscribers = () => {
 
                 {/* Modal Body */}
                 <div className="p-6 space-y-6">
-                  {/* ESP Provider */}
+                  {/* Add New Webhook URL */}
                   <div>
                     <label className="block text-sm font-medium text-[#101117] mb-3">
-                      Email Service Provider
+                      Add New Webhook URL
                     </label>
-                    <select
-                      value={espConnection.provider}
-                      onChange={(e) => setEspConnection({...espConnection, provider: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117]"
-                    >
-                      <option value="" className="text-[#101117]">Select ESP Provider</option>
-                      <option value="mailchimp" className="text-[#101117]">Mailchimp</option>
-                      <option value="constant-contact" className="text-[#101117]">Constant Contact</option>
-                      <option value="aweber" className="text-[#101117]">AWeber</option>
-                      <option value="convertkit" className="text-[#101117]">ConvertKit</option>
-                      <option value="activecampaign" className="text-[#101117]">ActiveCampaign</option>
-                      <option value="sendinblue" className="text-[#101117]">Sendinblue</option>
-                    </select>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        placeholder="https://example.com/webhook"
+                        value={newWebhookUrl}
+                        onChange={(e) => setNewWebhookUrl(e.target.value)}
+                        className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
+                      />
+                      <button
+                        onClick={handleAddWebhookUrl}
+                        disabled={webhookLoading || !newWebhookUrl.trim()}
+                        className="px-4 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                      >
+                        {webhookLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Plus className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
-                  {/* API Key */}
+                  {/* Current Webhook URLs */}
                   <div>
                     <label className="block text-sm font-medium text-[#101117] mb-3">
-                      API Key
+                      Current Webhook URLs ({webhookUrls.length})
                     </label>
-                    <input
-                      type="password"
-                      placeholder="Enter your API key..."
-                      value={espConnection.apiKey}
-                      onChange={(e) => setEspConnection({...espConnection, apiKey: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
-                    />
+                    
+                    {webhookLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-[#CF3232]" />
+                        <span className="ml-2 text-gray-600">Loading webhook URLs...</span>
+                      </div>
+                    ) : webhookUrls.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Link className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        <p>No webhook URLs configured</p>
+                        <p className="text-sm">Add your first webhook URL above</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 max-h-60 overflow-y-auto">
+                        {webhookUrls.map((url, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-[#101117] truncate" title={url}>
+                                {url}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Added {new Date().toLocaleDateString()}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleRemoveWebhookUrl(index)}
+                              disabled={webhookLoading}
+                              className="ml-3 p-1 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Remove webhook URL"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  {/* List ID */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#101117] mb-3">
-                      List ID
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter your list ID..."
-                      value={espConnection.listId}
-                      onChange={(e) => setEspConnection({...espConnection, listId: e.target.value})}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF3232] focus:border-transparent text-[#101117] placeholder-gray-500"
-                    />
-                  </div>
-
-                  {/* Connection Status */}
-                  {espConnection.connected && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                        <span className="text-green-800 text-sm font-medium">
-                          Successfully connected to {espConnection.provider}
-                        </span>
+                  {/* Info */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <Settings className="w-5 h-5 text-blue-500 mt-0.5" />
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-blue-800">About Webhook URLs</h3>
+                        <p className="text-sm text-blue-700 mt-1">
+                          Webhook URLs will receive notifications when subscribers are added, updated, or removed from your newsletter.
+                        </p>
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* Modal Footer */}
-                <div className="p-6 border-t border-gray-200 flex gap-3">
+                <div className="p-6 border-t border-gray-200">
                   <button
-                    onClick={() => setEspModalOpen(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    onClick={() => setWebhookModalOpen(false)}
+                    className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleEspConnection}
-                    disabled={!espConnection.provider || !espConnection.apiKey || !espConnection.listId}
-                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    {espConnection.connected ? 'Update Connection' : 'Connect ESP'}
+                    Close
                   </button>
                 </div>
               </div>

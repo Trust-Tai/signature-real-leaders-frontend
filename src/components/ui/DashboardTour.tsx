@@ -55,9 +55,9 @@ export const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete }) => {
         order: 1,
       },
       {
-        title: 'Following',
+        title: 'RSS Feed',
         content: 'See the RSS feeds and profiles you are following. Stay updated with content from your network.',
-        target: '[data-tour="following"]',
+        target: '[data-tour="rss-feed"]',
         order: 2,
       },
       {

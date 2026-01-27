@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/toast';
 import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2, Plus, Trash2, Lock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { UserProfileSidebar, UserProfileDropdown, useUser, ProfileReadyModal } from '@/components';
 import Image from 'next/image';
 import { OnboardingProvider } from '@/components/OnboardingContext';
@@ -18,6 +18,7 @@ import { countries } from '@/default/countries';
 
 const ProfilePage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, updateUser } = useUser();
   
   // Multi-Step State
@@ -26,17 +27,14 @@ const ProfilePage = () => {
 
   // Check URL for step parameter
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const stepParam = urlParams.get('step');
-      if (stepParam) {
-        const stepNumber = parseInt(stepParam, 10);
-        if (stepNumber >= 1 && stepNumber <= totalSteps) {
-          setCurrentStep(stepNumber);
-        }
+    const stepParam = searchParams.get('step');
+    if (stepParam) {
+      const stepNumber = parseInt(stepParam, 10);
+      if (stepNumber >= 1 && stepNumber <= totalSteps) {
+        setCurrentStep(stepNumber);
       }
     }
-  }, []);
+  }, [searchParams]);
   
   // Existing state
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -134,6 +132,38 @@ const ProfilePage = () => {
   // Webhook URLs state
   const [webhookUrls, setWebhookUrls] = useState<string[]>([]);
   const [newWebhookUrl, setNewWebhookUrl] = useState('');
+
+  // Custom industry state
+  const [customIndustry, setCustomIndustry] = useState('');
+
+  // Industry options list
+  const industryOptions = [
+    "Construction",
+    "Energy & Facilities",
+    "Consumer Packed Goods (CPG)",
+    "Education/Training",
+    "Fashion/Apparel",
+    "Financial services",
+    "Food & Beverage (Non-CPG)",
+    "Healthcare",
+    "Home & Lifestyle",
+    "Insurance",
+    "Manufacturing/Industrial",
+    "Marketing & Media",
+    "Membership/Community",
+    "Personal Care & Wellness",
+    "Professional/Advisory and Consulting Services",
+    "Real Estate",
+    "Social Enterprise & Education",
+    "Staffing/Recruiting",
+    "Travel and Hospitality",
+    "Technology"
+  ];
+
+  // Check if current industry is in predefined options
+  const isCustomIndustry = (industry: string) => {
+    return industry && !industryOptions.includes(industry) && industry !== "Other" && industry !== "";
+  };
 
 
 
@@ -464,6 +494,54 @@ const ProfilePage = () => {
         primary_call_to_action: user.primary_call_to_action || '',
         content_preference_industry: user.content_preference_industry || [],
       });
+      
+      // Handle custom industries that don't match predefined options
+      if (user.content_preference_industry && user.content_preference_industry.length > 0) {
+        const predefinedIndustries = [
+          "Construction",
+          "Energy & Facilities", 
+          "Consumer Packed Goods (CPG)",
+          "Education/Training",
+          "Fashion/Apparel",
+          "Financial services",
+          "Food & Beverage (Non-CPG)",
+          "Healthcare",
+          "Home & Lifestyle",
+          "Insurance",
+          "Manufacturing/Industrial",
+          "Marketing & Media",
+          "Membership/Community",
+          "Personal Care & Wellness",
+          "Professional/Advisory and Consulting Services",
+          "Real Estate",
+          "Social Enterprise & Education",
+          "Staffing/Recruiting",
+          "Travel and Hospitality",
+          "Technology"
+        ];
+        
+        const customIndustriesFromAPI = user.content_preference_industry.filter(
+          industry => !predefinedIndustries.includes(industry) && industry !== "Other"
+        );
+        
+        if (customIndustriesFromAPI.length > 0) {
+          // Set custom industries state
+          setCustomIndustries(customIndustriesFromAPI);
+          
+          // Add "Other" to the content_preference_industry if there are custom industries
+          const updatedIndustries = [...user.content_preference_industry];
+          if (!updatedIndustries.includes("Other")) {
+            updatedIndustries.push("Other");
+          }
+          
+          // Update the form data to include "Other"
+          setInformationData(prev => prev ? ({
+            ...prev,
+            content_preference_industry: updatedIndustries
+          }) : prev);
+        }
+      }
+      
       setMetricsData(user.success_metrics || {
         numberOfBookings: '',
         emailListSize: '',
@@ -890,7 +968,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                 <span className={currentStep === 2 ? 'text-[#CF3232] font-semibold' : ''}>Links</span>
                 <span className={currentStep === 3 ? 'text-[#CF3232] font-semibold' : ''}>Signature</span>
                 <span className={currentStep === 4 ? 'text-[#CF3232] font-semibold' : ''}>Template</span>
-                <span className={currentStep === 5 ? 'text-[#CF3232] font-semibold' : ''}>Newsletter</span>
+                <span className={currentStep === 5 ? 'text-[#CF3232] font-semibold' : ''}>Webhook URLs</span>
                 <span className={currentStep === 6 ? 'text-[#CF3232] font-semibold' : ''}>Metrics</span>
               </div>
             </div>
@@ -1156,22 +1234,47 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                       <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Industry</label>
                       <div className="relative firstVerifyScreen group">
                         <select
-                          value={informationData?.industry || ''}
-                          onChange={(e) => setInformationData(prev => prev ? { ...prev, industry: e.target.value } : null)}
+                          value={isCustomIndustry(informationData?.industry || '') ? 'Other' : (informationData?.industry || '')}
+                          onChange={(e) => {
+                            if (e.target.value === 'Other') {
+                              setInformationData(prev => prev ? { ...prev, industry: 'Other' } : null);
+                              if (!customIndustry && isCustomIndustry(informationData?.industry || '')) {
+                                setCustomIndustry(informationData?.industry || '');
+                              }
+                            } else {
+                              setInformationData(prev => prev ? { ...prev, industry: e.target.value } : null);
+                              setCustomIndustry('');
+                            }
+                          }}
                           className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
                         >
                           <option value="">Select industry</option>
-                          <option value="Technology">Technology</option>
-                          <option value="Healthcare">Healthcare</option>
-                          <option value="Finance">Finance</option>
-                          <option value="Education">Education</option>
-                          <option value="Retail">Retail</option>
-                          <option value="Manufacturing">Manufacturing</option>
-                          <option value="Consulting">Consulting</option>
+                          {industryOptions.map((industry) => (
+                            <option key={industry} value={industry}>{industry}</option>
+                          ))}
                           <option value="Other">Other</option>
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
                       </div>
+                      
+                      {/* Custom Industry Input - Shows when "Other" is selected OR when user has custom industry */}
+                      {(informationData?.industry === 'Other' || isCustomIndustry(informationData?.industry || '')) && (
+                        <div className="mt-3 firstVerifyScreen group">
+                          <input
+                            type="text"
+                            value={customIndustry || (isCustomIndustry(informationData?.industry || '') ? informationData?.industry : '')}
+                            onChange={(e) => setCustomIndustry(e.target.value)}
+                            onBlur={() => {
+                              if (customIndustry.trim()) {
+                                setInformationData(prev => prev ? { ...prev, industry: customIndustry.trim() } : null);
+                              }
+                            }}
+                            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                            style={{ color: '#949494' }}
+                            placeholder="Enter your industry"
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -1385,75 +1488,6 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                     </div>
                   </div>
 
-                  {/* Webhook URLs Section */}
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">Webhook URLs</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Add webhook URLs to receive subscription notifications when users subscribe to your profile. 
-                    When someone subscribes, we&apos;ll send the subscription data to all your webhook URLs.
-                  </p>
-
-                  {/* Existing Webhook URLs */}
-                  {webhookUrls.length > 0 && (
-                    <div className="space-y-3 mb-4">
-                      {webhookUrls.map((url, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                         
-                          <div className="flex-1">
-                            <input
-                              type="url"
-                              value={url}
-                              onChange={(e) => updateWebhookUrl(index, e.target.value)}
-                              className="w-full px-3 py-2 bg-white rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300"
-                              style={{ color: '#333333' }}
-                              placeholder="https://your-webhook-endpoint.com/webhook"
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeWebhookUrl(index)}
-                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-300"
-                            title="Remove webhook URL"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Add New Webhook URL */}
-                  <div className="space-y-3">
-                    <div className="firstVerifyScreen group">
-                      <input
-                        type="url"
-                        value={newWebhookUrl}
-                        onChange={(e) => setNewWebhookUrl(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addWebhookUrl();
-                          }
-                        }}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Enter webhook URL (e.g., https://your-site.com/webhook)"
-                      />
-                    </div>
-                    
-                    <button
-                      type="button"
-                      onClick={addWebhookUrl}
-                      disabled={!newWebhookUrl.trim() || webhookUrls.includes(newWebhookUrl.trim())}
-                      className="w-full px-4 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Add More URL</span>
-                    </button>
-                    
-                
-                  </div>
-
-                
                 </div>
               </div>
 
@@ -1537,44 +1571,46 @@ const handleArrayInputChange = (field: string, value: string[]) => {
 <div className="firstVerifyScreen group" style={{ height: "auto", flexDirection: "column" }}>
   {/* Content Preference Industry - Multi-select with improved UI */}
   <div className="space-y-4">
-    <div className='flex' style={{alignItems:"center",marginTop:"20px",flexDirection:"column"}}>
-    <label className="block text-lg font-semibold text-gray-800 mb-4">
-      Content Preference Industry
-    </label>
-    <p className="text-sm text-gray-600 mb-4">
-      Select all industries that interest you (select multiple)
-    </p>
-</div>
-    {/* Grid of industry options - larger and more spacious */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div className='flex flex-col items-center text-center mt-4 sm:mt-5 md:mt-6'>
+      <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-800 mb-2 sm:mb-3 md:mb-4">
+        Content Preference Industry
+      </label>
+      <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-3 sm:mb-4 px-2">
+        Select all industries that interest you (select multiple)
+      </p>
+    </div>
+    {/* Grid of industry options - responsive and compact */}
+    <div className="grid grid-cols-1 sm:grid-cols-2  gap-2 sm:gap-3 md:gap-4 mb-6">
       {[
-        "Technology",
+        "Construction",
+        "Energy & Facilities",
+        "Consumer Packed Goods (CPG)",
+        "Education/Training",
+        "Fashion/Apparel",
+        "Financial services",
+        "Food & Beverage (Non-CPG)",
         "Healthcare",
-        "Finance",
-        "Education",
-        "Retail",
-        "Manufacturing",
-        "Consulting",
-        "Marketing",
+        "Home & Lifestyle",
+        "Insurance",
+        "Manufacturing/Industrial",
+        "Marketing & Media",
+        "Membership/Community",
+        "Personal Care & Wellness",
+        "Professional/Advisory and Consulting Services",
         "Real Estate",
-        "Food & Beverage",
-        "Travel",
-        "Fashion",
-        "Media",
+        "Social Enterprise & Education",
+        "Staffing/Recruiting",
+        "Travel and Hospitality",
+        "Technology",
         "Other",
       ].map((industry) => (
         <label
           key={industry}
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer p-2 sm:p-3 md:p-4 rounded-lg border-2 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            cursor: "pointer",
-            padding: "16px",
-            borderRadius: "8px",
-            border: informationData?.content_preference_industry?.includes(industry)
-              ? "2px solid #CF3232"
-              : "2px solid #CF323240",
+            borderColor: informationData?.content_preference_industry?.includes(industry)
+              ? "#CF3232"
+              : "#CF323240",
             backgroundColor: informationData?.content_preference_industry?.includes(industry)
               ? "#FEF2F2"
               : "#ffffff",
@@ -1584,7 +1620,6 @@ const handleArrayInputChange = (field: string, value: string[]) => {
             transform: informationData?.content_preference_industry?.includes(industry)
               ? "scale(1.02)"
               : "scale(1)",
-            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
           onMouseEnter={(e) => {
             if (!informationData?.content_preference_industry?.includes(industry)) {
@@ -1603,7 +1638,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
             }
           }}
         >
-          <div className="relative flex items-center justify-center">
+          <div className="flex items-center justify-center flex-shrink-0">
             <input
               type="checkbox"
               checked={informationData?.content_preference_industry?.includes(industry) || false}
@@ -1615,13 +1650,12 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                   handleArrayInputChange("content_preference_industry", newValue);
                 }
               }}
-              className="w-5 h-5 rounded border-2 border-gray-300 text-[#CF3232] focus:ring-[#CF3232] focus:ring-2 cursor-pointer"
+              className="w-4 h-4 sm:w-5 sm:h-5 rounded border-2 border-gray-300 text-[#CF3232] focus:ring-[#CF3232] focus:ring-2 cursor-pointer flex-shrink-0"
             />
           </div>
           <span
+            className="text-xs sm:text-sm md:text-base font-medium leading-tight"
             style={{
-              fontSize: "16px",
-              fontWeight: "500",
               color: informationData?.content_preference_industry?.includes(industry)
                 ? "#CF3232"
                 : "#333333",
@@ -1635,9 +1669,11 @@ const handleArrayInputChange = (field: string, value: string[]) => {
     </div>
 
     {/* Display selected custom industries */}
-    {customIndustries.length > 0 && (
+    {(customIndustries.length > 0 || (informationData?.content_preference_industry?.some(industry => 
+      !["Construction", "Energy & Facilities", "Consumer Packed Goods (CPG)", "Education/Training", "Fashion/Apparel", "Financial services", "Food & Beverage (Non-CPG)", "Healthcare", "Home & Lifestyle", "Insurance", "Manufacturing/Industrial", "Marketing & Media", "Membership/Community", "Personal Care & Wellness", "Professional/Advisory and Consulting Services", "Real Estate", "Social Enterprise & Education", "Staffing/Recruiting", "Travel and Hospitality", "Technology", "Other"].includes(industry)
+    ))) && (
       <div
-        className="mb-6"
+        className="mb-6 p-[10px]"
         style={{
           animation: "fadeInUp 0.4s ease-out",
         }}
@@ -1646,9 +1682,10 @@ const handleArrayInputChange = (field: string, value: string[]) => {
           Your Custom Industries:
         </label>
         <div className="flex flex-wrap gap-3">
+          {/* Show custom industries from state */}
           {customIndustries.map((industry, index) => (
             <span
-              key={index}
+              key={`custom-${index}`}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -1702,6 +1739,73 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               </button>
             </span>
           ))}
+          
+          {/* Show custom industries from API data that aren't in customIndustries state yet */}
+          {informationData?.content_preference_industry?.filter(industry => 
+            !["Construction", "Energy & Facilities", "Consumer Packed Goods (CPG)", "Education/Training", "Fashion/Apparel", "Financial services", "Food & Beverage (Non-CPG)", "Healthcare", "Home & Lifestyle", "Insurance", "Manufacturing/Industrial", "Marketing & Media", "Membership/Community", "Personal Care & Wellness", "Professional/Advisory and Consulting Services", "Real Estate", "Social Enterprise & Education", "Staffing/Recruiting", "Travel and Hospitality", "Technology", "Other"].includes(industry) &&
+            !customIndustries.includes(industry)
+          ).map((industry, index) => (
+            <span
+              key={`api-${index}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "500",
+                backgroundColor: "#FEF2F2",
+                color: "#CF3232",
+                border: "2px solid #CF3232",
+                boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                transition: "all 0.3s ease",
+                animation: `fadeInScale 0.3s ease-out ${(customIndustries.length + index) * 0.1}s both`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow =
+                  "0 4px 6px -1px rgba(207, 50, 50, 0.2), 0 2px 4px -1px rgba(207, 50, 50, 0.1)";
+                e.currentTarget.style.transform = "translateY(-2px) scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
+                e.currentTarget.style.transform = "translateY(0) scale(1)";
+              }}
+            >
+              {industry}
+              <button
+                type="button"
+                onClick={() => {
+                  // Remove from content_preference_industry array
+                  if (informationData?.content_preference_industry) {
+                    const updatedIndustries = informationData.content_preference_industry.filter(ind => ind !== industry);
+                    handleArrayInputChange('content_preference_industry', updatedIndustries);
+                  }
+                }}
+                style={{
+                  marginLeft: "8px",
+                  color: "#CF3232",
+                  fontWeight: "bold",
+                  fontSize: "18px",
+                  border: "none",
+                  background: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  lineHeight: "1",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#b82d2d";
+                  e.currentTarget.style.transform = "rotate(90deg) scale(1.2)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#CF3232";
+                  e.currentTarget.style.transform = "rotate(0deg) scale(1)";
+                }}
+                aria-label={`Remove ${industry}`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
         </div>
       </div>
     )}
@@ -1709,22 +1813,18 @@ const handleArrayInputChange = (field: string, value: string[]) => {
     {/* Conditional custom industry input - only shows when "Other" is selected */}
     {informationData?.content_preference_industry?.includes("Other") && (
       <div
+        className="p-3 m-[10px] sm:p-4 md:p-6 mb-4 sm:mb-5 md:mb-6 rounded-lg border-2 border-[#CF323240] bg-[#FEF2F2]"
         style={{
-          backgroundColor: "#FEF2F2",
-          padding: "24px",
-          marginBottom:"20px",
-          borderRadius: "8px",
-          border: "2px solid #CF323240",
           animation: "slideInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
-        <label className="block text-base font-semibold text-gray-800 mb-3">
+        <label className="block text-sm sm:text-base md:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
           Add Your Custom Industry
         </label>
-        <p className="text-sm text-[#949494] mb-4">
+        <p className="text-xs sm:text-sm text-[#949494] mb-3 sm:mb-4">
           Enter the name of your industry and press Tab, Enter, or click away to add
         </p>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <input
             type="text"
             value={customContentPreference}
@@ -1744,22 +1844,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                 addCustomIndustry();
               }
             }}
-            style={{
-              flex: 1,
-              padding: "12px 16px",
-              backgroundColor: "#ffffff",
-              borderRadius: "8px",
-              border: "2px solid #CF323240",
-              outline: "none",
-              color: "#333333",
-              transition: "all 0.3s ease",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#CF3232";
-              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(207, 50, 50, 0.1)";
-              e.currentTarget.style.transform = "scale(1.01)";
-            }}
-           
+            className="flex-1 p-2 sm:p-3 md:p-4 bg-white rounded-lg border-2 border-[#CF323240] outline-none text-gray-800 transition-all duration-300 focus:border-[#CF3232] focus:shadow-lg focus:scale-[1.01] text-sm sm:text-base"
             placeholder="e.g., Entertainment, Sports, etc."
           />
           <button
@@ -1769,53 +1854,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               !customContentPreference.trim() ||
               informationData?.content_preference_industry?.includes(customContentPreference.trim())
             }
-            style={{
-              padding: "12px 24px",
-              backgroundColor:
-                !customContentPreference.trim() ||
-                informationData?.content_preference_industry?.includes(customContentPreference.trim())
-                  ? "#d1d5db"
-                  : "#CF3232",
-              color: "#ffffff",
-              fontWeight: "600",
-              borderRadius: "8px",
-              border: "none",
-              cursor:
-                !customContentPreference.trim() ||
-                informationData?.content_preference_industry?.includes(customContentPreference.trim())
-                  ? "not-allowed"
-                  : "pointer",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              boxShadow:
-                !customContentPreference.trim() ||
-                informationData?.content_preference_industry?.includes(customContentPreference.trim())
-                  ? "none"
-                  : "0 4px 6px -1px rgba(207, 50, 50, 0.3)",
-            }}
-            onMouseEnter={(e) => {
-              if (!e.currentTarget.disabled) {
-                e.currentTarget.style.backgroundColor = "#b82d2d";
-                e.currentTarget.style.transform = "translateY(-2px) scale(1.05)";
-                e.currentTarget.style.boxShadow = "0 6px 8px -1px rgba(207, 50, 50, 0.4)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!e.currentTarget.disabled) {
-                e.currentTarget.style.backgroundColor = "#CF3232";
-                e.currentTarget.style.transform = "translateY(0) scale(1)";
-                e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(207, 50, 50, 0.3)";
-              }
-            }}
-            onMouseDown={(e) => {
-              if (!e.currentTarget.disabled) {
-                e.currentTarget.style.transform = "translateY(0) scale(0.95)";
-              }
-            }}
-            onMouseUp={(e) => {
-              if (!e.currentTarget.disabled) {
-                e.currentTarget.style.transform = "translateY(-2px) scale(1.05)";
-              }
-            }}
+            className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 bg-[#CF3232] disabled:bg-gray-300 text-white font-semibold rounded-lg border-none cursor-pointer disabled:cursor-not-allowed transition-all duration-300 hover:bg-[#b82d2d] hover:-translate-y-1 hover:shadow-lg active:scale-95 text-sm sm:text-base whitespace-nowrap"
           >
             Add
           </button>
@@ -2291,212 +2330,74 @@ const handleArrayInputChange = (field: string, value: string[]) => {
 
               {/* Step 5: Newsletter Integration */}
               {currentStep === 5 && (
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0] relative overflow-hidden">
-                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Newsletter Service</h2>
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Webhook URLs</h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Add webhook URLs to receive subscription notifications when users subscribe to your profile. 
+                    When someone subscribes, we&apos;ll send the subscription data to all your webhook URLs.
+                  </p>
 
-                  {/* Coming Soon Overlay - Only for non-allowed users */}
-                  {user?.email !== 'tayeshobajo@gmail.com' && (
-                    <div className="absolute inset-0 bg-white/98 backdrop-blur-md rounded-xl flex items-center justify-center z-50 pointer-events-auto">
-                      <div className="text-center space-y-3 p-6">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 mb-2">
-                          <Lock className="w-8 h-8 text-yellow-600" />
-                        </div>
-                        <h3 className="text-2xl font-bold text-gray-800">Coming Soon</h3>
-                        <p className="text-gray-600 max-w-md">
-                          Newsletter integration feature is currently in development and will be available soon.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Current Status */}
-                  {user?.newsletter_service && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-green-800">Newsletter Service Connected</h4>
-                          <p className="text-sm text-green-600 capitalize">
-                            Currently using: {user.newsletter_service}
-                          </p>
-                        </div>
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      </div>
-                    </div>
-                  )}
-
-                  {!user?.newsletter_service && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-yellow-800">No Newsletter Service Connected</h4>
-                          <p className="text-sm text-yellow-600">
-                            Connect a newsletter service to manage your subscribers
-                          </p>
-                        </div>
-                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Newsletter Form */}
-                  <div className="space-y-6">
-                    {/* Step 1: Select Provider */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                      {/* Mailchimp Card */}
-                      <div
-                        onClick={() => {
-                          if (availableServices && !availableServices.mailchimp) return;
-                          setNewsletterProvider("Mailchimp");
-                          setVerificationStatus("idle");
-                        }}
-                        className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl relative ${newsletterProvider === "Mailchimp"
-                            ? "border-[#CF3232] shadow-2xl -translate-y-2 bg-pink-50 scale-105"
-                            : "border-gray-200 shadow-lg hover:border-[#CF3232] hover:bg-pink-50 hover:scale-105"
-                          }`}
-                      >
-                        {/* Info Icon - Top Right */}
-                        <div className="absolute top-4 right-4 group">
-                          <HelpCircle className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" />
-                          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                            How to find your Mailchimp API Key
-                            <div className="absolute top-full right-4 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                  {/* Existing Webhook URLs */}
+                  {webhookUrls.length > 0 && (
+                    <div className="space-y-3 mb-4">
+                      {webhookUrls.map((url, index) => (
+                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex-1">
+                            <input
+                              type="url"
+                              value={url}
+                              onChange={(e) => updateWebhookUrl(index, e.target.value)}
+                              className="w-full px-3 py-2 bg-white rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300"
+                              style={{ color: '#333333' }}
+                              placeholder="https://your-webhook-endpoint.com/webhook"
+                            />
                           </div>
-                          <a
-                            href="https://mailchimp.com/developer/marketing/guides/quick-start/#generate-your-api-key"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="absolute inset-0 z-20"
-                            onClick={(e) => e.stopPropagation()}
-                          ></a>
-                        </div>
-
-                        <Image alt="" src={images.mailchimpIcon} width={48} height={48} />
-                        <h3 className="font-outfit text-xl font-bold text-[#333333]">Mailchimp {servicesLoading ? '(...)' : ''}</h3>
-                        <p className="text-sm text-gray-600 text-center">
-                          Connect via API Key
-                        </p>
-                        {availableServices && !availableServices.mailchimp && (
-                          <p className="text-xs text-gray-500">Not available</p>
-                        )}
-                      </div>
-
-                      {/* HubSpot Card */}
-                      <div
-                        onClick={() => {
-                          if (availableServices && !availableServices.hubspot) return;
-                          setNewsletterProvider("HubSpot");
-                          setVerificationStatus("idle");
-                        }}
-                        className={`cursor-pointer border rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl relative ${newsletterProvider === "HubSpot"
-                            ? "border-[#CF3232] shadow-2xl -translate-y-2 bg-blue-50 scale-105"
-                            : "border-gray-200 shadow-lg hover:border-[#CF3232] hover:bg-blue-50 hover:scale-105"
-                          }`}
-                      >
-                        {/* Info Icon - Top Right */}
-                        <div className="absolute top-4 right-4 group">
-                          <HelpCircle className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" />
-                          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                            How to find your HubSpot credentials
-                            <div className="absolute top-full right-4 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                          </div>
-                          <a
-                            href="https://developers.hubspot.com/docs/api/private-apps"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="absolute inset-0 z-20"
-                            onClick={(e) => e.stopPropagation()}
-                          ></a>
-                        </div>
-
-                        <Image src={images.hubspotIcon} alt="" width={48} height={48} />
-                        <h3 className="font-outfit text-xl font-bold text-[#333333]">HubSpot {servicesLoading ? '(...)' : ''}</h3>
-                        <p className="text-sm text-gray-600 text-center">
-                          Connect via Client ID and Client Secret
-                        </p>
-                        {availableServices && !availableServices.hubspot && (
-                          <p className="text-xs text-gray-500">Not available</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Step 2: Form (visible only after provider selection) */}
-                    {newsletterProvider && (
-                      <div className="space-y-5">
-                        {newsletterProvider === "Mailchimp" && (
-                          <div className="firstVerifyScreen group">
-                            <div className="relative w-full">
-                              <input
-                                type={showNewsletterApiKey ? "text" : "password"}
-                                value={newsletterApiKey}
-                                onChange={(e) => setNewsletterApiKey(e.target.value)}
-                                className="w-full px-4 py-3 pr-12 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                                style={{ color: "#949494" }}
-                                placeholder="Mailchimp API Key"
-                                required
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setShowNewsletterApiKey(!showNewsletterApiKey)}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                              >
-                                {showNewsletterApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {newsletterProvider === "HubSpot" && (
-                          <>
-                            <div className="firstVerifyScreen group">
-                              <input
-                                type="text"
-                                value={newsletterClientId}
-                                onChange={(e) => setNewsletterClientId(e.target.value)}
-                                className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                                style={{ color: "#949494" }}
-                                placeholder="HubSpot Client ID"
-                                required
-                              />
-                            </div>
-                            <div className="firstVerifyScreen group">
-                              <div className="relative w-full">
-                                <input
-                                  type={showNewsletterClientSecret ? "text" : "password"}
-                                  value={newsletterClientSecret}
-                                  onChange={(e) => setNewsletterClientSecret(e.target.value)}
-                                  className="w-full px-4 py-3 pr-12 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                                  style={{ color: "#949494" }}
-                                  placeholder="HubSpot Client Secret"
-                                  required
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setShowNewsletterClientSecret(!showNewsletterClientSecret)}
-                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                >
-                                  {showNewsletterClientSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
-                              </div>
-                            </div>
-                          </>
-                        )}
-
-                        {/* Verify Button */}
-                        <div className="flex justify-center">
                           <button
                             type="button"
-                            onClick={verifyNewsletterCredentials}
-                            disabled={verificationStatus === "verifying"}
-                            className="custom-btn !px-6 !py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300"
+                            onClick={() => removeWebhookUrl(index)}
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-300"
+                            title="Remove webhook URL"
                           >
-                            {verificationStatus === "verifying" && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                            {verificationStatus === "verifying" ? "Verifying..." : "Verify Credentials"}
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
+                      ))}
+                    </div>
+                  )}
 
-                      </div>
-                    )}
+                  {/* Add New Webhook URL */}
+                  <div className="space-y-3">
+                    <div className="firstVerifyScreen group">
+                      <input
+                        type="url"
+                        value={newWebhookUrl}
+                        onChange={(e) => setNewWebhookUrl(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addWebhookUrl();
+                          }
+                        }}
+                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                        style={{ color: '#949494' }}
+                        placeholder="Enter webhook URL (e.g., https://your-site.com/webhook)"
+                      />
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={addWebhookUrl}
+                      disabled={!newWebhookUrl.trim() || webhookUrls.includes(newWebhookUrl.trim())}
+                      className="w-full px-4 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add More URL</span>
+                    </button>
+                    
+                  
                   </div>
+
+                
                 </div>
               )}
 

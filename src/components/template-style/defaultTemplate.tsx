@@ -88,12 +88,12 @@ export default function DefaultTemplate({
           animation: pulse 0.2s ease-in-out;
         }
       `}</style>
-      <div className="min-h-screen text-white relative overflow-x-hidden overflow-y-auto">
+      <div className="text-white relative overflow-x-hidden overflow-y-auto">
       <div className="absolute inset-0">
         <div className="w-full h-full bg-cover bg-center bg-no-repeat">
-          <Image src={images.profileBgImage} alt='' className='w-full' style={{ height: "1440px" }} />
+          <Image src={images.profileBgImage} alt='' className='w-full h-full object-cover' />
         </div>
-        <div className="absolute inset-0 bg-black/92 h-[1440px]"></div>
+        <div className="absolute inset-0 bg-black/92"></div>
       </div>
 
       {/* Main Content Container */}
@@ -103,7 +103,6 @@ export default function DefaultTemplate({
           style={{
             width: '504px',
             maxWidth: '90vw',
-            minHeight: '1250px',
             marginTop: '25px',
             opacity: 1
           }}

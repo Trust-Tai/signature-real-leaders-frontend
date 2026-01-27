@@ -72,7 +72,7 @@ const FollowingPage = () => {
       <UserProfileSidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        currentPage="following"
+        currentPage="rss-feed"
       />
 
       <div className="flex-1 flex flex-col w-full lg:w-auto h-full">
@@ -88,7 +88,7 @@ const FollowingPage = () => {
               </button>
               
               <h1 className="text-[#101117] text-lg sm:text-xl lg:text-2xl font-bold">
-                Following
+              RSS FEED
               </h1>
             </div>
             

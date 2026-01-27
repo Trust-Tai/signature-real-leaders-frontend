@@ -73,7 +73,7 @@ export default function BlueTemplate({
         }
       `}</style>
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md pb-[50px]">
         {/* Profile Card */}
         <div className="text-center mb-8">
           {/* Profile Image */}

@@ -60,6 +60,36 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [customIndustry, setCustomIndustry] = useState('');
+
+  // Industry options list
+  const industryOptions = [
+    "Construction",
+    "Energy & Facilities",
+    "Consumer Packed Goods (CPG)",
+    "Education/Training",
+    "Fashion/Apparel",
+    "Financial services",
+    "Food & Beverage (Non-CPG)",
+    "Healthcare",
+    "Home & Lifestyle",
+    "Insurance",
+    "Manufacturing/Industrial",
+    "Marketing & Media",
+    "Membership/Community",
+    "Personal Care & Wellness",
+    "Professional/Advisory and Consulting Services",
+    "Real Estate",
+    "Social Enterprise & Education",
+    "Staffing/Recruiting",
+    "Travel and Hospitality",
+    "Technology"
+  ];
+
+  // Check if current industry is in predefined options
+  const isCustomIndustry = (industry: string) => {
+    return industry && !industryOptions.includes(industry) && industry !== "Other" && industry !== "";
+  };
   
   // Track the original profile picture URL from API (for social login users)
   const [originalProfilePictureUrl, setOriginalProfilePictureUrl] = useState<string>('');
@@ -329,24 +359,50 @@ const InformationFormSection: React.FC<InformationFormSectionProps> = ({
         
         {/* Row 3: Industry & Number of Employees */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
-          <div className="relative firstVerifyScreen group">
-            <select
-              value={formData.industry}
-              onChange={(e) => handleInputChange('industry', e.target.value)}
-              className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-            >
-              <option value="">Industry</option>
-              <option value="Technology">Technology</option>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Finance">Finance</option>
-              <option value="Education">Education</option>
-              <option value="Retail">Retail</option>
-              <option value="Manufacturing">Manufacturing</option>
-              <option value="Consulting">Consulting</option>
-              <option value="Media">Media</option>
-              <option value="Other">Other</option>
-            </select>
-            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+          <div className="space-y-3">
+            <div className="relative firstVerifyScreen group">
+              <select
+                value={isCustomIndustry(formData.industry) ? 'Other' : formData.industry}
+                onChange={(e) => {
+                  if (e.target.value === 'Other') {
+                    handleInputChange('industry', 'Other');
+                    if (!customIndustry && isCustomIndustry(formData.industry)) {
+                      setCustomIndustry(formData.industry);
+                    }
+                  } else {
+                    handleInputChange('industry', e.target.value);
+                    setCustomIndustry('');
+                  }
+                }}
+                className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 appearance-none firstVerifyScreenInput pr-10 select-custom-color transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+              >
+                <option value="">Industry</option>
+                {industryOptions.map((industry) => (
+                  <option key={industry} value={industry}>{industry}</option>
+                ))}
+                <option value="Other">Other</option>
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5 transition-transform duration-300 group-hover:rotate-180" />
+            </div>
+            
+            {/* Custom Industry Input - Shows when "Other" is selected OR when user has custom industry */}
+            {(formData.industry === 'Other' || isCustomIndustry(formData.industry)) && (
+              <div className="firstVerifyScreen group">
+                <input
+                  type="text"
+                  value={customIndustry || (isCustomIndustry(formData.industry) ? formData.industry : '')}
+                  onChange={(e) => setCustomIndustry(e.target.value)}
+                  onBlur={() => {
+                    if (customIndustry.trim()) {
+                      handleInputChange('industry', customIndustry.trim());
+                    }
+                  }}
+                  className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                  style={{ color: '#949494' }}
+                  placeholder="Enter your industry"
+                />
+              </div>
+            )}
           </div>
           
           <div className="relative firstVerifyScreen group">
