@@ -6,6 +6,43 @@ import { UserProfileSidebar, useUser } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 
+// Utility function to detect if text contains HTML tags
+const containsHTML = (text: string): boolean => {
+  const htmlRegex = /<[^>]*>/;
+  return htmlRegex.test(text);
+};
+
+// Utility function to strip HTML tags and get plain text
+const stripHTML = (html: string): string => {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+};
+
+// Component to render content based on whether it contains HTML
+const ContentRenderer: React.FC<{ content: string; className?: string }> = ({ content, className = '' }) => {
+  if (!content) return null;
+  
+  const hasHTML = containsHTML(content);
+  
+  if (hasHTML) {
+    // If content has HTML, render it safely with dangerouslySetInnerHTML
+    return (
+      <div 
+        className={className}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    );
+  } else {
+    // If no HTML, render as plain text
+    return (
+      <p className={className}>
+        {content}
+      </p>
+    );
+  }
+};
+
 const FollowingPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,11 +73,22 @@ const FollowingPage = () => {
     if (!searchQuery.trim()) return rssFeedData.items;
     
     const query = searchQuery.toLowerCase();
-    return rssFeedData.items.filter(item =>
-      item.title?.toLowerCase().includes(query) ||
-      item.description?.toLowerCase().includes(query) ||
-      item.content?.toLowerCase().includes(query)
-    );
+    return rssFeedData.items.filter(item => {
+      // Search in title
+      const titleMatch = item.title?.toLowerCase().includes(query);
+      
+      // Search in description (strip HTML for search)
+      const descriptionText = item.description ? 
+        (containsHTML(item.description) ? stripHTML(item.description) : item.description) : '';
+      const descriptionMatch = descriptionText.toLowerCase().includes(query);
+      
+      // Search in content (strip HTML for search)
+      const contentText = item.content ? 
+        (containsHTML(item.content) ? stripHTML(item.content) : item.content) : '';
+      const contentMatch = contentText.toLowerCase().includes(query);
+      
+      return titleMatch || descriptionMatch || contentMatch;
+    });
   }, [rssFeedData?.items, searchQuery]);
 
   // Calculate stats from RSS feed
@@ -238,9 +286,10 @@ const FollowingPage = () => {
                         <h2 className="text-2xl font-bold text-[#101117]">{rssFeedData.feed_title}</h2>
                       </div>
                       {rssFeedData.feed_description && (
-                        <p className="text-sm text-gray-500 mt-2">
-                          {rssFeedData.feed_description}
-                        </p>
+                        <ContentRenderer 
+                          content={rssFeedData.feed_description}
+                          className="text-sm text-gray-500 mt-2"
+                        />
                       )}
                     </div>
                     {rssFeedData.feed_url && (
@@ -299,9 +348,12 @@ const FollowingPage = () => {
                             </a>
                           </h4>
                           {(item.description || item.content) && (
-                            <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">
-                              {item.content || item.description}
-                            </p>
+                            <div className="text-sm text-gray-600 mb-4 line-clamp-3 flex-1 rss-content">
+                              <ContentRenderer 
+                                content={item.content || item.description}
+                                className="text-sm text-gray-600"
+                              />
+                            </div>
                           )}
                           
                           {/* Footer */}
@@ -333,6 +385,97 @@ const FollowingPage = () => {
         
         <DashBoardFooter />
       </div>
+      
+      {/* CSS for RSS content styling */}
+      <style jsx global>{`
+        .rss-content {
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+        }
+        
+        .rss-content p {
+          margin: 0 0 0.5rem 0;
+          line-height: 1.4;
+        }
+        
+        .rss-content p:last-child {
+          margin-bottom: 0;
+        }
+        
+        .rss-content strong {
+          font-weight: 600;
+          color: #374151;
+        }
+        
+        .rss-content em {
+          font-style: italic;
+        }
+        
+        .rss-content a {
+          color: #CF3232;
+          text-decoration: underline;
+        }
+        
+        .rss-content a:hover {
+          color: #a82828;
+        }
+        
+        .rss-content code {
+          background-color: #f3f4f6;
+          padding: 0.125rem 0.25rem;
+          border-radius: 0.25rem;
+          font-family: 'Courier New', monospace;
+          font-size: 0.875em;
+          color: #374151;
+        }
+        
+        .rss-content pre {
+          background-color: #f3f4f6;
+          padding: 0.5rem;
+          border-radius: 0.375rem;
+          overflow-x: auto;
+          margin: 0.5rem 0;
+        }
+        
+        .rss-content ul, .rss-content ol {
+          margin: 0.5rem 0;
+          padding-left: 1.25rem;
+        }
+        
+        .rss-content li {
+          margin: 0.25rem 0;
+        }
+        
+        .rss-content blockquote {
+          border-left: 4px solid #CF3232;
+          padding-left: 1rem;
+          margin: 0.5rem 0;
+          font-style: italic;
+          color: #6b7280;
+        }
+        
+        .rss-content h1, .rss-content h2, .rss-content h3, 
+        .rss-content h4, .rss-content h5, .rss-content h6 {
+          font-weight: 600;
+          color: #374151;
+          margin: 0.5rem 0 0.25rem 0;
+        }
+        
+        .rss-content img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 0.375rem;
+          margin: 0.5rem 0;
+        }
+        
+        /* Ensure content doesn't overflow the card */
+        .rss-content * {
+          max-width: 100%;
+          word-wrap: break-word;
+        }
+      `}</style>
     </div>
   );
 };
