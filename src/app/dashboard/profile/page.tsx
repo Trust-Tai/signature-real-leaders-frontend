@@ -2331,7 +2331,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               {/* Step 5: Newsletter Integration */}
               {currentStep === 5 && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
-                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Webhook URLs</h2>
+                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Newsletter</h2>
                   <p className="text-sm text-gray-600 mb-4">
                     Add webhook URLs to receive subscription notifications when users subscribe to your profile. 
                     When someone subscribes, we&apos;ll send the subscription data to all your webhook URLs.

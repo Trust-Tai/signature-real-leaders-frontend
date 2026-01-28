@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, Mail, SquarePlus, Users,UserPlus, Wand2, HelpCircle, Share2 } from 'lucide-react';
+import { X, Mail, SquarePlus, Users, UserPlus, UserCheck, Wand2, HelpCircle, Share2 } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { useRouter } from 'next/navigation';
@@ -28,6 +28,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
   const sidebarItems = [
     { icon: Users, label: 'RSS Feed', path: '/dashboard/rss-feed', page: 'rss-feed', tourId: 'rss-feed' },
+    { icon: UserCheck, label: 'Following', path: '/dashboard/following', page: 'following' },
     { icon: UserPlus, label: 'Followers', path: '/dashboard/followers', page: 'followers' },
     { icon: Mail, label: 'Leads', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' }
   ];

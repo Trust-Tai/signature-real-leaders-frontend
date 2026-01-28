@@ -357,6 +357,102 @@ export const api = {
     );
   },
 
+  async getFollowing(authToken: string, page: number = 1, perPage: number = 20) {
+    return request<{
+      success: boolean;
+      following: Array<{
+        id: number;
+        first_name: string;
+        last_name: string;
+        display_name: string;
+        email: string;
+        company_name: string;
+        occupation: string;
+        date_followed: string;
+        follow_id: number;
+      }>;
+      pagination: {
+        current_page: number;
+        per_page: number;
+        total_following: number;
+        total_pages: number;
+      };
+    }>(
+      `/get-following?page=${page}&per_page=${perPage}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
+
+  async getFollowingStats(authToken: string) {
+    return request<{
+      success: boolean;
+      stats: {
+        total_following: number;
+        current_month_following: number;
+        top_country: {
+          name: string | null;
+          count: number;
+          percentage: number;
+        };
+        top_location: {
+          name: string | null;
+          count: number;
+          percentage: number;
+        };
+        all_countries: Record<string, number>;
+        all_locations: Record<string, number>;
+      };
+      period: {
+        current_month: string;
+        month_start: string;
+        generated_at: string;
+      };
+    }>(
+      '/get-following-stats',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      }
+    );
+  },
+
+  async exportFollowingCSV(authToken: string) {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/export-following-csv`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Accept': 'text/csv, text/plain, */*',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Get the raw CSV text directly - API returns raw CSV without JSON wrapper
+      const csvData = await response.text();
+      
+      // Basic check to ensure we got some data
+      if (!csvData || csvData.trim().length === 0) {
+        throw new Error('Received empty response from server');
+      }
+      
+      // Return the raw CSV data directly since API doesn't wrap it in JSON
+      return csvData;
+    } catch (error) {
+      console.error('Export following CSV error:', error);
+      throw error; // Re-throw the error to be handled by the calling function
+    }
+  },
+
   async getFollowerStats(authToken: string) {
     return request<{
       success: boolean;
