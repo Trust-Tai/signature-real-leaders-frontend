@@ -25,7 +25,7 @@ interface RSSFeeds {
   fetched_at: string;
 }
 
-interface User {
+export interface User {
   id: number;
   username: string;
   email: string;
@@ -76,6 +76,7 @@ interface User {
   date_of_birth: string;
   occupation: string;
   profile_privacy: boolean;
+  tour_guide: boolean;
   webhookUrl?: string[];
   webhook_url?: string[];
   pixel_tracking_enabled?: boolean;
@@ -146,11 +147,74 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           return;
         }
         
-        setUser({
+        // Handle pixel data from API response
+        let userWithPixelData = {
           ...response.user,
           rss_feed_url: (userData.rss_feed_url as string) || '',
           rss_feed_html: (userData.rss_feed_html as string) || ''
-        });
+        };
+
+      
+        // If pixels data exists in the response, merge it into user data
+        if (response.pixels) {
+          
+          // Extract pixel data and add to user object
+          const facebookPixelIds = response.pixels.facebook
+            ?.filter(pixel => pixel.enabled)
+            ?.map(pixel => pixel.pixel_id) || [];
+          
+          const googleAdsIds = response.pixels.google_ads
+            ?.filter(pixel => pixel.enabled)
+            ?.map(pixel => pixel.conversion_id) || [];
+          
+         
+          userWithPixelData = {
+            ...userWithPixelData,
+            pixel_tracking_enabled: response.pixels.tracking_enabled,
+            facebook_pixel_ids: facebookPixelIds,
+            google_ads_ids: googleAdsIds,
+            // Store the raw pixels data for reference
+            pixels: response.pixels
+          } as User & { pixels?: typeof response.pixels };
+          
+          
+        } else {
+       
+          
+          // Check if pixels data might be nested in user object
+          const userDataWithPixels = userData as Record<string, unknown>;
+          if (userDataWithPixels.pixels) {
+           
+            const pixelsData = userDataWithPixels.pixels as {
+              tracking_enabled: boolean;
+              facebook: Array<{ pixel_id: string; source: string; enabled: boolean }>;
+              google_ads: Array<{ conversion_id: string; source: string; enabled: boolean }>;
+            };
+            
+            const facebookPixelIds = pixelsData.facebook
+              ?.filter(pixel => pixel.enabled)
+              ?.map(pixel => pixel.pixel_id) || [];
+            
+            const googleAdsIds = pixelsData.google_ads
+              ?.filter(pixel => pixel.enabled)
+              ?.map(pixel => pixel.conversion_id) || [];
+            
+            userWithPixelData = {
+              ...userWithPixelData,
+              pixel_tracking_enabled: pixelsData.tracking_enabled,
+              facebook_pixel_ids: facebookPixelIds,
+              google_ads_ids: googleAdsIds,
+              pixels: pixelsData
+            } as User & { pixels?: typeof pixelsData };
+            
+            
+          } else {
+           
+          }
+        }
+        
+       
+        setUser(userWithPixelData);
       } else {
         setError('Failed to fetch user details');
       }

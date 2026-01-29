@@ -236,7 +236,6 @@ const ProfilePage = () => {
         const imageDataUrl = e.target?.result as string;
         handleSignatureInputChange('uploadedImage', imageDataUrl);
         handleSignatureInputChange('uploadedImageFile', file);
-        console.log('Image uploaded successfully:', file.name);
       };
       reader.readAsDataURL(file);
     } else {
@@ -322,7 +321,6 @@ const ProfilePage = () => {
         if (blob) {
           const file = new File([blob], 'signature.png', { type: 'image/png' });
           handleSignatureInputChange('signatureFile', file);
-          console.log('Signature converted to file:', file.name, file.size, 'bytes');
         }
       }, 'image/png');
     } catch (error) {
@@ -470,11 +468,7 @@ const ProfilePage = () => {
   // Initialize form data from user context
   useEffect(() => {
     if (user) {
-      console.log('[Profile] Initializing form data with user:', {
-        username: user.username,
-        firstName: user.first_name,
-        lastName: user.last_name
-      });
+     
       
       setBio(user.audience_description || '');
       setProfileImage(user.profile_picture_url || null);
@@ -558,10 +552,26 @@ const ProfilePage = () => {
         amountInDonations: '',
       });
       
-      // Initialize pixel tracking data
-      setPixelTrackingEnabled((user as { pixel_tracking_enabled?: boolean }).pixel_tracking_enabled || false);
-      setFacebookPixelIds((user as { facebook_pixel_ids?: string[] }).facebook_pixel_ids || []);
-      setGoogleAdsIds((user as { google_ads_ids?: string[] }).google_ads_ids || []);
+      // Initialize pixel tracking data from API response
+      const userWithPixels = user as { 
+        pixel_tracking_enabled?: boolean; 
+        facebook_pixel_ids?: string[]; 
+        google_ads_ids?: string[];
+        pixels?: {
+          tracking_enabled: boolean;
+          facebook: Array<{ pixel_id: string; source: string; enabled: boolean }>;
+          google_ads: Array<{ conversion_id: string; source: string; enabled: boolean }>;
+        };
+      };
+      
+     
+      
+      // Set tracking enabled state from API
+      setPixelTrackingEnabled(userWithPixels.pixel_tracking_enabled || false);
+      
+      // Set pixel IDs from processed arrays (UserContext already filtered enabled ones)
+      setFacebookPixelIds(userWithPixels.facebook_pixel_ids || []);
+      setGoogleAdsIds(userWithPixels.google_ads_ids || []);
       setLinks(user.links || []);
 
       // Initialize form state from existing links
@@ -765,7 +775,6 @@ const ProfilePage = () => {
         try {
           const userDetailsResponse = await api.getUserDetails(token);
           if (userDetailsResponse.success && userDetailsResponse.user) {
-            console.log('[Profile] Fresh user details fetched after update:', userDetailsResponse.user);
             updateUser(userDetailsResponse.user);
             
             // Show congratulations modal with updated profile data
@@ -914,6 +923,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
     // Google Analytics IDs start with 'G-' followed by alphanumeric characters
     return /^(AW-\d+|G-[A-Z0-9]+)$/.test(adsId.trim());
   };
+ 
 
   // Pixel tracking functions
   const addFacebookPixelId = () => {
@@ -947,7 +957,6 @@ const handleArrayInputChange = (field: string, value: string[]) => {
   const removeGoogleAdsId = (index: number) => {
     setGoogleAdsIds(prev => prev.filter((_, i) => i !== index));
   };
-
 
 
   return (
@@ -1185,7 +1194,6 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                           type="text"
                           value={informationData?.username || ''}
                           onChange={(e) => {
-                            console.log('[Profile] Username changed to:', e.target.value);
                             setInformationData(prev => prev ? { ...prev, username: e.target.value } : null);
                           }}
                           className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-transparent rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput text-sm sm:text-base"

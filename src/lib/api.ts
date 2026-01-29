@@ -178,6 +178,19 @@ export const api = {
         webhookUrl?: string[];
         webhook_url?: string[];
       };
+      pixels?: {
+        tracking_enabled: boolean;
+        facebook: Array<{
+          pixel_id: string;
+          source: string;
+          enabled: boolean;
+        }>;
+        google_ads: Array<{
+          conversion_id: string;
+          source: string;
+          enabled: boolean;
+        }>;
+      };
       profile_completion?: {
         percentage: number;
         steps: number;
