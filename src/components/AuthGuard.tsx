@@ -36,7 +36,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             setIsAuthenticated(false);
             return;
           }
-        } catch (error) {
+        } catch {
           // Silently handle parsing errors
         }
       }

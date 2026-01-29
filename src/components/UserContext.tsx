@@ -78,6 +78,9 @@ interface User {
   profile_privacy: boolean;
   webhookUrl?: string[];
   webhook_url?: string[];
+  pixel_tracking_enabled?: boolean;
+  facebook_pixel_ids?: string[];
+  google_ads_ids?: string[];
 }
 
 interface UserContextType {

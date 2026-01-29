@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/toast';
-import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, HelpCircle, Loader2, Plus, Trash2, Lock } from 'lucide-react';
+import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, Loader2, Plus, Trash2, Menu } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { UserProfileSidebar, UserProfileDropdown, useUser, ProfileReadyModal } from '@/components';
 import Image from 'next/image';
@@ -12,7 +12,6 @@ import {
   FaInstagram, FaTiktok, FaYoutube, FaSpotify, FaLinkedin, FaFacebook, FaPodcast, FaBlog, FaHandshake, FaHeart, FaXTwitter
 } from 'react-icons/fa6';
 import { FaMapMarkedAlt, FaRss } from 'react-icons/fa';
-import { images } from '@/assets';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { countries } from '@/default/countries';
 
@@ -72,6 +71,16 @@ const ProfilePage = () => {
     content_preference_industry: string[];
   } | null>(null);
   const [metricsData, setMetricsData] = useState<{ numberOfBookings: string; emailListSize: string; amountInSales: string; amountInDonations: string } | null>(null);
+  
+  // Pixel tracking state
+  const [pixelTrackingEnabled, setPixelTrackingEnabled] = useState(false);
+  const [facebookPixelIds, setFacebookPixelIds] = useState<string[]>([]);
+  const [googleAdsIds, setGoogleAdsIds] = useState<string[]>([]);
+  const [newFacebookPixelId, setNewFacebookPixelId] = useState('');
+  const [newGoogleAdsId, setNewGoogleAdsId] = useState('');
+
+  // Mobile sidebar state
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [links, setLinks] = useState<Array<{ name: string; url: string }> | null>(null);
   const [targetAudience, setTargetAudience] = useState<Array<{ role: string; ageRange: string; demographics: string }>>([
     { role: '', ageRange: '', demographics: '' }
@@ -548,6 +557,11 @@ const ProfilePage = () => {
         amountInSales: '',
         amountInDonations: '',
       });
+      
+      // Initialize pixel tracking data
+      setPixelTrackingEnabled((user as { pixel_tracking_enabled?: boolean }).pixel_tracking_enabled || false);
+      setFacebookPixelIds((user as { facebook_pixel_ids?: string[] }).facebook_pixel_ids || []);
+      setGoogleAdsIds((user as { google_ads_ids?: string[] }).google_ads_ids || []);
       setLinks(user.links || []);
 
       // Initialize form state from existing links
@@ -729,6 +743,17 @@ const ProfilePage = () => {
         updateData.webhookUrl = webhookUrls.filter(url => url.trim() !== '');
       }
 
+      // Pixel tracking data - save if enabled and has valid IDs
+      if (pixelTrackingEnabled && (facebookPixelIds.length > 0 || googleAdsIds.length > 0)) {
+        updateData.pixel_tracking_enabled = pixelTrackingEnabled;
+        updateData.facebook_pixel_ids = facebookPixelIds;
+        updateData.google_ads_ids = googleAdsIds;
+      } else {
+        updateData.pixel_tracking_enabled = false;
+        updateData.facebook_pixel_ids = [];
+        updateData.google_ads_ids = [];
+      }
+
       const response = await api.updateProfile(token, updateData);
 
       if (response.success) {
@@ -878,11 +903,56 @@ const handleArrayInputChange = (field: string, value: string[]) => {
     setWebhookUrls(prev => prev.map((url, i) => i === index ? value : url));
   };
 
+  // Pixel tracking validation functions
+  const validateFacebookPixelId = (pixelId: string): boolean => {
+    // Facebook pixel IDs are usually 15-16 digits
+    return /^\d{15,16}$/.test(pixelId.trim());
+  };
+
+  const validateGoogleAdsId = (adsId: string): boolean => {
+    // Google Ads IDs start with 'AW-' followed by numbers
+    // Google Analytics IDs start with 'G-' followed by alphanumeric characters
+    return /^(AW-\d+|G-[A-Z0-9]+)$/.test(adsId.trim());
+  };
+
+  // Pixel tracking functions
+  const addFacebookPixelId = () => {
+    const trimmedId = newFacebookPixelId.trim();
+    if (trimmedId && validateFacebookPixelId(trimmedId) && !facebookPixelIds.includes(trimmedId)) {
+      setFacebookPixelIds(prev => [...prev, trimmedId]);
+      setNewFacebookPixelId('');
+    } else if (trimmedId && !validateFacebookPixelId(trimmedId)) {
+      toast.error('Facebook Pixel ID must be 15-16 digits');
+    } else if (facebookPixelIds.includes(trimmedId)) {
+      toast.error('This Facebook Pixel ID is already added');
+    }
+  };
+
+  const removeFacebookPixelId = (index: number) => {
+    setFacebookPixelIds(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addGoogleAdsId = () => {
+    const trimmedId = newGoogleAdsId.trim();
+    if (trimmedId && validateGoogleAdsId(trimmedId) && !googleAdsIds.includes(trimmedId)) {
+      setGoogleAdsIds(prev => [...prev, trimmedId]);
+      setNewGoogleAdsId('');
+    } else if (trimmedId && !validateGoogleAdsId(trimmedId)) {
+      toast.error('Google Ads ID must start with "AW-" followed by numbers, or Google Analytics ID must start with "G-" followed by alphanumeric characters');
+    } else if (googleAdsIds.includes(trimmedId)) {
+      toast.error('This Google Ads/Analytics ID is already added');
+    }
+  };
+
+  const removeGoogleAdsId = (index: number) => {
+    setGoogleAdsIds(prev => prev.filter((_, i) => i !== index));
+  };
+
 
 
   return (
     <OnboardingProvider>
-      <div className="h-screen flex bg-[#FFF9F9] overflow-hidden" style={{ fontFamily: 'Outfit, sans-serif' }}>
+      <div className="min-h-screen flex bg-[#FFF9F9] overflow-hidden lg:h-screen" style={{ fontFamily: 'Outfit, sans-serif' }}>
         {/* Custom CSS for dropdown content styling */}
         <style jsx>{`
         /* Force select color with multiple selectors */
@@ -922,35 +992,59 @@ const handleArrayInputChange = (field: string, value: string[]) => {
           color: white !important;
         }
       `}</style>
-        {/* Sidebar */}
-        <UserProfileSidebar
-          sidebarOpen={false}
-          setSidebarOpen={() => { }}
-          currentPage="profile"
-        />
+        {/* Sidebar - Hidden on mobile, overlay on mobile when open */}
+        <div className="hidden lg:block">
+          <UserProfileSidebar
+            sidebarOpen={false}
+            setSidebarOpen={() => { }}
+            currentPage="profile"
+          />
+        </div>
+
+        {/* Mobile Sidebar Overlay */}
+        {mobileSidebarOpen && (
+          <div className="lg:hidden fixed inset-0 z-50 flex">
+            <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setMobileSidebarOpen(false)} />
+            <div className="relative flex flex-col w-64 bg-white">
+              <UserProfileSidebar
+                sidebarOpen={true}
+                setSidebarOpen={setMobileSidebarOpen}
+                currentPage="profile"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Right Side (Header + Main Content) */}
-        <div className="flex-1 flex flex-col w-full lg:w-auto overflow-hidden">
+        <div className="flex-1 flex flex-col w-full overflow-hidden">
           {/* Header - Fixed */}
-          <header className="bg-[#FFF9F9] px-4 sm:px-6 py-4 border-b border-[#efc0c0] flex-shrink-0">
+          <header className="bg-[#FFF9F9] px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-[#efc0c0] flex-shrink-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                {/* Mobile Menu Button */}
+                <button
+                  onClick={() => setMobileSidebarOpen(true)}
+                  className="lg:hidden p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                </button>
+                
                 <div
                   onClick={() => router.push("/dashboard")}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                 </div>
-                <h1 className="text-xl font-outift font-semibold text-[#333333]">Profile Settings</h1>
+                <h1 className="text-lg sm:text-xl font-outift font-semibold text-[#333333]">Profile Settings</h1>
               </div>
 
               <UserProfileDropdown />
             </div>
 
             {/* Progress Indicator */}
-            <div className="mt-4 px-4">
+            <div className="mt-3 sm:mt-4 px-1 sm:px-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600 font-outfit">
+                <span className="text-xs sm:text-sm text-gray-600 font-outfit">
                   Step {currentStep} of {totalSteps}
                 </span>
                 
@@ -962,31 +1056,43 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                 />
               </div>
               
-              {/* Step Titles */}
-              <div className="flex justify-between text-xs text-gray-500 font-outfit">
+              {/* Step Titles - Responsive */}
+              <div className="hidden sm:flex justify-between text-xs text-gray-500 font-outfit">
                 <span className={currentStep === 1 ? 'text-[#CF3232] font-semibold' : ''}>Personal Info</span>
                 <span className={currentStep === 2 ? 'text-[#CF3232] font-semibold' : ''}>Links</span>
                 <span className={currentStep === 3 ? 'text-[#CF3232] font-semibold' : ''}>Signature</span>
                 <span className={currentStep === 4 ? 'text-[#CF3232] font-semibold' : ''}>Template</span>
                 <span className={currentStep === 5 ? 'text-[#CF3232] font-semibold' : ''}>Webhook URLs</span>
-                <span className={currentStep === 6 ? 'text-[#CF3232] font-semibold' : ''}>Metrics</span>
+                <span className={currentStep === 6 ? 'text-[#CF3232] font-semibold' : ''}>Metrics & Tracking</span>
+              </div>
+              
+              {/* Mobile Step Title - Show current step only */}
+              <div className="sm:hidden text-center">
+                <span className="text-xs text-[#CF3232] font-semibold font-outfit">
+                  {currentStep === 1 && 'Personal Info'}
+                  {currentStep === 2 && 'Links'}
+                  {currentStep === 3 && 'Signature'}
+                  {currentStep === 4 && 'Template'}
+                  {currentStep === 5 && 'Webhook URLs'}
+                  {currentStep === 6 && 'Metrics & Tracking'}
+                </span>
               </div>
             </div>
           </header>
 
           {/* Main Content - Scrollable */}
           <main className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+            <div className="max-w-4xl mx-auto p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
 
               {/* Step 1: Personal Information & Profile */}
               {currentStep === 1 && (
                 <>
               {/* Profile Image Section */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+              <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-[#efc0c0]">
                 <h2 className="font-outift font-semibold text-[#333333] mb-4">Profile Image</h2>
-                <div className="flex items-center space-x-6">
-                  <div className="relative">
-                    <div className="w-24 h-24 rounded-full border-4 border-[#efc0c0] overflow-hidden">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+                  <div className="relative flex-shrink-0">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-[#efc0c0] overflow-hidden">
                       {profileImage ? (
                         <Image
                           src={profileImage}
@@ -998,12 +1104,12 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                          <Camera className="w-8 h-8 text-gray-400" />
+                          <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                         </div>
                       )}
                     </div>
-                    <label className="absolute bottom-0 right-0 bg-[#CF3232] text-white p-2 rounded-full cursor-pointer hover:bg-red-600 transition-colors">
-                      <Camera className="w-4 h-4" />
+                    <label className="absolute bottom-0 right-0 bg-[#CF3232] text-white p-1.5 sm:p-2 rounded-full cursor-pointer hover:bg-red-600 transition-colors">
+                      <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
                       <input
                         type="file"
                         accept="image/*"
@@ -1012,14 +1118,14 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                       />
                     </label>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">
+                  <div className="text-center sm:text-left flex-1">
+                    <p className="text-sm text-gray-600 mb-3 sm:mb-2">
                       Upload a new profile image. Recommended size: 256x256 pixels.
                     </p>
                     <button
                       onClick={handleSaveProfile}
                       disabled={isLoading}
-                      className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center space-x-2"
+                      className="w-full sm:w-auto px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
                     >
                       <Save className="w-4 h-4" />
                       <span>{isLoading ? 'Saving...' : 'Save Image'}</span>
@@ -1029,15 +1135,15 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               </div>
 
               {/* Information Section (from verification) */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+              <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-[#efc0c0]">
                 <h2 className="font-semibold font-outift text-[#333333] mb-4">Your Information</h2>
                 
                
 
                 {/* Inline Information Form */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {/* Row 1: First Name & Last Name */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
                       <div className='firstVerifyScreen group'>
@@ -1045,7 +1151,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                           type="text"
                           value={informationData?.firstName || ''}
                           onChange={(e) => setInformationData(prev => prev ? { ...prev, firstName: e.target.value } : null)}
-                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl text-sm sm:text-base"
                           style={{ color: '#949494' }}
                           placeholder="Enter your first name"
                         />
@@ -1058,7 +1164,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                           type="text"
                           value={informationData?.lastName || ''}
                           onChange={(e) => setInformationData(prev => prev ? { ...prev, lastName: e.target.value } : null)}
-                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl text-sm sm:text-base"
                           style={{ color: '#949494' }}
                           placeholder="Enter your last name"
                         />
@@ -1067,8 +1173,8 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                   </div>
 
                   {/* Row 1.5: Username - Special Field */}
-                  <div className="mb-[10]">
-                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Username</label>
+                  <div className="mb-4 sm:mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-2 sm:mt-4">Username</label>
                     <div className='relative'>
                       <div className='firstVerifyScreen group' style={{ 
                         border: '2px solid #CF3232', 
@@ -1082,7 +1188,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                             console.log('[Profile] Username changed to:', e.target.value);
                             setInformationData(prev => prev ? { ...prev, username: e.target.value } : null);
                           }}
-                          className="w-full px-4 py-3 bg-transparent rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-transparent rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput text-sm sm:text-base"
                           style={{ color: '#CF3232', fontWeight: '500' }}
                           placeholder="e.g., johndoe"
                         />
@@ -1090,12 +1196,17 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                       
                       {/* Warning Note */}
                       <div className="mt-2 flex items-start space-x-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                        <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        <p className="text-sm text-yellow-800">
-                          <strong>Warning:</strong> Changing this will update your profile URL. Your current URL: <span className="font-mono text-yellow-900">https://real-leaders.com/{user?.username}</span>
-                        </p>
+                        <div className="flex-1">
+                          <p className="text-xs sm:text-sm text-yellow-800">
+                            <strong>Warning:</strong> Changing this will update your profile URL.
+                          </p>
+                          <p className="text-xs text-yellow-700 mt-1 break-all">
+                            Current URL: <span className="font-mono">https://real-leaders.com/{user?.username}</span>
+                          </p>
+                        </div>
                       </div>
 
                       {/* Update Username Button - Show only if username changed */}
@@ -1128,7 +1239,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                             }
                           }}
                           disabled={isLoading}
-                          className="mt-3 w-full sm:w-auto px-6 py-2.5 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
+                          className="mt-3 w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium text-sm sm:text-base"
                         >
                           {isLoading ? (
                             <>
@@ -1147,9 +1258,9 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                   </div>
 
                   {/* Row 2: Date of Birth & Occupation */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Date of Birth</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-2 sm:mt-4">Date of Birth</label>
                       <div className='firstVerifyScreen group relative'>
                         <input
                           type="text"
@@ -1161,20 +1272,20 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                               e.target.type = 'text';
                             }
                           }}
-                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl text-sm sm:text-base"
                           style={{ color: '#949494' }}
                           placeholder="Select date"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Role</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-2 sm:mt-4">Role</label>
                       <div className='firstVerifyScreen group'>
                         <input
                           type="text"
                           value={informationData?.occupation || ''}
                           onChange={(e) => setInformationData(prev => prev ? { ...prev, occupation: e.target.value } : null)}
-                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl text-sm sm:text-base"
                           style={{ color: '#949494' }}
                           placeholder="Enter your job title"
                         />
@@ -1183,28 +1294,28 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                   </div>
 
                   {/* Row 3: Company Name & Company Website */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Company Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-2 sm:mt-4">Company Name</label>
                       <div className='firstVerifyScreen group'>
                         <input
                           type="text"
                           value={informationData?.companyName || ''}
                           onChange={(e) => setInformationData(prev => prev ? { ...prev, companyName: e.target.value } : null)}
-                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl text-sm sm:text-base"
                           style={{ color: '#949494' }}
                           placeholder="Enter company name"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Company Website</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-2 sm:mt-4">Company Website</label>
                       <div className='firstVerifyScreen group'>
                         <input
                           type="url"
                           value={informationData?.companyWebsite || ''}
                           onChange={(e) => setInformationData(prev => prev ? { ...prev, companyWebsite: e.target.value } : null)}
-                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl text-sm sm:text-base"
                           style={{ color: '#949494' }}
                           placeholder="https://example.com"
                         />
@@ -1580,7 +1691,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
       </p>
     </div>
     {/* Grid of industry options - responsive and compact */}
-    <div className="grid grid-cols-1 sm:grid-cols-2  gap-2 sm:gap-3 md:gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2  gap-2 sm:gap-3 md:gap-4 mb-6" style={{margin:25}}>
       {[
         "Construction",
         "Energy & Facilities",
@@ -2401,85 +2512,252 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                 </div>
               )}
 
-              {/* Step 6: Success Metrics */}
+              {/* Step 6: Metrics & Tracking */}
               {currentStep === 6 && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
-                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Success Metrics</h2>
-                  <p className="text-gray-600 mb-4 text-sm">Track your business goals (Optional)</p>
+                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Metrics & Tracking</h2>
                   
-                  <div className="space-y-4">
-                    {/* Number of Bookings */}
-                    <div className="relative firstVerifyScreen group">
-                      <select
-                        value={metricsData?.numberOfBookings || ''}
-                        onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, numberOfBookings: e.target.value }))}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
-                        style={{ color: '#949494' }}
-                      >
-                        <option value="">Number of Bookings</option>
-                        <option value="0-10">0-10</option>
-                        <option value="11-50">11-50</option>
-                        <option value="51-100">51-100</option>
-                        <option value="101-500">101-500</option>
-                        <option value="500+">500+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                  {/* Success Metrics Section */}
+                  <div className="mb-8">
+                    <h3 className="font-semibold text-gray-800 mb-4">Success Metrics</h3>
+                    <p className="text-gray-600 mb-4 text-sm">Track your business goals (Optional)</p>
+                    
+                    <div className="space-y-4">
+                      {/* Number of Bookings */}
+                      <div className="relative firstVerifyScreen group">
+                        <select
+                          value={metricsData?.numberOfBookings || ''}
+                          onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, numberOfBookings: e.target.value }))}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
+                          style={{ color: '#949494' }}
+                        >
+                          <option value="">Number of Bookings</option>
+                          <option value="0-10">0-10</option>
+                          <option value="11-50">11-50</option>
+                          <option value="51-100">51-100</option>
+                          <option value="101-500">101-500</option>
+                          <option value="500+">500+</option>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                      </div>
+
+                      {/* Email List Size */}
+                      <div className="relative firstVerifyScreen group">
+                        <select
+                          value={metricsData?.emailListSize || ''}
+                          onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, emailListSize: e.target.value }))}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
+                          style={{ color: '#949494' }}
+                        >
+                          <option value="">Email List Size</option>
+                          <option value="0-100">0-100</option>
+                          <option value="101-500">101-500</option>
+                          <option value="501-1000">501-1000</option>
+                          <option value="1001-5000">1001-5000</option>
+                          <option value="5001-10000">5001-10000</option>
+                          <option value="10000+">10000+</option>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                      </div>
+
+                      {/* Amount in Sales */}
+                      <div className="relative firstVerifyScreen group">
+                        <select
+                          value={metricsData?.amountInSales || ''}
+                          onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, amountInSales: e.target.value }))}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
+                          style={{ color: '#949494' }}
+                        >
+                          <option value="">Amount in Sales</option>
+                          <option value="0-10k">$0 - $10k</option>
+                          <option value="10k-50k">$10k - $50k</option>
+                          <option value="50k-100k">$50k - $100k</option>
+                          <option value="100k-500k">$100k - $500k</option>
+                          <option value="500k+">$500k+</option>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                      </div>
+
+                      {/* Amount in Donations */}
+                      <div className="relative firstVerifyScreen group">
+                        <select
+                          value={metricsData?.amountInDonations || ''}
+                          onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, amountInDonations: e.target.value }))}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
+                          style={{ color: '#949494' }}
+                        >
+                          <option value="">Amount in Donations</option>
+                          <option value="0-1k">$0 - $1k</option>
+                          <option value="1k-5k">$1k - $5k</option>
+                          <option value="5k-10k">$5k - $10k</option>
+                          <option value="10k-50k">$10k - $50k</option>
+                          <option value="50k+">$50k+</option>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pixel Tracking Section */}
+                  <div className="border-t border-gray-200 pt-4 sm:pt-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-3 sm:space-y-0">
+                      <div>
+                        <h3 className="font-semibold text-gray-800">Pixel Tracking</h3>
+                        <p className="text-gray-600 text-sm">Track user engagement on your public profile page</p>
+                      </div>
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={pixelTrackingEnabled}
+                          onChange={(e) => setPixelTrackingEnabled(e.target.checked)}
+                          className="sr-only"
+                        />
+                        <div className={`relative w-12 h-6 rounded-full transition-colors ${pixelTrackingEnabled ? 'bg-[#CF3232]' : 'bg-gray-300'}`}>
+                          <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${pixelTrackingEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-gray-700">
+                          {pixelTrackingEnabled ? 'Enabled' : 'Disabled'}
+                        </span>
+                      </label>
                     </div>
 
-                    {/* Email List Size */}
-                    <div className="relative firstVerifyScreen group">
-                      <select
-                        value={metricsData?.emailListSize || ''}
-                        onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, emailListSize: e.target.value }))}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
-                        style={{ color: '#949494' }}
-                      >
-                        <option value="">Email List Size</option>
-                        <option value="0-100">0-100</option>
-                        <option value="101-500">101-500</option>
-                        <option value="501-1000">501-1000</option>
-                        <option value="1001-5000">1001-5000</option>
-                        <option value="5001-10000">5001-10000</option>
-                        <option value="10000+">10000+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
-                    </div>
+                    {pixelTrackingEnabled && (
+                      <div className="space-y-4 sm:space-y-6">
+                        {/* Facebook Pixel IDs */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Facebook Pixel IDs
+                          </label>
+                          <p className="text-xs text-gray-500 mb-3">
+                            Facebook Pixel IDs are usually 15-16 digits (e.g., 1234567890123456)
+                          </p>
+                          
+                          {/* Add new Facebook Pixel ID */}
+                          <div className="mb-3">
+                            <div className="firstVerifyScreen group">
+                              <input
+                                type="text"
+                                value={newFacebookPixelId}
+                                onChange={(e) => setNewFacebookPixelId(e.target.value)}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    addFacebookPixelId();
+                                  }
+                                }}
+                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all firstVerifyScreenInput text-sm sm:text-base"
+                                style={{ color: '#949494' }}
+                                placeholder="Enter Facebook Pixel ID"
+                              />
+                            </div>
+                            <div className="flex justify-end mt-2">
+                              <button
+                                type="button"
+                                onClick={addFacebookPixelId}
+                                disabled={!newFacebookPixelId.trim()}
+                                className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 text-sm"
+                              >
+                                <Plus className="w-4 h-4" />
+                                <span>Add</span>
+                              </button>
+                            </div>
+                          </div>
 
-                    {/* Amount in Sales */}
-                    <div className="relative firstVerifyScreen group">
-                      <select
-                        value={metricsData?.amountInSales || ''}
-                        onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, amountInSales: e.target.value }))}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
-                        style={{ color: '#949494' }}
-                      >
-                        <option value="">Amount in Sales</option>
-                        <option value="0-10k">$0 - $10k</option>
-                        <option value="10k-50k">$10k - $50k</option>
-                        <option value="50k-100k">$50k - $100k</option>
-                        <option value="100k-500k">$100k - $500k</option>
-                        <option value="500k+">$500k+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
-                    </div>
+                          {/* Display Facebook Pixel IDs */}
+                          {facebookPixelIds.length > 0 && (
+                            <div className="space-y-2">
+                              {facebookPixelIds.map((pixelId, index) => (
+                                <div key={index} className="flex items-center justify-between bg-gray-50 px-3 sm:px-4 py-2 rounded-lg">
+                                  <span className="text-sm font-mono text-gray-700 break-all">{pixelId}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeFacebookPixelId(index)}
+                                    className="text-red-500 hover:text-red-700 transition-colors ml-2 flex-shrink-0"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
 
-                    {/* Amount in Donations */}
-                    <div className="relative firstVerifyScreen group">
-                      <select
-                        value={metricsData?.amountInDonations || ''}
-                        onChange={(e) => setMetricsData(prev => ({ ...prev || { numberOfBookings: '', emailListSize: '', amountInSales: '', amountInDonations: '' }, amountInDonations: e.target.value }))}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all appearance-none pr-10"
-                        style={{ color: '#949494' }}
-                      >
-                        <option value="">Amount in Donations</option>
-                        <option value="0-1k">$0 - $1k</option>
-                        <option value="1k-5k">$1k - $5k</option>
-                        <option value="5k-10k">$5k - $10k</option>
-                        <option value="10k-50k">$10k - $50k</option>
-                        <option value="50k+">$50k+</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
-                    </div>
+                        {/* Google Ads IDs */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Google Ads / Analytics IDs
+                          </label>
+                          <p className="text-xs text-gray-500 mb-3">
+                            Google Ads IDs start with &quot;AW-&quot; followed by numbers (e.g., AW-1234567890). Google Analytics IDs start with &quot;G-&quot; followed by alphanumeric characters (e.g., G-FE3XTDLD7N)
+                          </p>
+                          
+                          {/* Add new Google Ads ID */}
+                          <div className="mb-3">
+                            <div className="firstVerifyScreen group">
+                              <input
+                                type="text"
+                                value={newGoogleAdsId}
+                                onChange={(e) => setNewGoogleAdsId(e.target.value)}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    addGoogleAdsId();
+                                  }
+                                }}
+                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all firstVerifyScreenInput text-sm sm:text-base"
+                                style={{ color: '#949494' }}
+                                placeholder="Enter Google Ads ID (AW-... or G-...)"
+                              />
+                            </div>
+                            <div className="flex justify-end mt-2">
+                              <button
+                                type="button"
+                                onClick={addGoogleAdsId}
+                                disabled={!newGoogleAdsId.trim()}
+                                className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 text-sm"
+                              >
+                                <Plus className="w-4 h-4" />
+                                <span>Add</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Display Google Ads IDs */}
+                          {googleAdsIds.length > 0 && (
+                            <div className="space-y-2">
+                              {googleAdsIds.map((adsId, index) => (
+                                <div key={index} className="flex items-center justify-between bg-gray-50 px-3 sm:px-4 py-2 rounded-lg">
+                                  <span className="text-sm font-mono text-gray-700 break-all">{adsId}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeGoogleAdsId(index)}
+                                    className="text-red-500 hover:text-red-700 transition-colors ml-2 flex-shrink-0"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Info about tracking */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                          <div className="flex items-start space-x-2 sm:space-x-3">
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                            <div>
+                              <h4 className="text-sm font-medium text-blue-800 mb-1">How Pixel Tracking Works</h4>
+                              <p className="text-xs sm:text-sm text-blue-700">
+                                When enabled, your Facebook and Google pixels will track user engagement on your public profile page. 
+                                This helps you measure profile views, link clicks, and other interactions for marketing analytics.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2574,55 +2852,58 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               )}
 
               {/* Navigation Buttons */}
-              <div className="flex items-center justify-between gap-4 pt-6 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
                 {/* Back Button */}
                 {currentStep > 1 && (
                   <button
                     onClick={prevStep}
-                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 font-outfit font-medium"
+                    className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 font-outfit font-medium text-sm sm:text-base order-2 sm:order-1"
                   >
                     ← Back
                   </button>
                 )}
 
-                <div className="flex-1" />
+                <div className="hidden sm:block flex-1" />
 
-                {/* Skip Button - Hide on last step */}
-                {currentStep < totalSteps && (
-                  <button
-                    onClick={skipStep}
-                    className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 font-outfit font-medium"
-                  >
-                    Skip
-                  </button>
-                )}
+                {/* Mobile: Skip and Next/Save in same row */}
+                <div className="flex gap-3 order-1 sm:order-2">
+                  {/* Skip Button - Hide on last step */}
+                  {currentStep < totalSteps && (
+                    <button
+                      onClick={skipStep}
+                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 font-outfit font-medium text-sm sm:text-base"
+                    >
+                      Skip
+                    </button>
+                  )}
 
-                {/* Next/Save Button */}
-                {currentStep < totalSteps ? (
-                  <button
-                    onClick={nextStep}
-                    disabled={isLoading}
-                    className="px-6 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center space-x-2"
-                  >
-                    <span>Next</span>
-                    <span>→</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleSaveAll}
-                    disabled={isLoading}
-                    className="px-6 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center space-x-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>{isLoading ? 'Saving...' : 'Save All Changes'}</span>
-                  </button>
-                )}
+                  {/* Next/Save Button */}
+                  {currentStep < totalSteps ? (
+                    <button
+                      onClick={nextStep}
+                      disabled={isLoading}
+                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center justify-center space-x-2 text-sm sm:text-base"
+                    >
+                      <span>Next</span>
+                      <span>→</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSaveAll}
+                      disabled={isLoading}
+                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center justify-center space-x-2 text-sm sm:text-base"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>{isLoading ? 'Saving...' : 'Save All Changes'}</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </main>
 
-          {/* Footer - Fixed at bottom */}
-          <div className="flex-shrink-0">
+          {/* Footer - Fixed at bottom - Hidden on mobile */}
+          <div className="hidden lg:block flex-shrink-0">
             <DashBoardFooter />
           </div>
         </div>

@@ -14,7 +14,7 @@ type InteractiveFollowCardProps = {
   name?: string;
 };
 
-export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = ({ name }) => {
+export const InteractiveFollowCard: React.FC<InteractiveFollowCardProps> = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const glareRef = useRef<HTMLDivElement>(null);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);

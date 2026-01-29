@@ -33,7 +33,6 @@ interface LocalSubscriber {
 
 
 const EmailSubscribers = () => {
-  const router = useRouter();
   const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

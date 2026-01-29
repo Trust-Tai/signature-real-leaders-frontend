@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { Search, Bell, User as UserIcon, Menu, X, Download, Filter } from 'lucide-react';
+import { Search, Menu, X, Download, Filter } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';

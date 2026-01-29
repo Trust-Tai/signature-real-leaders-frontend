@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Bell, User, TrendingUp, TrendingDown, Calendar, Menu, Loader2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Calendar, Menu, Loader2 } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import { StatsCards } from '@/components';

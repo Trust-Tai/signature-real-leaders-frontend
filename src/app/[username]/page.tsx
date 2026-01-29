@@ -9,6 +9,8 @@ import { toast } from '@/components/ui/toast';
 import { LoadingScreen } from '@/components';
 import { useUser } from '@/components/UserContext';
 import { recordProfileVisit, recordLinkClick } from '@/lib/statisticsApi';
+import { usePixelTracking, trackPixelLinkClick } from '@/hooks/usePixelTracking';
+import type { PixelData } from '@/hooks/usePixelTracking';
 import { 
   FaInstagram, FaTiktok, FaYoutube, FaSpotify, FaLinkedin, FaFacebook, FaPodcast, FaBlog, FaHandshake, FaHeart, FaXTwitter
 } from 'react-icons/fa6';
@@ -116,6 +118,7 @@ export default function DynamicUserProfile() {
   }
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [pixelsData, setPixelsData] = useState<PixelData | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [optIn, setOptIn] = useState(false);
@@ -128,6 +131,9 @@ export default function DynamicUserProfile() {
     email: ''
   });
   const [newsletterLoading, setNewsletterLoading] = useState(false);
+  console.log("profileData",profileData)
+  // Initialize pixel tracking
+  usePixelTracking(profileData, pixelsData);
 
   // Check follow status
   const checkFollowStatus = useCallback(async (userId: number) => {
@@ -160,6 +166,7 @@ export default function DynamicUserProfile() {
         console.log("response>>>>", response);
         
         if (response.success) {
+          
           // Transform links to match the expected format
           const profile = response.profile as Record<string, unknown>;
           const transformedProfile = {
@@ -183,6 +190,11 @@ export default function DynamicUserProfile() {
             })) || []
           };
           setProfileData(transformedProfile);
+          
+          // Set pixels data separately from the response
+          if (response.pixels) {
+            setPixelsData(response.pixels);
+          }
           
           // Record profile visit only if it's not the user's own profile
           const authToken = localStorage.getItem('auth_token');
@@ -447,6 +459,9 @@ export default function DynamicUserProfile() {
         console.log('[Profile] Recording link click for user_id:', profileData.user_id, 'link:', link.url);
         const clickResponse = await recordLinkClick(profileData.user_id, link.url);
         console.log('[Profile] Link click recorded successfully:', clickResponse);
+        
+        // Track pixel events for link clicks
+        trackPixelLinkClick(profileData, pixelsData, link.display_name || link.name, link.url);
       } catch (error) {
         console.error('[Profile] Error recording link click:', error);
         // Don't show error to user as this is background tracking

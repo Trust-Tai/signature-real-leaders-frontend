@@ -546,6 +546,19 @@ export const api = {
         };
         profile_privacy: string;
       };
+      pixels?: {
+        tracking_enabled: boolean;
+        facebook: Array<{
+          pixel_id: string;
+          source: string;
+          enabled: boolean;
+        }>;
+        google_ads: Array<{
+          conversion_id: string;
+          source: string;
+          enabled: boolean;
+        }>;
+      };
       meta: {
         total_links: number;
         profile_url: string;
