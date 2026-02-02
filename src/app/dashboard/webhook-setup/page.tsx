@@ -3,7 +3,7 @@
 import React from 'react';
 import { ArrowLeft, Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import PageHeader from '@/components/ui/PageHeader';
+import { navigateToProfileStep } from '@/lib/profileNavigation';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 
@@ -56,7 +56,10 @@ export default function WebhookSetupPage() {
               </button>
               
               <button
-                onClick={() => router.back()}
+                onClick={() => {
+                  // Navigate back to profile step 5 (Newsletter section)
+                  navigateToProfileStep(5, router);
+                }}
                 className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />

@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/toast';
 import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, Loader2, Plus, Trash2, Menu } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { UserProfileSidebar, UserProfileDropdown, useUser, ProfileReadyModal } from '@/components';
 import Image from 'next/image';
 import { OnboardingProvider } from '@/components/OnboardingContext';
 import { api } from '@/lib/api';
+import { useProfileStepNavigation } from '@/hooks/useProfileStepNavigation';
 import {
   FaInstagram, FaTiktok, FaYoutube, FaSpotify, FaLinkedin, FaFacebook, FaPodcast, FaBlog, FaHandshake, FaHeart, FaXTwitter
 } from 'react-icons/fa6';
@@ -17,28 +18,20 @@ import { countries } from '@/default/countries';
 
 const ProfilePage = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, updateUser } = useUser();
   
-  // Multi-Step State
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
-
-  // Check URL for step parameter
-  useEffect(() => {
-    const stepParam = searchParams.get('step');
-    console.log('[Profile] URL step parameter:', stepParam);
-    if (stepParam) {
-      const stepNumber = parseInt(stepParam, 10);
-      console.log('[Profile] Parsed step number:', stepNumber);
-      if (stepNumber >= 1 && stepNumber <= totalSteps) {
-        console.log('[Profile] Setting currentStep to:', stepNumber);
-        setCurrentStep(stepNumber);
-      } else {
-        console.log('[Profile] Invalid step number, ignoring');
-      }
-    }
-  }, [searchParams, totalSteps]);
+  // Multi-Step Navigation using custom hook
+  const {
+    currentStep,
+    totalSteps,
+    navigateToStep,
+    nextStep,
+    prevStep,
+    skipStep,
+    clearStepStorage,
+    isFirstStep,
+    isLastStep
+  } = useProfileStepNavigation();
   
   // Existing state
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -794,6 +787,9 @@ const ProfilePage = () => {
           setNewsletterClientSecret("");
           setVerificationStatus("idle");
         }
+
+        // Clear step navigation storage when form is completed
+        clearStepStorage();
       } else {
         // Show backend error message
         toast.error(response.message || 'Failed to update profile');
@@ -877,24 +873,10 @@ const handleArrayInputChange = (field: string, value: string[]) => {
     setCustomIndustries(prev => prev.filter(industry => industry !== industryToRemove));
   };
 
-  // Multi-Step Navigation Functions
-  const nextStep = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const skipStep = () => {
-    nextStep();
-  };
+  // Multi-Step Navigation Functions - removed, now using hook
+  // const nextStep = () => { ... }
+  // const prevStep = () => { ... }
+  // const skipStep = () => { ... }
 
   // Webhook URL functions
   const addWebhookUrl = () => {
@@ -2452,8 +2434,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
                   <h2 className="font-semibold font-outfit text-[#333333] mb-4">Newsletter</h2>
                   <p className="text-sm text-gray-600 mb-4">
-                    Add webhook URLs to receive subscription notifications when users subscribe to your profile. 
-                    When someone subscribes, we&apos;ll send the subscription data to all your webhook URLs.
+                   Newsletter Add webhook URLs to receive subscription notifications when users subscribe to your profile. When someone subscribes to your newsletter, the notifications go to your ESP
                   </p>
 
                   {/* Webhook Setup Guide Link */}
@@ -2987,7 +2968,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               {/* Navigation Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
                 {/* Back Button */}
-                {currentStep > 1 && (
+                {!isFirstStep && (
                   <button
                     onClick={prevStep}
                     className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 font-outfit font-medium text-sm sm:text-base order-2 sm:order-1"
@@ -3001,7 +2982,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                 {/* Mobile: Skip and Next/Save in same row */}
                 <div className="flex gap-3 order-1 sm:order-2">
                   {/* Skip Button - Hide on last step */}
-                  {currentStep < totalSteps && (
+                  {!isLastStep && (
                     <button
                       onClick={skipStep}
                       className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 font-outfit font-medium text-sm sm:text-base"
@@ -3011,7 +2992,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                   )}
 
                   {/* Next/Save Button */}
-                  {currentStep < totalSteps ? (
+                  {!isLastStep ? (
                     <button
                       onClick={nextStep}
                       disabled={isLoading}
@@ -3056,12 +3037,12 @@ const handleArrayInputChange = (field: string, value: string[]) => {
           setShowProfileReadyModal(false);
           
           // Set step to 4 immediately
-          setCurrentStep(4);
+          navigateToStep(4);
           console.log('[Profile] Set currentStep to 4');
           
           // Update URL to reflect step 4 without any delay
-          router.replace('/dashboard/profile?step=4');
-          console.log('[Profile] Router replace called with step=4');
+          // router.replace('/dashboard/profile?step=4'); // This is now handled by navigateToStep
+          console.log('[Profile] Navigation to step 4 completed');
         }}
       />
     </OnboardingProvider>
