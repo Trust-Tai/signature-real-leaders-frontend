@@ -42,12 +42,10 @@ export const usePixelTracking = (profileData: ProfileData | null, pixels: PixelD
       return;
     }
 
-    console.log('[Pixel Debug] Initializing pixel tracking for profile:', profileData.username);
-    console.log('[Pixel Debug] Pixel configuration:', pixels);
+
 
     // Load Facebook Pixel
     if (pixels.facebook && pixels.facebook.length > 0) {
-      console.log(`[Pixel Debug] Loading ${pixels.facebook.length} Facebook pixel(s)`);
       pixels.facebook.forEach((pixel) => {
         if (pixel.enabled) {
           loadFacebookPixel(pixel.pixel_id, profileData);
@@ -61,7 +59,6 @@ export const usePixelTracking = (profileData: ProfileData | null, pixels: PixelD
 
     // Load Google Ads
     if (pixels.google_ads && pixels.google_ads.length > 0) {
-      console.log(`[Pixel Debug] Loading ${pixels.google_ads.length} Google Ads pixel(s)`);
       pixels.google_ads.forEach((ads) => {
         if (ads.enabled) {
           loadGoogleAds(ads.conversion_id, profileData);
@@ -76,12 +73,10 @@ export const usePixelTracking = (profileData: ProfileData | null, pixels: PixelD
 };
 
 const loadFacebookPixel = (pixelId: string, profileData: ProfileData) => {
-  console.log(`[Pixel Debug] Loading Facebook Pixel: ${pixelId}`);
   
   // Check if Facebook Pixel is already loaded
   if (typeof window !== 'undefined' && (window as { fbq?: unknown }).fbq) {
     // Facebook Pixel already loaded, just track the event
-    console.log(`[Pixel Debug] Facebook Pixel already loaded, tracking event`);
     trackFacebookEvent(pixelId, profileData);
     return;
   }
@@ -116,26 +111,33 @@ const trackFacebookEvent = (pixelId: string, profileData: ProfileData) => {
       content_type: 'profile',
       content_ids: [`user_${profileData.user_id}`],
       content_name: profileData.full_name || profileData.username,
+      content_category: 'profile_view',
+      value: 1,
+      currency: 'USD',
       custom_parameter: {
         profile_username: profileData.username,
-        profile_id: profileData.user_id
+        profile_id: profileData.user_id,
+        profile_name: profileData.full_name || profileData.username,
+        view_source: 'profile_page'
       }
     };
     
-    console.log(`[Pixel Debug] Tracking Facebook ViewContent event:`, eventData);
+    
     (window as unknown as { fbq: (action: string, event: string, data?: unknown) => void }).fbq('track', 'ViewContent', eventData);
+    
+    // Also track as custom profile view event
+    (window as unknown as { fbq: (action: string, event: string, data?: unknown) => void }).fbq('trackCustom', 'ProfileView', eventData);
   } else {
     console.log(`[Pixel Debug] Facebook Pixel not available for tracking`);
   }
 };
 
 const loadGoogleAds = (conversionId: string, profileData: ProfileData) => {
-  console.log(`[Pixel Debug] Loading Google Ads: ${conversionId}`);
+
   
   // Check if Google Ads is already loaded
   if (typeof window !== 'undefined' && (window as { gtag?: unknown }).gtag) {
     // Google Ads already loaded, just track the event
-    console.log(`[Pixel Debug] Google Ads already loaded, tracking event`);
     trackGoogleAdsEvent(conversionId, profileData);
     return;
   }
@@ -167,15 +169,27 @@ const trackGoogleAdsEvent = (conversionId: string, profileData: ProfileData) => 
   if (typeof window !== 'undefined' && (window as { gtag?: (command: string, action: string, parameters?: unknown) => void }).gtag) {
     const eventData = {
       send_to: conversionId,
+      event_category: 'profile_engagement',
+      event_label: `Profile View - ${profileData.username}`,
+      value: 1,
+      currency: 'USD',
       custom_parameter: {
         profile_username: profileData.username,
         profile_id: profileData.user_id,
-        profile_name: profileData.full_name || profileData.username
+        profile_name: profileData.full_name || profileData.username,
+        view_source: 'profile_page'
       }
     };
     
-    console.log(`[Pixel Debug] Tracking Google Ads page_view event:`, eventData);
     (window as unknown as { gtag: (command: string, action: string, parameters?: unknown) => void }).gtag('event', 'page_view', eventData);
+    
+    // Also track as custom profile view event
+    (window as unknown as { gtag: (command: string, action: string, parameters?: unknown) => void }).gtag('event', 'profile_view', {
+      event_category: 'profile_engagement',
+      event_label: profileData.username,
+      value: 1,
+      custom_parameters: eventData.custom_parameter
+    });
   } else {
     console.log(`[Pixel Debug] Google Ads not available for tracking`);
   }
@@ -188,7 +202,6 @@ export const trackPixelLinkClick = (profileData: ProfileData | null, pixels: Pix
     return;
   }
 
-  console.log(`[Pixel Debug] Tracking link click: ${linkName} -> ${linkUrl}`);
 
   // Track Facebook Pixel link click
   if (pixels.facebook && pixels.facebook.length > 0) {
@@ -197,17 +210,24 @@ export const trackPixelLinkClick = (profileData: ProfileData | null, pixels: Pix
         const eventData = {
           content_type: 'link_click',
           content_name: linkName,
-          value: linkUrl,
+          content_category: 'profile_link',
+          value: 1, // Assign value of 1 for each link click
+          currency: 'USD',
           custom_parameter: {
             profile_username: profileData.username,
             profile_id: profileData.user_id,
+            profile_name: profileData.full_name || profileData.username,
             link_name: linkName,
-            link_url: linkUrl
+            link_url: linkUrl,
+            click_source: 'profile_page'
           }
         };
         
-        console.log(`[Pixel Debug] Tracking Facebook Lead event for link click:`, eventData);
+        // Track as Lead event (good for conversion tracking)
         (window as unknown as { fbq: (action: string, event: string, data?: unknown) => void }).fbq('track', 'Lead', eventData);
+        
+        // Also track as custom event for more detailed analytics
+        (window as unknown as { fbq: (action: string, event: string, data?: unknown) => void }).fbq('trackCustom', 'ProfileLinkClick', eventData);
       }
     });
   }
@@ -218,19 +238,30 @@ export const trackPixelLinkClick = (profileData: ProfileData | null, pixels: Pix
       if (ads.enabled && typeof window !== 'undefined' && (window as { gtag?: (command: string, action: string, parameters?: unknown) => void }).gtag) {
         const eventData = {
           send_to: ads.conversion_id,
-          event_category: 'profile_link',
-          event_label: linkName,
-          value: linkUrl,
+          event_category: 'profile_engagement',
+          event_label: `${linkName} - ${linkUrl}`,
+          value: 1,
+          currency: 'USD',
           custom_parameter: {
             profile_username: profileData.username,
             profile_id: profileData.user_id,
+            profile_name: profileData.full_name || profileData.username,
             link_name: linkName,
-            link_url: linkUrl
+            link_url: linkUrl,
+            click_source: 'profile_page'
           }
         };
         
-        console.log(`[Pixel Debug] Tracking Google Ads click event for link:`, eventData);
-        (window as unknown as { gtag: (command: string, action: string, parameters?: unknown) => void }).gtag('event', 'click', eventData);
+        // Track as conversion event
+        (window as unknown as { gtag: (command: string, action: string, parameters?: unknown) => void }).gtag('event', 'conversion', eventData);
+        
+        // Also track as custom click event
+        (window as unknown as { gtag: (command: string, action: string, parameters?: unknown) => void }).gtag('event', 'link_click', {
+          event_category: 'profile_engagement',
+          event_label: linkName,
+          value: linkUrl,
+          custom_parameters: eventData.custom_parameter
+        });
       }
     });
   }

@@ -47,13 +47,15 @@ export default function ProfileReadyModal({ isOpen, onClose, profileData, user, 
 
   const handleChangeTemplate = () => {
     console.log('[ProfileReadyModal] Change template clicked');
-    onClose();
     
     // Call the callback if provided (for direct step change)
     if (onChangeTemplate) {
+      console.log('[ProfileReadyModal] Calling onChangeTemplate callback');
       onChangeTemplate();
+      // Don't call onClose here - let the callback handle it
     } else {
       // Fallback to URL navigation
+      onClose();
       setTimeout(() => {
         console.log('[ProfileReadyModal] Navigating to step 4 (Template)');
         router.replace('/dashboard/profile?step=4');

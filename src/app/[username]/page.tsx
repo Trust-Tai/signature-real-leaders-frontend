@@ -11,6 +11,7 @@ import { useUser } from '@/components/UserContext';
 import { recordProfileVisit, recordLinkClick } from '@/lib/statisticsApi';
 import { usePixelTracking, trackPixelLinkClick } from '@/hooks/usePixelTracking';
 import type { PixelData } from '@/hooks/usePixelTracking';
+
 import { 
   FaInstagram, FaTiktok, FaYoutube, FaSpotify, FaLinkedin, FaFacebook, FaPodcast, FaBlog, FaHandshake, FaHeart, FaXTwitter
 } from 'react-icons/fa6';
@@ -134,6 +135,9 @@ export default function DynamicUserProfile() {
   console.log("profileData",profileData)
   // Initialize pixel tracking
   usePixelTracking(profileData, pixelsData);
+  
+  // Initialize webhook integration
+
 
   // Check follow status
   const checkFollowStatus = useCallback(async (userId: number) => {
@@ -195,6 +199,8 @@ export default function DynamicUserProfile() {
           if (response.pixels) {
             setPixelsData(response.pixels);
           }
+          
+        
           
           // Record profile visit only if it's not the user's own profile
           const authToken = localStorage.getItem('auth_token');
@@ -462,6 +468,8 @@ export default function DynamicUserProfile() {
         
         // Track pixel events for link clicks
         trackPixelLinkClick(profileData, pixelsData, link.display_name || link.name, link.url);
+        
+     
       } catch (error) {
         console.error('[Profile] Error recording link click:', error);
         // Don't show error to user as this is background tracking

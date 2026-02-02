@@ -27,13 +27,18 @@ const ProfilePage = () => {
   // Check URL for step parameter
   useEffect(() => {
     const stepParam = searchParams.get('step');
+    console.log('[Profile] URL step parameter:', stepParam);
     if (stepParam) {
       const stepNumber = parseInt(stepParam, 10);
+      console.log('[Profile] Parsed step number:', stepNumber);
       if (stepNumber >= 1 && stepNumber <= totalSteps) {
+        console.log('[Profile] Setting currentStep to:', stepNumber);
         setCurrentStep(stepNumber);
+      } else {
+        console.log('[Profile] Invalid step number, ignoring');
       }
     }
-  }, [searchParams]);
+  }, [searchParams, totalSteps]);
   
   // Existing state
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -753,16 +758,11 @@ const ProfilePage = () => {
         updateData.webhookUrl = webhookUrls.filter(url => url.trim() !== '');
       }
 
-      // Pixel tracking data - save if enabled and has valid IDs
-      if (pixelTrackingEnabled && (facebookPixelIds.length > 0 || googleAdsIds.length > 0)) {
-        updateData.pixel_tracking_enabled = pixelTrackingEnabled;
-        updateData.facebook_pixel_ids = facebookPixelIds;
-        updateData.google_ads_ids = googleAdsIds;
-      } else {
-        updateData.pixel_tracking_enabled = false;
-        updateData.facebook_pixel_ids = [];
-        updateData.google_ads_ids = [];
-      }
+      // Pixel tracking data - always save the current state
+      // Don't empty the arrays when tracking is disabled, just update the status
+      updateData.pixel_tracking_enabled = pixelTrackingEnabled;
+      updateData.facebook_pixel_ids = facebookPixelIds;
+      updateData.google_ads_ids = googleAdsIds;
 
       const response = await api.updateProfile(token, updateData);
 
@@ -2456,6 +2456,34 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                     When someone subscribes, we&apos;ll send the subscription data to all your webhook URLs.
                   </p>
 
+                  {/* Webhook Setup Guide Link */}
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m0 0l4-4a4 4 0 105.656-5.656l-4 4m-4 4l4-4m0 0l-1.102 1.102a4 4 0 01-5.656 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-[#333333] mb-1">
+                          Need Help Getting Webhook URLs?
+                        </h4>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Get step-by-step instructions for Zapier, Zoho, Mailchimp, and HubSpot webhook URLs.
+                        </p>
+                        <button
+                          onClick={() => router.push('/dashboard/webhook-setup')}
+                          className="inline-flex items-center px-3 py-2 bg-[#CF3232] text-white text-sm font-medium rounded-lg hover:bg-[#b82828] transition-colors font-outfit"
+                        >
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                          </svg>
+                          View Webhook Setup Guide
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Existing Webhook URLs */}
                   {webhookUrls.length > 0 && (
                     <div className="space-y-3 mb-4">
@@ -2608,29 +2636,123 @@ const handleArrayInputChange = (field: string, value: string[]) => {
 
                   {/* Pixel Tracking Section */}
                   <div className="border-t border-gray-200 pt-4 sm:pt-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-3 sm:space-y-0">
-                      <div>
-                        <h3 className="font-semibold text-gray-800">Pixel Tracking</h3>
-                        <p className="text-gray-600 text-sm">Track user engagement on your public profile page</p>
-                      </div>
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={pixelTrackingEnabled}
-                          onChange={(e) => setPixelTrackingEnabled(e.target.checked)}
-                          className="sr-only"
-                        />
-                        <div className={`relative w-12 h-6 rounded-full transition-colors ${pixelTrackingEnabled ? 'bg-[#CF3232]' : 'bg-gray-300'}`}>
-                          <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${pixelTrackingEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-6">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <div className="flex items-center justify-center w-8 h-8 bg-[#CF3232]/10 rounded-lg">
+                            <svg className="w-4 h-4 text-[#CF3232]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-[#333333] font-outfit text-lg">Pixel Tracking</h3>
                         </div>
-                        <span className="ml-3 text-sm font-medium text-gray-700">
+                        <p className="text-gray-600 text-sm mb-3 font-outfit leading-relaxed">
+                          Track user engagement on your public profile page with Facebook Pixel and Google Analytics
+                        </p>
+                        <button
+                          onClick={() => router.push('/dashboard/tracking-setup')}
+                          className="inline-flex items-center text-xs text-[#CF3232] hover:text-[#b82828] font-medium font-outfit transition-colors group"
+                        >
+                          <svg className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                          </svg>
+                          Need help getting your tracking IDs? View setup guide
+                          <svg className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+                      
+                      <div className="flex flex-col items-end space-y-2">
+                        <label className="flex items-center cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={pixelTrackingEnabled}
+                            onChange={(e) => setPixelTrackingEnabled(e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div className={`relative w-14 h-7 rounded-full transition-all duration-300 shadow-inner ${
+                            pixelTrackingEnabled 
+                              ? 'bg-[#CF3232] shadow-[#CF3232]/20' 
+                              : 'bg-gray-300 group-hover:bg-gray-400'
+                          }`}>
+                            <div className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-all duration-300 shadow-md ${
+                              pixelTrackingEnabled ? 'translate-x-7 shadow-lg' : 'translate-x-0'
+                            }`}>
+                              {pixelTrackingEnabled && (
+                                <svg className="w-3 h-3 text-[#CF3232] absolute top-1.5 left-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                        </label>
+                        <span className={`text-sm font-medium font-outfit transition-colors ${
+                          pixelTrackingEnabled ? 'text-[#CF3232]' : 'text-gray-500'
+                        }`}>
                           {pixelTrackingEnabled ? 'Enabled' : 'Disabled'}
                         </span>
-                      </label>
+                      </div>
                     </div>
+
+                    {/* Show configured IDs even when tracking is disabled */}
+                    {!pixelTrackingEnabled && (facebookPixelIds.length > 0 || googleAdsIds.length > 0) && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mb-4">
+                        <div className="flex items-start space-x-2 sm:space-x-3">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          <div>
+                            <h4 className="text-sm font-medium text-yellow-800 mb-1">Tracking Currently Disabled</h4>
+                            <p className="text-xs sm:text-sm text-yellow-700 mb-2">
+                              You have {facebookPixelIds.length + googleAdsIds.length} pixel ID(s) configured, but tracking is currently disabled.
+                            </p>
+                            <div className="text-xs text-yellow-700">
+                              {facebookPixelIds.length > 0 && (
+                                <p>• Facebook Pixels: {facebookPixelIds.length} configured</p>
+                              )}
+                              {googleAdsIds.length > 0 && (
+                                <p>• Google Ads: {googleAdsIds.length} configured</p>
+                              )}
+                            </div>
+                            <p className="text-xs sm:text-sm text-yellow-700 mt-2 font-medium">
+                              Enable tracking above to activate these pixels.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {pixelTrackingEnabled && (
                       <div className="space-y-4 sm:space-y-6">
+                        {/* Help Section */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0">
+                              <svg className="w-6 h-6 text-[#CF3232]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-sm font-semibold text-[#333333] mb-2">
+                                Need Help Getting Your Tracking IDs?
+                              </h4>
+                              <p className="text-sm text-gray-600 mb-3">
+                                Follow our step-by-step guide to get your Facebook Pixel ID, Google Analytics ID (G-), and Google Ads ID (AW-).
+                              </p>
+                              <button
+                                onClick={() => router.push('/dashboard/tracking-setup')}
+                                className="inline-flex items-center px-4 py-2 bg-[#CF3232] text-white text-sm font-medium rounded-lg hover:bg-[#b82828] transition-colors font-outfit"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                View Setup Guide
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
                         {/* Facebook Pixel IDs */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2757,9 +2879,12 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                             </svg>
                             <div>
                               <h4 className="text-sm font-medium text-blue-800 mb-1">How Pixel Tracking Works</h4>
-                              <p className="text-xs sm:text-sm text-blue-700">
+                              <p className="text-xs sm:text-sm text-blue-700 mb-2">
                                 When enabled, your Facebook and Google pixels will track user engagement on your public profile page. 
                                 This helps you measure profile views, link clicks, and other interactions for marketing analytics.
+                              </p>
+                              <p className="text-xs sm:text-sm text-blue-700 font-medium">
+                                💡 Note: Your pixel IDs are always saved. You can temporarily disable tracking without losing your configured IDs.
                               </p>
                             </div>
                           </div>
@@ -2923,6 +3048,21 @@ const handleArrayInputChange = (field: string, value: string[]) => {
         onClose={() => setShowProfileReadyModal(false)}
         profileData={savedProfileData}
         user={user}
+        onChangeTemplate={() => {
+          console.log('[Profile] onChangeTemplate callback triggered');
+          console.log('[Profile] Current step before change:', currentStep);
+          
+          // Close the modal first
+          setShowProfileReadyModal(false);
+          
+          // Set step to 4 immediately
+          setCurrentStep(4);
+          console.log('[Profile] Set currentStep to 4');
+          
+          // Update URL to reflect step 4 without any delay
+          router.replace('/dashboard/profile?step=4');
+          console.log('[Profile] Router replace called with step=4');
+        }}
       />
     </OnboardingProvider>
   );
