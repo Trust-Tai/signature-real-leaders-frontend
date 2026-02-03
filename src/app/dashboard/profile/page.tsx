@@ -15,6 +15,8 @@ import {
 import { FaMapMarkedAlt, FaRss } from 'react-icons/fa';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { countries } from '@/default/countries';
+import WebhookSetupComponent from '@/components/ui/WebhookSetupComponent';
+import TrackingSetupComponent from '@/components/ui/TrackingSetupComponent';
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -139,6 +141,10 @@ const ProfilePage = () => {
   // Webhook URLs state
   const [webhookUrls, setWebhookUrls] = useState<string[]>([]);
   const [newWebhookUrl, setNewWebhookUrl] = useState('');
+
+  // State for rendering components in steps 5 and 6
+  const [showWebhookSetup, setShowWebhookSetup] = useState(false);
+  const [showTrackingSetup, setShowTrackingSetup] = useState(false);
 
   // Custom industry state
   const [customIndustry, setCustomIndustry] = useState('');
@@ -995,7 +1001,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
         {/* Mobile Sidebar Overlay */}
         {mobileSidebarOpen && (
           <div className="lg:hidden fixed inset-0 z-50 flex">
-            <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setMobileSidebarOpen(false)} />
+            <div className="fixed inset-0 bg-opacity-50" onClick={() => setMobileSidebarOpen(false)} />
             <div className="relative flex flex-col w-64 bg-white">
               <UserProfileSidebar
                 sidebarOpen={true}
@@ -1021,19 +1027,24 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                 </button>
                 
                 <div
-                  onClick={() => router.push("/dashboard")}
+                  onClick={() => showWebhookSetup ? setShowWebhookSetup(false): showTrackingSetup ? setShowTrackingSetup(false) :router.push("/dashboard")}
                   className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                 </div>
-                <h1 className="text-lg sm:text-xl font-outift font-semibold text-[#333333]">Profile Settings</h1>
+                <h1 className="text-lg sm:text-xl font-outift font-semibold text-[#333333]">
+                  {showWebhookSetup ? 'Webhook Integration Guide' : 
+                   showTrackingSetup ? 'Tracking Setup Guide' : 
+                   'Profile Settings'}
+                </h1>
               </div>
 
               <UserProfileDropdown />
             </div>
 
-            {/* Progress Indicator */}
-            <div className="mt-3 sm:mt-4 px-1 sm:px-4">
+            {/* Progress Indicator - Hide when showing setup components */}
+            {!showWebhookSetup && !showTrackingSetup && (
+              <div className="mt-3 sm:mt-4 px-1 sm:px-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs sm:text-sm text-gray-600 font-outfit">
                   Step {currentStep} of {totalSteps}
@@ -1068,7 +1079,8 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                   {currentStep === 6 && 'Metrics & Tracking'}
                 </span>
               </div>
-            </div>
+              </div>
+            )}
           </header>
 
           {/* Main Content - Scrollable */}
@@ -2431,108 +2443,133 @@ const handleArrayInputChange = (field: string, value: string[]) => {
 
               {/* Step 5: Newsletter Integration */}
               {currentStep === 5 && (
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
-                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Newsletter</h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                   Newsletter Add webhook URLs to receive subscription notifications when users subscribe to your profile. When someone subscribes to your newsletter, the notifications go to your ESP
-                  </p>
-
-                  {/* Webhook Setup Guide Link */}
-                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 mb-4">
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0">
-                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m0 0l4-4a4 4 0 105.656-5.656l-4 4m-4 4l4-4m0 0l-1.102 1.102a4 4 0 01-5.656 0z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-[#333333] mb-1">
-                          Need Help Getting Webhook URLs?
-                        </h4>
-                        <p className="text-sm text-gray-600 mb-3">
-                          Get step-by-step instructions for Zapier, Zoho, Mailchimp, and HubSpot webhook URLs.
-                        </p>
-                        <button
-                          onClick={() => router.push('/dashboard/webhook-setup')}
-                          className="inline-flex items-center px-3 py-2 bg-[#CF3232] text-white text-sm font-medium rounded-lg hover:bg-[#b82828] transition-colors font-outfit"
-                        >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                          </svg>
-                          View Webhook Setup Guide
-                        </button>
+                <>
+                  {showWebhookSetup ? (
+                    // Show webhook setup with full page layout (sidebar + header visible)
+                    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+                      <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-[#efc0c0]">
+                        
+                        <WebhookSetupComponent onBack={() => setShowWebhookSetup(false)} />
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+                      <h2 className="font-semibold font-outfit text-[#333333] mb-4">Newsletter</h2>
+                      <p className="text-sm text-gray-600 mb-4">
+                       Newsletter Add webhook URLs to receive subscription notifications when users subscribe to your profile. When someone subscribes to your newsletter, the notifications go to your ESP
+                      </p>
 
-                  {/* Existing Webhook URLs */}
-                  {webhookUrls.length > 0 && (
-                    <div className="space-y-3 mb-4">
-                      {webhookUrls.map((url, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                          <div className="flex-1">
-                            <input
-                              type="url"
-                              value={url}
-                              onChange={(e) => updateWebhookUrl(index, e.target.value)}
-                              className="w-full px-3 py-2 bg-white rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300"
-                              style={{ color: '#333333' }}
-                              placeholder="https://your-webhook-endpoint.com/webhook"
-                            />
+                      {/* Webhook Setup Guide Link */}
+                      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 mb-4">
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0">
+                            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m0 0l4-4a4 4 0 105.656-5.656l-4 4m-4 4l4-4m0 0l-1.102 1.102a4 4 0 01-5.656 0z" />
+                            </svg>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => removeWebhookUrl(index)}
-                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-300"
-                            title="Remove webhook URL"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-semibold text-[#333333] mb-1">
+                              Need Help Getting Webhook URLs?
+                            </h4>
+                            <p className="text-sm text-gray-600 mb-3">
+                              Get step-by-step instructions for Zapier, Zoho, Mailchimp, and HubSpot webhook URLs.
+                            </p>
+                            <button
+                              onClick={() => setShowWebhookSetup(true)}
+                              className="inline-flex items-center px-3 py-2 bg-[#CF3232] text-white text-sm font-medium rounded-lg hover:bg-[#b82828] transition-colors font-outfit"
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                              </svg>
+                              View Webhook Setup Guide
+                            </button>
+                          </div>
                         </div>
-                      ))}
+                      </div>
+
+                      {/* Existing Webhook URLs */}
+                      {webhookUrls.length > 0 && (
+                        <div className="space-y-3 mb-4">
+                          {webhookUrls.map((url, index) => (
+                            <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                              <div className="flex-1">
+                                <input
+                                  type="url"
+                                  value={url}
+                                  onChange={(e) => updateWebhookUrl(index, e.target.value)}
+                                  className="w-full px-3 py-2 bg-white rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300"
+                                  style={{ color: '#333333' }}
+                                  placeholder="https://your-webhook-endpoint.com/webhook"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeWebhookUrl(index)}
+                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-300"
+                                title="Remove webhook URL"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add New Webhook URL */}
+                      <div className="space-y-3">
+                        <div className="firstVerifyScreen group">
+                          <input
+                            type="url"
+                            value={newWebhookUrl}
+                            onChange={(e) => setNewWebhookUrl(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                addWebhookUrl();
+                              }
+                            }}
+                            className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                            style={{ color: '#949494' }}
+                            placeholder="Enter webhook URL (e.g., https://your-site.com/webhook)"
+                          />
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={addWebhookUrl}
+                          disabled={!newWebhookUrl.trim() || webhookUrls.includes(newWebhookUrl.trim())}
+                          className="w-full px-4 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Add More URL</span>
+                        </button>
+                        
+                      
+                      </div>
+
+                    
                     </div>
                   )}
-
-                  {/* Add New Webhook URL */}
-                  <div className="space-y-3">
-                    <div className="firstVerifyScreen group">
-                      <input
-                        type="url"
-                        value={newWebhookUrl}
-                        onChange={(e) => setNewWebhookUrl(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addWebhookUrl();
-                          }
-                        }}
-                        className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Enter webhook URL (e.g., https://your-site.com/webhook)"
-                      />
-                    </div>
-                    
-                    <button
-                      type="button"
-                      onClick={addWebhookUrl}
-                      disabled={!newWebhookUrl.trim() || webhookUrls.includes(newWebhookUrl.trim())}
-                      className="w-full px-4 py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Add More URL</span>
-                    </button>
-                    
-                  
-                  </div>
-
-                
-                </div>
+                </>
               )}
 
               {/* Step 6: Metrics & Tracking */}
               {currentStep === 6 && (
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
-                  <h2 className="font-semibold font-outfit text-[#333333] mb-4">Metrics & Tracking</h2>
+                <>
+              {/* Step 6: Metrics & Tracking */}
+              {currentStep === 6 && (
+                <>
+                  {showTrackingSetup ? (
+                    // Show tracking setup with full page layout (sidebar + header visible)
+                    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+                      <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-[#efc0c0]">
+                       
+                        <TrackingSetupComponent onBack={() => setShowTrackingSetup(false)} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-[#efc0c0]">
+                      <h2 className="font-semibold font-outfit text-[#333333] mb-4">Metrics & Tracking</h2>
                   
                   {/* Success Metrics Section */}
                   <div className="mb-8">
@@ -2631,7 +2668,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                           Track user engagement on your public profile page with Facebook Pixel and Google Analytics
                         </p>
                         <button
-                          onClick={() => router.push('/dashboard/tracking-setup')}
+                          onClick={() => setShowTrackingSetup(true)}
                           className="inline-flex items-center text-xs text-[#CF3232] hover:text-[#b82828] font-medium font-outfit transition-colors group"
                         >
                           <svg className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2722,7 +2759,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                                 Follow our step-by-step guide to get your Facebook Pixel ID, Google Analytics ID (G-), and Google Ads ID (AW-).
                               </p>
                               <button
-                                onClick={() => router.push('/dashboard/tracking-setup')}
+                                onClick={() => setShowTrackingSetup(true)}
                                 className="inline-flex items-center px-4 py-2 bg-[#CF3232] text-white text-sm font-medium rounded-lg hover:bg-[#b82828] transition-colors font-outfit"
                               >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2873,7 +2910,9 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                       </div>
                     )}
                   </div>
-                </div>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Password Change Section - Removed from steps, always accessible */}
@@ -2964,56 +3003,60 @@ const handleArrayInputChange = (field: string, value: string[]) => {
               </div>
               </div>
               )}
-
-              {/* Navigation Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
-                {/* Back Button */}
-                {!isFirstStep && (
-                  <button
-                    onClick={prevStep}
-                    className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 font-outfit font-medium text-sm sm:text-base order-2 sm:order-1"
-                  >
-                    ← Back
-                  </button>
-                )}
-
-                <div className="hidden sm:block flex-1" />
-
-                {/* Mobile: Skip and Next/Save in same row */}
-                <div className="flex gap-3 order-1 sm:order-2">
-                  {/* Skip Button - Hide on last step */}
-                  {!isLastStep && (
+  </>
+              )}
+              {/* Navigation Buttons - Hide when showing setup components */}
+              {!showWebhookSetup && !showTrackingSetup && (
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
+                  {/* Back Button */}
+                  {!isFirstStep && (
                     <button
-                      onClick={skipStep}
-                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 font-outfit font-medium text-sm sm:text-base"
+                      onClick={prevStep}
+                      className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 font-outfit font-medium text-sm sm:text-base order-2 sm:order-1"
                     >
-                      Skip
+                      ← Back
                     </button>
                   )}
 
-                  {/* Next/Save Button */}
-                  {!isLastStep ? (
-                    <button
-                      onClick={nextStep}
-                      disabled={isLoading}
-                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center justify-center space-x-2 text-sm sm:text-base"
-                    >
-                      <span>Next</span>
-                      <span>→</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleSaveAll}
-                      disabled={isLoading}
-                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center justify-center space-x-2 text-sm sm:text-base"
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>{isLoading ? 'Saving...' : 'Save All Changes'}</span>
-                    </button>
-                  )}
+                  <div className="hidden sm:block flex-1" />
+
+                  {/* Mobile: Skip and Next/Save in same row */}
+                  <div className="flex gap-3 order-1 sm:order-2">
+                    {/* Skip Button - Hide on last step */}
+                    {!isLastStep && (
+                      <button
+                        onClick={skipStep}
+                        className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 font-outfit font-medium text-sm sm:text-base"
+                      >
+                        Skip
+                      </button>
+                    )}
+
+                    {/* Next/Save Button */}
+                    {!isLastStep ? (
+                      <button
+                        onClick={nextStep}
+                        disabled={isLoading}
+                        className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center justify-center space-x-2 text-sm sm:text-base"
+                      >
+                        <span>Next</span>
+                        <span>→</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleSaveAll}
+                        disabled={isLoading}
+                        className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-outfit font-medium flex items-center justify-center space-x-2 text-sm sm:text-base"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>{isLoading ? 'Saving...' : 'Save All Changes'}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
+              )}
+            
+          </div>
           </main>
 
           {/* Footer - Fixed at bottom - Hidden on mobile */}

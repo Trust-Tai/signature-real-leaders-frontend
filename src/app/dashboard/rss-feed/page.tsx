@@ -6,41 +6,61 @@ import { UserProfileSidebar, useUser } from '@/components';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 
-// Utility function to detect if text contains HTML tags
-const containsHTML = (text: string): boolean => {
-  const htmlRegex = /<[^>]*>/;
-  return htmlRegex.test(text);
+// Utility function to strip CSS styles and inline styles from HTML content
+const stripCSSFromHTML = (html: string): string => {
+  if (!html) return '';
+  
+  // Create a temporary div to parse HTML
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  
+  // Remove all style attributes
+  const elementsWithStyle = tmp.querySelectorAll('[style]');
+  elementsWithStyle.forEach(element => {
+    element.removeAttribute('style');
+  });
+  
+  // Remove all <style> tags
+  const styleTags = tmp.querySelectorAll('style');
+  styleTags.forEach(styleTag => {
+    styleTag.remove();
+  });
+  
+  // Remove all <link> tags (CSS links)
+  const linkTags = tmp.querySelectorAll('link[rel="stylesheet"], link[type="text/css"]');
+  linkTags.forEach(linkTag => {
+    linkTag.remove();
+  });
+  
+  // Remove class attributes that might contain CSS classes
+  const elementsWithClass = tmp.querySelectorAll('[class]');
+  elementsWithClass.forEach(element => {
+    element.removeAttribute('class');
+  });
+  
+  return tmp.innerHTML;
 };
 
-// Utility function to strip HTML tags and get plain text
+// Utility function to strip HTML tags and get plain text (for search)
 const stripHTML = (html: string): string => {
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   return tmp.textContent || tmp.innerText || '';
 };
 
-// Component to render content based on whether it contains HTML
+// Component to render content - always use dangerouslySetInnerHTML with CSS stripped
 const ContentRenderer: React.FC<{ content: string; className?: string }> = ({ content, className = '' }) => {
   if (!content) return null;
   
-  const hasHTML = containsHTML(content);
+  // Always strip CSS and render with dangerouslySetInnerHTML
+  const cleanContent = stripCSSFromHTML(content);
   
-  if (hasHTML) {
-    // If content has HTML, render it safely with dangerouslySetInnerHTML
-    return (
-      <div 
-        className={className}
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-    );
-  } else {
-    // If no HTML, render as plain text
-    return (
-      <p className={className}>
-        {content}
-      </p>
-    );
-  }
+  return (
+    <div 
+      className={className}
+      dangerouslySetInnerHTML={{ __html: cleanContent }}
+    />
+  );
 };
 
 const FollowingPage = () => {
@@ -78,13 +98,11 @@ const FollowingPage = () => {
       const titleMatch = item.title?.toLowerCase().includes(query);
       
       // Search in description (strip HTML for search)
-      const descriptionText = item.description ? 
-        (containsHTML(item.description) ? stripHTML(item.description) : item.description) : '';
+      const descriptionText = item.description ? stripHTML(item.description) : '';
       const descriptionMatch = descriptionText.toLowerCase().includes(query);
       
       // Search in content (strip HTML for search)
-      const contentText = item.content ? 
-        (containsHTML(item.content) ? stripHTML(item.content) : item.content) : '';
+      const contentText = item.content ? stripHTML(item.content) : '';
       const contentMatch = contentText.toLowerCase().includes(query);
       
       return titleMatch || descriptionMatch || contentMatch;

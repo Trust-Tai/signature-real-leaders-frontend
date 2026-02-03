@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search,  ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Loader2, Settings, Link } from 'lucide-react';
+import { Search,  ChevronLeft, ChevronRight, Menu, X, Plus, Download, Filter, Loader2, Settings, Link, Trash2, Target } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
 import UserProfileDropdown from '@/components/ui/UserProfileDropdown';
@@ -33,14 +33,15 @@ interface LocalSubscriber {
 
 
 const EmailSubscribers = () => {
-  const { user } = useUser();
+  const { user, fetchUserDetails } = useUser();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [addSubscriberModalOpen, setAddSubscriberModalOpen] = useState(false);
   const [editSubscriberModalOpen, setEditSubscriberModalOpen] = useState(false);
   const [webhookModalOpen, setWebhookModalOpen] = useState(false);
+  const [pixelTrackingModalOpen, setPixelTrackingModalOpen] = useState(false);
   const [editingSubscriber, setEditingSubscriber] = useState<LocalSubscriber | null>(null);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -58,6 +59,14 @@ const EmailSubscribers = () => {
   const [webhookUrls, setWebhookUrls] = useState<string[]>([]);
   const [newWebhookUrl, setNewWebhookUrl] = useState('');
   const [webhookLoading, setWebhookLoading] = useState(false);
+
+  // Pixel tracking state
+  const [pixelTrackingEnabled, setPixelTrackingEnabled] = useState(false);
+  const [facebookPixelIds, setFacebookPixelIds] = useState<string[]>([]);
+  const [googleAdsIds, setGoogleAdsIds] = useState<string[]>([]);
+  const [newFacebookPixelId, setNewFacebookPixelId] = useState('');
+  const [newGoogleAdsId, setNewGoogleAdsId] = useState('');
+  const [pixelLoading, setPixelLoading] = useState(false);
 
   // API State
   const [stats, setStats] = useState<NewsletterStats | null>(null);
@@ -438,6 +447,9 @@ const EmailSubscribers = () => {
         setNewWebhookUrl('');
         toast.success(response.message || 'Webhook URL added successfully!');
         
+        // Fetch fresh user details to get updated data
+        await fetchUserDetails();
+        
         // Update localStorage
         const userDataStr = localStorage.getItem('user_data');
         if (userDataStr) {
@@ -484,6 +496,9 @@ const EmailSubscribers = () => {
         setWebhookUrls(updatedUrls);
         toast.success(response.message || 'Webhook URL removed successfully!');
         
+        // Fetch fresh user details to get updated data
+        await fetchUserDetails();
+        
         // Update localStorage
         const userDataStr = localStorage.getItem('user_data');
         if (userDataStr) {
@@ -513,6 +528,143 @@ const EmailSubscribers = () => {
       fetchWebhookUrls();
     }
   }, [webhookModalOpen, fetchWebhookUrls]);
+
+  // Pixel tracking validation functions
+  const validateFacebookPixelId = (pixelId: string): boolean => {
+    // Facebook pixel IDs are usually 15-16 digits
+    return /^\d{15,16}$/.test(pixelId.trim());
+  };
+
+  const validateGoogleAdsId = (adsId: string): boolean => {
+    // Google Ads IDs start with 'AW-' followed by numbers
+    // Google Analytics IDs start with 'G-' followed by alphanumeric characters
+    return /^(AW-\d+|G-[A-Z0-9]+)$/.test(adsId.trim());
+  };
+
+  // Pixel tracking functions
+  const addFacebookPixelId = () => {
+    const trimmedId = newFacebookPixelId.trim();
+    if (trimmedId && validateFacebookPixelId(trimmedId) && !facebookPixelIds.includes(trimmedId)) {
+      setFacebookPixelIds(prev => [...prev, trimmedId]);
+      setNewFacebookPixelId('');
+    } else if (trimmedId && !validateFacebookPixelId(trimmedId)) {
+      toast.error('Facebook Pixel ID must be 15-16 digits');
+    } else if (facebookPixelIds.includes(trimmedId)) {
+      toast.error('This Facebook Pixel ID is already added');
+    }
+  };
+
+  const removeFacebookPixelId = (index: number) => {
+    setFacebookPixelIds(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addGoogleAdsId = () => {
+    const trimmedId = newGoogleAdsId.trim();
+    if (trimmedId && validateGoogleAdsId(trimmedId) && !googleAdsIds.includes(trimmedId)) {
+      setGoogleAdsIds(prev => [...prev, trimmedId]);
+      setNewGoogleAdsId('');
+    } else if (trimmedId && !validateGoogleAdsId(trimmedId)) {
+      toast.error('Google Ads ID must start with "AW-" followed by numbers, or Google Analytics ID must start with "G-" followed by alphanumeric characters');
+    } else if (googleAdsIds.includes(trimmedId)) {
+      toast.error('This Google Ads/Analytics ID is already added');
+    }
+  };
+
+  const removeGoogleAdsId = (index: number) => {
+    setGoogleAdsIds(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Fetch current pixel tracking data
+  const fetchPixelTrackingData = useCallback(async () => {
+    try {
+      setPixelLoading(true);
+      // Get user data from localStorage or context
+      const userDataStr = localStorage.getItem('user_data');
+      let userData = user;
+      
+      if (!userData && userDataStr) {
+        try {
+          userData = JSON.parse(userDataStr);
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+      }
+      
+      if (userData) {
+        const userWithPixels = userData as { 
+          pixel_tracking_enabled?: boolean; 
+          facebook_pixel_ids?: string[]; 
+          google_ads_ids?: string[];
+        };
+        
+        setPixelTrackingEnabled(userWithPixels.pixel_tracking_enabled || false);
+        setFacebookPixelIds(userWithPixels.facebook_pixel_ids || []);
+        setGoogleAdsIds(userWithPixels.google_ads_ids || []);
+      }
+    } catch (error) {
+      console.error('Error fetching pixel tracking data:', error);
+    } finally {
+      setPixelLoading(false);
+    }
+  }, [user]);
+
+  // Save pixel tracking data
+  const savePixelTrackingData = async () => {
+    try {
+      setPixelLoading(true);
+      
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        toast.error('Authentication token not found. Please log in again.');
+        return;
+      }
+
+      // Call update profile API using the same method as profile page
+      const response = await api.updateProfile(token, {
+        pixel_tracking_enabled: pixelTrackingEnabled,
+        facebook_pixel_ids: facebookPixelIds,
+        google_ads_ids: googleAdsIds
+      });
+
+      if (response.success) {
+        toast.success(response.message || 'Pixel tracking settings updated successfully!');
+        
+        // Fetch fresh user details to get updated data
+        await fetchUserDetails();
+        
+        // Update localStorage
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            userData.pixel_tracking_enabled = pixelTrackingEnabled;
+            userData.facebook_pixel_ids = facebookPixelIds;
+            userData.google_ads_ids = googleAdsIds;
+            localStorage.setItem('user_data', JSON.stringify(userData));
+          } catch (e) {
+            console.error('Error updating localStorage:', e);
+          }
+        }
+        
+        setPixelTrackingModalOpen(false);
+      } else {
+        toast.error(response.message || 'Failed to update pixel tracking settings');
+      }
+    } catch (error) {
+      console.error('Error saving pixel tracking data:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update pixel tracking settings';
+      toast.error(errorMessage);
+    } finally {
+      setPixelLoading(false);
+    }
+  };
+
+  // Fetch pixel tracking data when modal opens
+  useEffect(() => {
+    if (pixelTrackingModalOpen) {
+      fetchPixelTrackingData();
+    }
+  }, [pixelTrackingModalOpen, fetchPixelTrackingData]);
 
   // Remove access restriction - show data for all users
 
@@ -603,6 +755,13 @@ const EmailSubscribers = () => {
               >
                 <Link className="w-4 h-4" />
                 <span>Webhook URLs</span>
+              </button>
+              <button 
+                onClick={() => setPixelTrackingModalOpen(true)}
+                className="bg-white text-[#CF3232] border border-[#CF3232] px-4 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Target className="w-4 h-4" />
+                <span>Add Pixel Tracking</span>
               </button>
               <button 
                 onClick={handleExportSubscribers}
@@ -843,11 +1002,11 @@ const EmailSubscribers = () => {
           {/* Filter Modal */}
           {filterModalOpen && (
             <div 
-              className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+              className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
               onClick={() => setFilterModalOpen(false)}
             >
               <div 
-                className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
+                className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Modal Header */}
@@ -974,11 +1133,11 @@ const EmailSubscribers = () => {
           {/* Add New Subscriber Modal */}
           {addSubscriberModalOpen && (
             <div 
-              className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+              className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
               onClick={() => setAddSubscriberModalOpen(false)}
             >
               <div 
-                className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
+                className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Modal Header */}
@@ -1090,11 +1249,11 @@ const EmailSubscribers = () => {
           {/* Edit Subscriber Modal */}
           {editSubscriberModalOpen && editingSubscriber && (
             <div 
-              className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+              className="fixed inset-0  bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
               onClick={() => setEditSubscriberModalOpen(false)}
             >
               <div 
-                className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
+                className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Modal Header */}
@@ -1192,11 +1351,11 @@ const EmailSubscribers = () => {
           {/* Webhook URLs Modal */}
           {webhookModalOpen && (
             <div 
-              className="fixed inset-0 bg-opacity-[0.3] z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+              className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
               onClick={() => setWebhookModalOpen(false)}
             >
               <div 
-                className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100"
+                className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Modal Header */}
@@ -1309,6 +1468,275 @@ const EmailSubscribers = () => {
                     className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                   >
                     Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Pixel Tracking Modal */}
+          {pixelTrackingModalOpen && (
+            <div 
+              className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+              onClick={() => setPixelTrackingModalOpen(false)}
+            >
+              <div 
+                className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
+                      Pixel Tracking Settings
+                    </h2>
+                    <button
+                      onClick={() => setPixelTrackingModalOpen(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 space-y-6">
+                  {pixelLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#CF3232]" />
+                      <span className="ml-2 text-gray-600">Loading pixel tracking settings...</span>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Enable/Disable Toggle */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold text-[#333333] mb-2">
+                              Enable Pixel Tracking
+                            </h3>
+                            <p className="text-gray-600 text-sm mb-3 font-outfit leading-relaxed">
+                              Track user engagement on your public profile page with Facebook Pixel and Google Analytics
+                            </p>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={pixelTrackingEnabled}
+                              onChange={(e) => setPixelTrackingEnabled(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#CF3232]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#CF3232]"></div>
+                          </label>
+                        </div>
+                        
+                        <button
+                          onClick={() => router.push('/dashboard/tracking-setup')}
+                          className="inline-flex items-center text-sm text-[#CF3232] hover:text-red-600 font-medium group"
+                        >
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                          </svg>
+                          Need help getting your tracking IDs? View setup guide
+                          <svg className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Show configured IDs even when tracking is disabled */}
+                      {!pixelTrackingEnabled && (facebookPixelIds.length > 0 || googleAdsIds.length > 0) && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mb-4">
+                          <div className="flex items-start space-x-2 sm:space-x-3">
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <div>
+                              <h4 className="text-sm font-medium text-yellow-800 mb-1">Tracking Currently Disabled</h4>
+                              <p className="text-xs sm:text-sm text-yellow-700 mb-2">
+                                You have {facebookPixelIds.length + googleAdsIds.length} pixel ID(s) configured, but tracking is currently disabled.
+                              </p>
+                              <div className="text-xs text-yellow-700">
+                                {facebookPixelIds.length > 0 && (
+                                  <p>• Facebook Pixels: {facebookPixelIds.length} configured</p>
+                                )}
+                                {googleAdsIds.length > 0 && (
+                                  <p>• Google Ads: {googleAdsIds.length} configured</p>
+                                )}
+                              </div>
+                              <p className="text-xs sm:text-sm text-yellow-700 font-medium mt-2">
+                                Enable tracking above to activate these pixels.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {pixelTrackingEnabled && (
+                        <div className="space-y-4 sm:space-y-6">
+                          {/* Facebook Pixel IDs */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Facebook Pixel IDs
+                            </label>
+                            <p className="text-xs text-gray-500 mb-3">
+                              Facebook Pixel IDs are usually 15-16 digits (e.g., 1234567890123456)
+                            </p>
+                            
+                            {/* Add new Facebook Pixel ID */}
+                            <div className="mb-3">
+                              <div className="firstVerifyScreen group">
+                                <input
+                                  type="text"
+                                  value={newFacebookPixelId}
+                                  onChange={(e) => setNewFacebookPixelId(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      addFacebookPixelId();
+                                    }
+                                  }}
+                                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all firstVerifyScreenInput text-sm sm:text-base border border-gray-300"
+                                  style={{ color: '#949494' }}
+                                  placeholder="Enter Facebook Pixel ID"
+                                />
+                              </div>
+                              <div className="flex justify-end mt-2">
+                                <button
+                                  type="button"
+                                  onClick={addFacebookPixelId}
+                                  disabled={!newFacebookPixelId.trim()}
+                                  className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 text-sm"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  <span>Add</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Display Facebook Pixel IDs */}
+                            {facebookPixelIds.length > 0 && (
+                              <div className="space-y-2">
+                                {facebookPixelIds.map((pixelId, index) => (
+                                  <div key={index} className="flex items-center justify-between bg-gray-50 px-3 sm:px-4 py-2 rounded-lg">
+                                    <span className="text-sm font-mono text-gray-700 break-all">{pixelId}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeFacebookPixelId(index)}
+                                      className="text-red-500 hover:text-red-700 transition-colors ml-2 flex-shrink-0"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Google Ads IDs */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Google Ads / Analytics IDs
+                            </label>
+                            <p className="text-xs text-gray-500 mb-3">
+                              Google Ads IDs start with &quot;AW-&quot; followed by numbers (e.g., AW-1234567890). Google Analytics IDs start with &quot;G-&quot; followed by alphanumeric characters (e.g., G-FE3XTDLD7N)
+                            </p>
+                            
+                            {/* Add new Google Ads ID */}
+                            <div className="mb-3">
+                              <div className="firstVerifyScreen group">
+                                <input
+                                  type="text"
+                                  value={newGoogleAdsId}
+                                  onChange={(e) => setNewGoogleAdsId(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      addGoogleAdsId();
+                                    }
+                                  }}
+                                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CF3232]/20 transition-all firstVerifyScreenInput text-sm sm:text-base border border-gray-300"
+                                  style={{ color: '#949494' }}
+                                  placeholder="Enter Google Ads ID (AW-... or G-...)"
+                                />
+                              </div>
+                              <div className="flex justify-end mt-2">
+                                <button
+                                  type="button"
+                                  onClick={addGoogleAdsId}
+                                  disabled={!newGoogleAdsId.trim()}
+                                  className="px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 text-sm"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  <span>Add</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Display Google Ads IDs */}
+                            {googleAdsIds.length > 0 && (
+                              <div className="space-y-2">
+                                {googleAdsIds.map((adsId, index) => (
+                                  <div key={index} className="flex items-center justify-between bg-gray-50 px-3 sm:px-4 py-2 rounded-lg">
+                                    <span className="text-sm font-mono text-gray-700 break-all">{adsId}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeGoogleAdsId(index)}
+                                      className="text-red-500 hover:text-red-700 transition-colors ml-2 flex-shrink-0"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info about tracking */}
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                            <div className="flex items-start space-x-2 sm:space-x-3">
+                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                              <div>
+                                <h4 className="text-sm font-medium text-blue-800 mb-1">How Pixel Tracking Works</h4>
+                                <p className="text-xs sm:text-sm text-blue-700 mb-2">
+                                  When enabled, your Facebook and Google pixels will track user engagement on your public profile page. 
+                                  This helps you measure profile views, link clicks, and other interactions for marketing analytics.
+                                </p>
+                                <p className="text-xs sm:text-sm text-blue-700 font-medium">
+                                  💡 Note: Your pixel IDs are always saved. You can temporarily disable tracking without losing your configured IDs.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-gray-200 flex gap-3">
+                  <button
+                    onClick={() => setPixelTrackingModalOpen(false)}
+                    disabled={pixelLoading}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={savePixelTrackingData}
+                    disabled={pixelLoading}
+                    className="flex-1 px-4 py-2 bg-[#CF3232] text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    {pixelLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <span>Save Settings</span>
+                    )}
                   </button>
                 </div>
               </div>

@@ -34,6 +34,8 @@ export { ProfileCompletionCard } from './ui/ProfileCompletionCard';
 export { WelcomeModal } from './ui/WelcomeModal';
 export { DashboardProfileCompletionWrapper } from './ui/DashboardProfileCompletionWrapper';
 export { default as ProfileReadyModal } from './ui/ProfileReadyModal';
+export { default as WebhookSetupComponent } from './ui/WebhookSetupComponent';
+export { default as TrackingSetupComponent } from './ui/TrackingSetupComponent';
 
 // Layout Components
 export { default as Sidebar } from './ui/Sidebar';
