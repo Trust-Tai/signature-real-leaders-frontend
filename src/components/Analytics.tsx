@@ -2,12 +2,6 @@
 
 import { useEffect } from 'react';
 
-declare global {
-  interface Window {
-    dataLayer: Array<Record<string, unknown>>;
-  }
-}
-
 export default function Analytics() {
   useEffect(() => {
     const gtmId = process.env.NEXT_PUBLIC_GTM_ID;

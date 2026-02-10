@@ -19,6 +19,7 @@ import { api } from '@/lib/api';
 import { images } from "../../assets/index";
 import { toast } from '@/components/ui/toast';
 import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
+import { trackProfileVerificationSuccess, trackProfileVerificationStart } from '@/lib/conversionTracking';
 
 const InnerProfileVerificationPage = () => {
   // Track if we've already processed redirect_to_step
@@ -60,6 +61,9 @@ const InnerProfileVerificationPage = () => {
         localStorage.removeItem('redirect_to_step');
       }, 100);
     }
+    
+    // Track profile verification start when component mounts
+    trackProfileVerificationStart();
   }, []);
   
   // Don't save current step to localStorage
@@ -156,6 +160,12 @@ const InnerProfileVerificationPage = () => {
       const newStep = currentStep + 1;
       console.log('Setting new step to:', newStep);
       setCurrentStep(newStep);
+      
+      // Fire conversion tracking when reaching the final step (step 4)
+      if (newStep === 4) {
+        console.log('[Conversion Tracking] Profile verification completed - firing success event');
+        trackProfileVerificationSuccess();
+      }
     }
   };
 
