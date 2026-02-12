@@ -50,7 +50,7 @@ export const useAutoLogin = (): UseAutoLoginReturn => {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('[AutoLogin] Error during auto-login:', error);
+     
       setError(errorMessage);
       toast.error(`Connection failed: ${errorMessage}`);
     } finally {
