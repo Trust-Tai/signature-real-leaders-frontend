@@ -47,6 +47,7 @@ export { default as ErrorBoundary } from './ui/ErrorBoundary';
 
 // Context
 export { UserProvider, useUser } from './UserContext';
+export { SSOProvider } from './SSOProvider';
 
 // Auth Components
 export { default as AuthGuard } from './AuthGuard';

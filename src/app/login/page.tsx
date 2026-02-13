@@ -945,6 +945,7 @@ const SignInPage: FC = () => {
     try {
       setIsSubmitting(true);
       const { api } = await import('@/lib/api');
+      const { loginToWordPress } = await import('@/lib/ssoUtils');
       const data = await api.loginWithPassword(email, password);
 
       if (data?.success && data?.token) {
@@ -972,7 +973,9 @@ const SignInPage: FC = () => {
         }
 
         toast.success(data?.message || "Login successful!");
-        router.push('/dashboard/analytics');
+        
+        // SSO Flow 2: Login to WordPress after frontend login
+        loginToWordPress(data.token, '/dashboard/analytics');
       } else {
         toast.error(data?.message || "Invalid credentials");
       }
@@ -993,6 +996,7 @@ const SignInPage: FC = () => {
 
     try {
       setIsSubmitting(true);
+      const { loginToWordPress } = await import('@/lib/ssoUtils');
       const res = await fetch(
         "https://real-leaders.com/wp-json/verified-real-leaders/v1/login/verify-code-and-login",
         {
@@ -1029,7 +1033,9 @@ const SignInPage: FC = () => {
           }
 
           toast.success(data?.message || "Login successful!");
-          router.push('/dashboard/analytics');
+          
+          // SSO Flow 2: Login to WordPress after frontend login
+          loginToWordPress(data.token, '/dashboard/analytics');
         }
       } else {
         toast.error(data?.message || "Invalid code");

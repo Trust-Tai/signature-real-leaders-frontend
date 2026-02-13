@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ToastProvider from "@/components/ui/ToastProvider";
+import { SSOProvider } from "@/components/SSOProvider";
 import Script from "next/script";
+import { Suspense } from "react";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -106,8 +108,12 @@ export default function RootLayout({
             style={{display:'none',visibility:'hidden'}}
           />
         </noscript>
-        <ToastProvider />
-        {children}
+        <Suspense fallback={null}>
+          <SSOProvider>
+            <ToastProvider />
+            {children}
+          </SSOProvider>
+        </Suspense>
       </body>
     </html>
   );

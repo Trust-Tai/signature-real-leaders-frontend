@@ -41,7 +41,19 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
     setShowLogoutPopup(true);
   };
 
-  const handleLogoutConfirm = () => {
+  const handleLogoutConfirm = async () => {
+    const token = localStorage.getItem('auth_token');
+    
+    // SSO Flow 3: Sync logout with WordPress
+    if (token) {
+      try {
+        const { syncLogoutWithWordPress } = await import('@/lib/ssoUtils');
+        await syncLogoutWithWordPress(token);
+      } catch (error) {
+        console.error('Failed to sync logout with WordPress:', error);
+      }
+    }
+    
     // Clear user data and token
     clearUser();
     

@@ -4,7 +4,19 @@
  * Clears authentication token and redirects to login page
  * This function should be called whenever a 401 unauthorized error occurs
  */
-export const handleUnauthorized = () => {
+export const handleUnauthorized = async () => {
+  const token = localStorage.getItem('auth_token');
+  
+  // SSO Flow 3: Sync logout with WordPress if token exists
+  if (token) {
+    try {
+      const { syncLogoutWithWordPress } = await import('./ssoUtils');
+      await syncLogoutWithWordPress(token);
+    } catch (error) {
+      console.error('Failed to sync logout with WordPress:', error);
+    }
+  }
+  
   // Clear all user-related data from localStorage
   localStorage.removeItem('auth_token');
   localStorage.removeItem('user_data');
