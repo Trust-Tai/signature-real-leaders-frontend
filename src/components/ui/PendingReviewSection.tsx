@@ -3,7 +3,6 @@
 import { images } from '@/assets';
 import Image from 'next/image';
 import React from 'react';
-import { trackProfileVerificationSuccess } from '@/lib/conversionTracking';
 
 interface PendingReviewSectionProps {
   className?: string;
@@ -12,12 +11,6 @@ interface PendingReviewSectionProps {
 const PendingReviewSection: React.FC<PendingReviewSectionProps> = ({
   className
 }) => {
-  // Fire conversion tracking when this component mounts (backup tracking)
-  React.useEffect(() => {
-    console.log('[Conversion Tracking] PendingReviewSection mounted - firing backup success event');
-    trackProfileVerificationSuccess();
-  }, []);
-
   return (
     <div className={`min-h-screen flex items-start justify-center p-4 sm:p-8 animate-fade-in-up ${className || ''}`} 
         style={{marginTop: 100}}>

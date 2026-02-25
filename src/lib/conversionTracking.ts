@@ -7,12 +7,24 @@ const GA4_MEASUREMENT_ID = "G-FE3YQDLD7N";
 const GOOGLE_ADS_CONVERSION_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
+// Flag to prevent duplicate tracking
+let hasTrackedSuccess = false;
+
 /**
  * Fire conversion event when profile verification is completed
  * This tracks the "success" event for GA4 and Google Ads conversion tracking
+ * Uses a flag to ensure the event is only fired once per session
  */
 export const trackProfileVerificationSuccess = () => {
+  // Prevent duplicate tracking
+  if (hasTrackedSuccess) {
+    console.log('[Conversion Tracking] ⚠️ Success event already tracked, skipping duplicate');
+    return;
+  }
+  
   try {
+    // Set flag to prevent duplicate tracking
+    hasTrackedSuccess = true;
   
 
     // Track via Google Tag Manager dataLayer (Primary method - works with your GTM-TT86VCLZ)
@@ -83,24 +95,6 @@ export const trackProfileVerificationSuccess = () => {
       console.log('[Conversion Tracking] ⚠️ GOOGLE_ADS_CONVERSION_ID not configured, skipping Google Ads tracking');
     }
 
-    // Additional events for flexibility (via GTM dataLayer)
-    if (typeof window !== 'undefined' && window.dataLayer) {
-      // Alternative event names for different tracking needs
-      window.dataLayer.push({
-        event: 'verification_started', // For tracking verification process completion
-        event_category: 'profile_verification',
-        event_label: 'process_completed'
-      });
-
-      window.dataLayer.push({
-        event: 'submit_application_success', // Alternative event name
-        event_category: 'profile_verification',
-        event_label: 'application_submitted'
-      });
-
-      console.log('[Conversion Tracking] ✅ Additional tracking events pushed to dataLayer');
-    }
-
   } catch (error) {
     console.error('[Conversion Tracking] ❌ Error tracking profile verification success:', error);
   }
@@ -144,4 +138,12 @@ export const trackProfileVerificationStart = () => {
   } catch (error) {
     console.error('[Conversion Tracking] ❌ Error tracking profile verification start:', error);
   }
+};
+
+/**
+ * Reset the tracking flag (useful for testing or when user starts a new verification)
+ */
+export const resetTrackingFlag = () => {
+  hasTrackedSuccess = false;
+  console.log('[Conversion Tracking] 🔄 Tracking flag reset');
 };

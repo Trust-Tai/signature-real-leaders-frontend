@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Plus, Download, X } from 'lucide-react';
+import { Plus, Download, X } from 'lucide-react';
 import { StatsCards } from '@/components';
 import { api } from '@/lib/api';
 import { toast } from '@/components/ui/toast';
@@ -10,6 +10,10 @@ const PageClicksTab = () => {
   const [loading, setLoading] = useState(true);
   const [addLinkModalOpen, setAddLinkModalOpen] = useState(false);
   const [newLink, setNewLink] = useState({ name: '', url: '', category: 'general' });
+  const [dateFilter, setDateFilter] = useState('last_30_days');
+  const [customDateFrom, setCustomDateFrom] = useState('');
+  const [customDateTo, setCustomDateTo] = useState('');
+  const [showCustomDateInputs, setShowCustomDateInputs] = useState(false);
   
   const [statsData, setStatsData] = useState({
     total_clicks: 0,
@@ -47,13 +51,20 @@ const PageClicksTab = () => {
   useEffect(() => {
     const fetchLinkStats = async () => {
       try {
+        setLoading(true);
         const authToken = localStorage.getItem('auth_token');
         if (!authToken) {
           toast.error('Please login to view stats');
           return;
         }
 
-        const response = await api.getLinkStats(authToken);
+        const response = await api.getLinkStats(
+          authToken,
+          dateFilter,
+          dateFilter === 'custom' ? customDateFrom : undefined,
+          dateFilter === 'custom' ? customDateTo : undefined
+        );
+        
         if (response.success) {
           setStatsData(response.data);
           
@@ -78,8 +89,16 @@ const PageClicksTab = () => {
       }
     };
 
-    fetchLinkStats();
-  }, []);
+    if (dateFilter !== 'custom' || (customDateFrom && customDateTo)) {
+      fetchLinkStats();
+    }
+  }, [dateFilter, customDateFrom, customDateTo]);
+
+  const handleDateFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setDateFilter(value);
+    setShowCustomDateInputs(value === 'custom');
+  };
 
   const statsCards = [
     { number: loading ? '...' : statsData.total_clicks.toLocaleString(), label: 'TOTAL LINK CLICKS', description: 'Combined total of clicks across all links', color: '#CF3232' },
@@ -156,15 +175,47 @@ ${links.map(link => `${link.link}: ${link.clicks} clicks, ${link.ctr} CTR, ${lin
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-[#101117]">Page Clicks Analytics</h2>
         <div className="flex items-center space-x-2">
-          <Calendar className="w-4 h-4 text-gray-600" />
-          <select className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
-            <option>Last 7 days</option>
-            <option>Last 30 days</option>
-            <option>Last 90 days</option>
-            <option>Last year</option>
+       
+          <select 
+          style={{color:"gray"}}
+            value={dateFilter}
+            onChange={handleDateFilterChange}
+            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="today">Today</option>
+            <option value="last_7_days">Last 7 days</option>
+            <option value="last_30_days">Last 30 days</option>
+            <option value="this_month">This month</option>
+            <option value="last_month">Last month</option>
+            <option value="this_year">This year</option>
+            <option value="all_time">All time</option>
+            <option value="custom">Custom range</option>
           </select>
         </div>
       </div>
+
+      {showCustomDateInputs && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700">From:</label>
+            <input
+              type="date"
+              value={customDateFrom}
+              onChange={(e) => setCustomDateFrom(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-1 text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700">To:</label>
+            <input
+              type="date"
+              value={customDateTo}
+              onChange={(e) => setCustomDateTo(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-1 text-sm"
+            />
+          </div>
+        </div>
+      )}
 
       <StatsCards stats={statsCards} columns={4} />
 

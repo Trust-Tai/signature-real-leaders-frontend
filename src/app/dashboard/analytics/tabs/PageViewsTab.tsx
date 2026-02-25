@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar } from 'lucide-react';
 import { StatsCards } from '@/components';
 import { api } from '@/lib/api';
 import { toast } from '@/components/ui/toast';
 
 const PageViewsTab = () => {
   const [loading, setLoading] = useState(true);
+  const [dateFilter, setDateFilter] = useState('last_30_days');
+  const [customDateFrom, setCustomDateFrom] = useState('');
+  const [customDateTo, setCustomDateTo] = useState('');
+  const [showCustomDateInputs, setShowCustomDateInputs] = useState(false);
+  
   const [statsData, setStatsData] = useState({
     total_page_views: 0,
     unique_visitors: 0,
@@ -19,13 +23,20 @@ const PageViewsTab = () => {
   useEffect(() => {
     const fetchPageViewStats = async () => {
       try {
+        setLoading(true);
         const authToken = localStorage.getItem('auth_token');
         if (!authToken) {
           toast.error('Please login to view stats');
           return;
         }
 
-        const response = await api.getPageViewStats(authToken);
+        const response = await api.getPageViewStats(
+          authToken,
+          dateFilter,
+          dateFilter === 'custom' ? customDateFrom : undefined,
+          dateFilter === 'custom' ? customDateTo : undefined
+        );
+        
         if (response.success) {
           setStatsData(response.data);
         }
@@ -37,8 +48,16 @@ const PageViewsTab = () => {
       }
     };
 
-    fetchPageViewStats();
-  }, []);
+    if (dateFilter !== 'custom' || (customDateFrom && customDateTo)) {
+      fetchPageViewStats();
+    }
+  }, [dateFilter, customDateFrom, customDateTo]);
+
+  const handleDateFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setDateFilter(value);
+    setShowCustomDateInputs(value === 'custom');
+  };
 
   const statsCards = [
     { number: loading ? '...' : statsData.total_page_views.toLocaleString(), label: 'TOTAL PAGE VIEWS', description: 'Total number of times your pages were viewed', color: '#CF3232' },
@@ -65,15 +84,47 @@ const PageViewsTab = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-[#101117]">Page Views Analytics</h2>
         <div className="flex items-center space-x-2">
-          <Calendar className="w-4 h-4 text-gray-600" />
-          <select className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
-            <option>Last 7 days</option>
-            <option>Last 30 days</option>
-            <option>Last 90 days</option>
-            <option>Last year</option>
+        
+          <select 
+          style={{color:"gray"}}
+            value={dateFilter}
+            onChange={handleDateFilterChange}
+            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="today">Today</option>
+            <option value="last_7_days">Last 7 days</option>
+            <option value="last_30_days">Last 30 days</option>
+            <option value="this_month">This month</option>
+            <option value="last_month">Last month</option>
+            <option value="this_year">This year</option>
+            <option value="all_time">All time</option>
+            <option value="custom">Custom range</option>
           </select>
         </div>
       </div>
+
+      {showCustomDateInputs && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700">From:</label>
+            <input
+              type="date"
+              value={customDateFrom}
+              onChange={(e) => setCustomDateFrom(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-1 text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700">To:</label>
+            <input
+              type="date"
+              value={customDateTo}
+              onChange={(e) => setCustomDateTo(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-1 text-sm"
+            />
+          </div>
+        </div>
+      )}
 
       <StatsCards stats={statsCards} columns={4} />
 

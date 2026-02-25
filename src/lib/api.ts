@@ -744,7 +744,18 @@ export const api = {
     };
   },
 
-  async getPageViewStats(authToken: string) {
+  async getPageViewStats(
+    authToken: string,
+    dateFilter: string = 'last_30_days',
+    dateFrom?: string,
+    dateTo?: string
+  ) {
+    const params = new URLSearchParams({ date_filter: dateFilter });
+    if (dateFilter === 'custom' && dateFrom && dateTo) {
+      params.append('date_from', dateFrom);
+      params.append('date_to', dateTo);
+    }
+
     return request<{
       success: boolean;
       data: {
@@ -760,7 +771,7 @@ export const api = {
         };
       };
     }>(
-      '/user/page-view-stats',
+      `/user/page-view-stats?${params.toString()}`,
       {
         method: 'GET',
         headers: {
@@ -786,7 +797,18 @@ export const api = {
     );
   },
 
-  async getLinkStats(authToken: string) {
+  async getLinkStats(
+    authToken: string,
+    dateFilter: string = 'last_30_days',
+    dateFrom?: string,
+    dateTo?: string
+  ) {
+    const params = new URLSearchParams({ date_filter: dateFilter });
+    if (dateFilter === 'custom' && dateFrom && dateTo) {
+      params.append('date_from', dateFrom);
+      params.append('date_to', dateTo);
+    }
+
     return request<{
       success: boolean;
       data: {
@@ -819,7 +841,7 @@ export const api = {
         };
       };
     }>(
-      '/user/link-stats',
+      `/user/link-stats?${params.toString()}`,
       {
         method: 'GET',
         headers: {
