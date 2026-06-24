@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { WORDPRESS_URLS, API_ENDPOINTS, buildRedirectUrl, API_BASE_URL } from '@/lib/config';
 import { useSearchParams } from 'next/navigation';
 
 export default function SSOTestPage() {
@@ -41,7 +42,7 @@ export default function SSOTestPage() {
       
       // Test API call
       addLog(`\nTesting API call to get user details...`);
-      fetch('https://real-leaders.com/wp-json/verified-real-leaders/v1/user/user-details', {
+      fetch(`${API_BASE_URL}/user/user-details`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -73,8 +74,8 @@ export default function SSOTestPage() {
         <div className="bg-gray-800 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Test Instructions:</h2>
           <ol className="list-decimal list-inside space-y-2">
-            <li>Login to WordPress: <a href="https://real-leaders.com/wp-admin" target="_blank" className="text-blue-400 underline">real-leaders.com/wp-admin</a></li>
-            <li>After login, visit: <a href="https://real-leaders.com/wp-json/verified-real-leaders/v1/sso/check-session?redirect_url=https://app.real-leaders.com/sso-test" target="_blank" className="text-blue-400 underline">SSO Check Session</a></li>
+            <li>Login to WordPress: <a href={WORDPRESS_URLS.WP_ADMIN} target="_blank" className="text-blue-400 underline">{WORDPRESS_URLS.WP_ADMIN}</a></li>
+            <li>After login, visit: <a href={`${API_ENDPOINTS.SSO_CHECK_SESSION}?redirect_url=${encodeURIComponent(buildRedirectUrl('/sso-test'))}`} target="_blank" className="text-blue-400 underline">SSO Check Session</a></li>
             <li>You should be redirected back here with auth_token</li>
             <li>Check the logs below to see what happened</li>
           </ol>

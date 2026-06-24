@@ -503,6 +503,7 @@ import React, { useState, useEffect, FC } from "react";
 import { Mail, ArrowLeft, Loader2, Eye, EyeOff, Lock } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/config";
 import { images } from "@/assets";
 import { toast } from "@/components/ui/toast";
 
@@ -912,7 +913,7 @@ const SignInPage: FC = () => {
     try {
       setIsSubmitting(true);
       const res = await fetch(
-        "https://real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code",
+        `${API_BASE_URL}/login/send-verification-code`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -998,7 +999,7 @@ const SignInPage: FC = () => {
       setIsSubmitting(true);
       const { loginToWordPress } = await import('@/lib/ssoUtils');
       const res = await fetch(
-        "https://real-leaders.com/wp-json/verified-real-leaders/v1/login/verify-code-and-login",
+        `${API_BASE_URL}/login/verify-code-and-login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1075,7 +1076,7 @@ const SignInPage: FC = () => {
     try {
       setIsResending(true);
       const res = await fetch(
-        "https://real-leaders.com/wp-json/verified-real-leaders/v1/login/send-verification-code",
+        `${API_BASE_URL}/login/send-verification-code`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -1,6 +1,7 @@
 // Statistics API service for tracking profile visits and link clicks
+import { API_ENDPOINTS } from './config';
 
-const BASE_URL = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/statistics';
+const BASE_URL = API_ENDPOINTS.STATISTICS;
 
 export interface RecordInteractionRequest {
   user_id: number;

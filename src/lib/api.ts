@@ -1,6 +1,7 @@
 import { authFetch } from './authUtils';
+import { API_BASE_URL, API_ENDPOINTS, WORDPRESS_URLS } from './config';
 
-export const API_BASE_URL = 'https://real-leaders.com/wp-json/verified-real-leaders/v1';
+export { API_BASE_URL };
 
 type JsonRecord = Record<string, unknown>;
 
@@ -516,7 +517,7 @@ export const api = {
           'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          redirect_url: redirectUrl || 'https://real-leaders.com/about-us'
+          redirect_url: redirectUrl || WORDPRESS_URLS.ABOUT_US
         }),
       }
     );
@@ -590,7 +591,7 @@ export const api = {
 
   async followUser(userId: number, optIn: boolean = false) {
     const authToken = localStorage.getItem('auth_token');
-    const url = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/follow-user';
+    const url = API_ENDPOINTS.FOLLOW_USER;
     const response = await authFetch(url, {
       method: 'POST',
       headers: {
@@ -622,7 +623,7 @@ export const api = {
 
   async unfollowUser(userId: number) {
     const authToken = localStorage.getItem('auth_token');
-    const url = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/unfollow-user';
+    const url = API_ENDPOINTS.UNFOLLOW_USER;
     const response = await authFetch(url, {
       method: 'POST',
       headers: {
@@ -649,7 +650,7 @@ export const api = {
 
   async checkFollowStatus(userId: number) {
     const authToken = localStorage.getItem('auth_token');
-    const url = `https://real-leaders.com/wp-json/verified-real-leaders/v1/check-follow-status?user_id=${userId}`;
+    const url = `${API_ENDPOINTS.CHECK_FOLLOW_STATUS}?user_id=${userId}`;
     const response = await authFetch(url, {
       method: 'GET',
       headers: {
@@ -950,7 +951,7 @@ export const api = {
     location: string;
   }) {
     // Use the external API endpoint for claim profile
-    const url = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/claim-profile';
+    const url = API_ENDPOINTS.CLAIM_PROFILE;
     
     try {
       const response = await fetch(url, {

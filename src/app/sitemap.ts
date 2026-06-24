@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next'
+import { WP_URL } from '@/lib/config'
  
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://real-leaders.com'
+  const baseUrl = WP_URL
   
   return [
     {

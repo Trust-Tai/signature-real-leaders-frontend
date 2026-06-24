@@ -181,6 +181,22 @@ All components are built with mobile-first design principles:
 npm install
 ```
 
+### Environment Setup
+
+1. Copy the environment template:
+```bash
+cp .env.example .env.local
+```
+
+2. Update `.env.local` with your configuration:
+```env
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_WP_URL=https://real-leaders.com
+NEXT_PUBLIC_API_BASE_URL=https://real-leaders.com/wp-json/verified-real-leaders/v1
+```
+
+See `ENVIRONMENT_VARIABLES.md` for detailed configuration guide.
+
 ### Development
 
 ```bash

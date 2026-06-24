@@ -1,8 +1,10 @@
 // SSO (Single Sign-On) utilities for WordPress integration
 // Handles authentication synchronization between frontend and WordPress
 
-const WP_SSO_BASE_URL = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/sso';
-const FRONTEND_BASE_URL = 'https://app.real-leaders.com';
+import { API_ENDPOINTS, APP_URL } from './config';
+
+const WP_SSO_BASE_URL = API_ENDPOINTS.SSO;
+const FRONTEND_BASE_URL = APP_URL;
 
 /**
  * Flow 1: Check WordPress session and redirect for SSO

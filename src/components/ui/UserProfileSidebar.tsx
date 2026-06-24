@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { X, Mail, SquarePlus,Rss, UserPlus, UserCheck, Wand2, HelpCircle, Share2 } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
+import { WP_URL } from '@/lib/config';
 import { useRouter } from 'next/navigation';
 
 interface UserProfileSidebarProps {
@@ -23,7 +24,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
   const handleLogoClick = () => {
     // Navigate to WordPress site with auto-login
-    performAutoLogin('https://real-leaders.com', true);
+    performAutoLogin(WP_URL, true);
   };
 
   const sidebarItems = [
@@ -67,7 +68,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                 className="hover:opacity-80 transition-opacity cursor-pointer"
                 title="Go to Real Leaders Website"
               >
-                <Image src="https://real-leaders.com/wp-content/uploads/sites/5/2025/11/menu-logo.png" width={200} height={60} alt='Real Leaders Logo' />
+                <Image src={`${WP_URL}/wp-content/uploads/sites/5/2025/11/menu-logo.png`} width={200} height={60} alt='Real Leaders Logo' />
               </button>
             </div>
            

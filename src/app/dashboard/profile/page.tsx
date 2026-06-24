@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { WP_URL } from '@/lib/config';
 import { toast } from '@/components/ui/toast';
 import { ArrowLeft, Camera, Save, Eye, EyeOff, ChevronDown, Upload, Loader2, Plus, Trash2, Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -1206,7 +1207,7 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                             <strong>Warning:</strong> Changing this will update your profile URL.
                           </p>
                           <p className="text-xs text-yellow-700 mt-1 break-all">
-                            Current URL: <span className="font-mono">https://real-leaders.com/{user?.username}</span>
+                            Current URL: <span className="font-mono">{WP_URL}/{user?.username}</span>
                           </p>
                         </div>
                       </div>

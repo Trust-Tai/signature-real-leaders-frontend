@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { LoadingScreen } from '@/components';
+import { buildRedirectUrl, API_ENDPOINTS } from '@/lib/config';
 
 
 interface AuthGuardProps {
@@ -38,8 +39,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       if (!token && pathname.startsWith('/dashboard')) {
         console.log('[AuthGuard] No token found, checking WordPress session...');
         // Redirect to WordPress SSO check
-        const redirectUrl = `https://app.real-leaders.com${pathname}`;
-        const ssoCheckUrl = `https://real-leaders.com/wp-json/verified-real-leaders/v1/sso/check-session?redirect_url=${encodeURIComponent(redirectUrl)}`;
+        const redirectUrl = buildRedirectUrl(pathname);
+        const ssoCheckUrl = `${API_ENDPOINTS.SSO_CHECK_SESSION}?redirect_url=${encodeURIComponent(redirectUrl)}`;
         window.location.href = ssoCheckUrl;
         setIsAuthenticated(false);
         return;

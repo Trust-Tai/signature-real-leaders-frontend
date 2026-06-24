@@ -1,18 +1,13 @@
 import { api } from './api';
 import { toast } from '@/components/ui/toast';
 
+import { WORDPRESS_URLS } from './config';
+
 /**
  * Common WordPress URLs for auto-login
+ * Now imported from centralized config
  */
-export const WORDPRESS_URLS = {
-  ABOUT_US: 'https://real-leaders.com/about-us',
-  DASHBOARD: 'https://real-leaders.com/wp-admin',
-  PROFILE: 'https://real-leaders.com/wp-admin/profile.php',
-  POSTS: 'https://real-leaders.com/wp-admin/edit.php',
-  MEDIA: 'https://real-leaders.com/wp-admin/upload.php',
-  USERS: 'https://real-leaders.com/wp-admin/users.php',
-  SETTINGS: 'https://real-leaders.com/wp-admin/options-general.php',
-} as const;
+export { WORDPRESS_URLS };
 
 /**
  * Auto-login utility function

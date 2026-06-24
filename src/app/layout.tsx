@@ -4,6 +4,7 @@ import ToastProvider from "@/components/ui/ToastProvider";
 import { SSOProvider } from "@/components/SSOProvider";
 import Script from "next/script";
 import { Suspense } from "react";
+import { WP_URL } from "@/lib/config";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -12,7 +13,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://real-leaders.com'),
+  metadataBase: new URL(WP_URL),
   title: {
     default: "Real Leaders - Build Your Leadership Brand",
     template: "%s | Real Leaders"
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://real-leaders.com",
+    url: WP_URL,
     siteName: "Real Leaders",
     title: "Real Leaders - Build Your Leadership Brand",
     description: "Build your leadership brand, grow your influence, and amplify your impact with Real Leaders.",

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
+import { WP_URL } from '@/lib/config';
 
 // Import images directly from @/assets/images
 import mg1Image from "@/assets/images/new1.png";
@@ -28,7 +29,7 @@ const cards: Card[] = [
     badge: "MAGAZINE",
     title: "Purpose-Driven Business Stories",
     subtitle: "Read the latest from Real Leaders.",
-    link: "https://real-leaders.com/",
+    link: `${WP_URL}/`,
     position: "pos1",
   },
   {
@@ -37,7 +38,7 @@ const cards: Card[] = [
     badge: "AWARDS",
     title: "Real Leaders Impact Awards",
     subtitle: "Celebrating companies using business for good.",
-    link: "https://real-leaders.com/awards/",
+    link: `${WP_URL}/awards/`,
     position: "pos2",
   },
   {
@@ -46,7 +47,7 @@ const cards: Card[] = [
     badge: "SIGNIFY",
     title: "Follow Signify Leaders",
     subtitle: "Insights and reels from leaders you trust.",
-    link: "https://real-leaders.com/signify/",
+    link: `${WP_URL}/signify/`,
     position: "pos3",
   },
   {
@@ -55,7 +56,7 @@ const cards: Card[] = [
     badge: "EVENTS",
     title: "Book Speakers & Advisors",
     subtitle: "Bring impact leaders to your next event.",
-    link: "https://real-leaders.com/events/",
+    link: `${WP_URL}/events/`,
     position: "pos4",
   },
   {
@@ -64,7 +65,7 @@ const cards: Card[] = [
     badge: "SUBSCRIBE",
     title: "Get the Magazine",
     subtitle: "Insights delivered to your inbox & door.",
-    link: "https://real-leaders.com/subscribe/",
+    link: `${WP_URL}/subscribe/`,
     position: "pos5",
   },
 ];

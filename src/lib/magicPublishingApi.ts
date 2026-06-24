@@ -1,7 +1,8 @@
 // Magic Publishing API service
 import { authFetch } from './authUtils';
+import { API_ENDPOINTS } from './config';
 
-const BASE_URL = 'https://real-leaders.com/wp-json/verified-real-leaders/v1/magic-publishing';
+const BASE_URL = API_ENDPOINTS.MAGIC_PUBLISHING;
 
 export interface GenerateArticlesRequest {
   topic?: string;

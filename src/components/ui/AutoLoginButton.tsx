@@ -3,6 +3,7 @@
 import React from 'react';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { useAutoLogin } from '@/hooks/useAutoLogin';
+import { WORDPRESS_URLS } from '@/lib/config';
 import Button from './Button';
 
 interface AutoLoginButtonProps {
@@ -15,7 +16,7 @@ interface AutoLoginButtonProps {
 }
 
 const AutoLoginButton: React.FC<AutoLoginButtonProps> = ({
-  redirectUrl = 'https://real-leaders.com/about-us',
+  redirectUrl = WORDPRESS_URLS.ABOUT_US,
   children = 'Go to WordPress',
   className = '',
   variant = 'primary',

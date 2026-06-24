@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { WP_URL } from '@/lib/config'
  
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -15,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://real-leaders.com/sitemap.xml',
+    sitemap: `${WP_URL}/sitemap.xml`,
   }
 }

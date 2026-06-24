@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { WP_URL } from '@/lib/config';
 import { useUser } from '@/components/UserContext';
 import { Copy, Check, Facebook, Twitter, Linkedin, Mail, MessageCircle, Share2, Menu } from 'lucide-react';
 import UserProfileSidebar from '@/components/ui/UserProfileSidebar';
@@ -13,7 +14,7 @@ const ShareProfilePage = () => {
 
   // Generate profile URL
   const profileUrl = user?.username
-  ? `https://real-leaders.com/${user.username}`
+  ? `${WP_URL}/${user.username}`
   : '';
 
   const handleCopy = async (text: string, field: string) => {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { WP_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     title: "Login | Real Leaders",
     description: "Sign in to your Real Leaders account to access your verified profile and leadership tools.",
     type: "website",
-    url: "https://real-leaders.com/login",
+    url: `${WP_URL}/login`,
   },
   twitter: {
     card: "summary",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://real-leaders.com/login",
+    canonical: `${WP_URL}/login`,
   }
 };
 
@@ -41,7 +42,7 @@ export default function LoginLayout({
             "@type": "WebPage",
             "name": "Login",
             "description": "Sign in to your Real Leaders account",
-            "url": "https://real-leaders.com/login"
+            "url": `${WP_URL}/login`
           })
         }}
       />
