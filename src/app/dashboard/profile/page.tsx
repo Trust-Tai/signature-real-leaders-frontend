@@ -1449,8 +1449,8 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                     </div>
                   </div>
 
-                  {/* Billing Address Section */}
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">Billing Address</h3>
+                  {/* Mailing Address Section */}
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">Mailing Address</h3>
 
                   {/* Street Address 1 */}
                   <div>
