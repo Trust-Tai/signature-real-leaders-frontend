@@ -33,6 +33,7 @@ export interface User {
   registered_date: string;
   signature_url: string;
   profile_picture_url: string;
+  profile_video?: string;
   first_name: string;
   last_name: string;
   company_name: string;

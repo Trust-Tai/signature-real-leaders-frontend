@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { images } from '@/assets';
+import ProfileVideoPlayer from '@/components/ui/ProfileVideoPlayer';
 
 interface BlueTemplateProps {
   profileData: {
@@ -15,6 +16,7 @@ interface BlueTemplateProps {
     audience_description?: string;
     profile_picture_url?: string;
     profile_image?: string;
+    profile_video?: string;
     signature_url?: string;
     newsletter_service?: string;
     links?: Array<{
@@ -90,6 +92,13 @@ export default function BlueTemplate({
               }}
             />
           </div>
+
+          {/* Video Section */}
+          {profileData.profile_video && (
+            <div className="w-full mb-6">
+              <ProfileVideoPlayer src={profileData.profile_video} />
+            </div>
+          )}
 
           {/* Name */}
           <h1 className="text-5xl font-bold text-white mb-3">

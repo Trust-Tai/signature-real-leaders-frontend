@@ -481,6 +481,13 @@ const ProfilePage = () => {
       
       setBio(user.audience_description || '');
       setProfileImage(user.profile_picture_url || null);
+
+      // Prefill video section from saved profile_video
+      if (user.profile_video) {
+        setVideoUrl(user.profile_video);
+        setShowVideoSection(true);
+      }
+
       setInformationData({
         firstName: user.first_name || '',
         lastName: user.last_name || '',

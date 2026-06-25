@@ -38,6 +38,7 @@ interface ProfileData {
   location: string;
   profile_image: string;
   profile_picture_url: string;
+  profile_video?: string;
   signature_url: string;
   links: Array<{
     id: number;

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { images } from '@/assets';
+import ProfileVideoPlayer from '@/components/ui/ProfileVideoPlayer';
 
 interface DefaultTemplateProps {
   profileData: {
@@ -18,6 +19,7 @@ interface DefaultTemplateProps {
     audience_description?: string;
     profile_picture_url?: string;
     profile_image?: string;
+    profile_video?: string;
     signature_url?: string;
     newsletter_service?: string;
     links?: Array<{
@@ -130,6 +132,13 @@ export default function DefaultTemplate({
               }}
             />
           </div>
+
+          {/* Video Section */}
+          {profileData.profile_video && (
+            <div className="w-full mb-8">
+              <ProfileVideoPlayer src={profileData.profile_video} />
+            </div>
+          )}
 
           {/* Name */}
           <h1
