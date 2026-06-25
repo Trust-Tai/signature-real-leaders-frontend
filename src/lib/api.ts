@@ -944,9 +944,10 @@ export const api = {
   async claimProfile(payload: {
     id: number;
     company_name: string;
-    ceo: string;
+    first_name: string;
+    last_name: string;
     website: string;
-    linkedin_url: string;
+    linkedin: string;
     email: string;
     industry: string;
   }) {

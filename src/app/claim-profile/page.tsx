@@ -100,13 +100,13 @@ const InnerClaimProfilePage = () => {
     try {
       setLoading(true);
       
-      // Combine first_name and last_name into ceo for API
       const result = await api.claimProfile({
         id: parseInt(profileId, 10),
         company_name: formData.company_name,
-        ceo: `${formData.first_name} ${formData.last_name}`.trim(),
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         website: formData.website,
-        linkedin_url: formData.linkedin_url,
+        linkedin: formData.linkedin_url,
         email: formData.email,
         industry: formData.industry
       });

@@ -13,7 +13,7 @@ import { useProfileStepNavigation } from '@/hooks/useProfileStepNavigation';
 import {
   FaInstagram, FaTiktok, FaYoutube, FaSpotify, FaLinkedin, FaFacebook, FaPodcast, FaBlog, FaHandshake, FaHeart, FaXTwitter
 } from 'react-icons/fa6';
-import { FaMapMarkedAlt, FaRss } from 'react-icons/fa';
+import { FaMapMarkedAlt } from 'react-icons/fa';
 import DashBoardFooter from '@/components/ui/dashboardFooter';
 import { countries } from '@/default/countries';
 import WebhookSetupComponent from '@/components/ui/WebhookSetupComponent';
@@ -39,6 +39,10 @@ const ProfilePage = () => {
   // Existing state
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [bio, setBio] = useState("");
+  // Video section state
+  const [showVideoSection, setShowVideoSection] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -764,7 +768,24 @@ const ProfilePage = () => {
       updateData.facebook_pixel_ids = facebookPixelIds;
       updateData.google_ads_ids = googleAdsIds;
 
-      const response = await api.updateProfile(token, updateData);
+      // Video section - send as `profile_video` (a file upload or a URL string)
+      if (showVideoSection && videoUrl && !videoFile) {
+        updateData.profile_video = videoUrl;
+      }
+
+      // If a video file was uploaded, send everything as multipart with the file under `profile_video`
+      let response;
+      if (showVideoSection && videoFile) {
+        const formData = new FormData();
+        Object.entries(updateData).forEach(([key, value]) => {
+          if (value === undefined || value === null) return;
+          formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+        });
+        formData.append('profile_video', videoFile);
+        response = await api.updateProfileWithFiles(token, formData);
+      } else {
+        response = await api.updateProfile(token, updateData);
+      }
 
       if (response.success) {
         // Show backend success message
@@ -1207,7 +1228,15 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                             <strong>Warning:</strong> Changing this will update your profile URL.
                           </p>
                           <p className="text-xs text-yellow-700 mt-1 break-all">
-                            Current URL: <span className="font-mono">{WP_URL}/{user?.username}</span>
+                            Current URL:{' '}
+                            <a
+                              href={`${WP_URL}/${user?.username}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-mono underline hover:text-yellow-900 transition-colors"
+                            >
+                              {WP_URL}/{user?.username}
+                            </a>
                           </p>
                         </div>
                       </div>
@@ -1326,22 +1355,6 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                     </div>
                   </div>
 
-                  {/* Row 4: RSS Feed URL */}
-                  <div className="mb-[10]">
-                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">RSS Feed URL</label>
-                    <div className='firstVerifyScreen group relative'>
-                      <FaRss className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#FF6600] z-10" />
-                      <input
-                        type="url"
-                        value={informationData?.rss_feed_url || ''}
-                        onChange={(e) => setInformationData(prev => prev ? { ...prev, rss_feed_url: e.target.value } : null)}
-                        className="w-full pl-12 pr-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
-                        style={{ color: '#949494' }}
-                        placeholder="Add your RSS feed URL"
-                      />
-                    </div>
-                  </div>
-
                   {/* Row 5: Industry & Number of Employees */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-[10]">
                     <div>
@@ -1448,6 +1461,80 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                       />
                     </div>
                   </div>
+
+                  {/* Add Video Section Toggle */}
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowVideoSection(prev => !prev)}
+                      className="flex items-center justify-between w-full sm:w-auto sm:min-w-[260px] px-4 py-3 rounded-lg border border-gray-300 hover:border-[#CF3232] transition-colors"
+                    >
+                      <span className="text-sm font-medium text-gray-700">Add Video Section</span>
+                      <span className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors ${showVideoSection ? 'bg-[#CF3232]' : 'bg-gray-200'}`}>
+                        <span className={`inline-block w-5 h-5 bg-white rounded-full shadow transform transition-transform ${showVideoSection ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Video Field - file upload or URL */}
+                  {showVideoSection && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Video</label>
+                      <p className="text-xs text-gray-500 mb-3">Upload a video file or paste a video URL.</p>
+
+                      {/* Video URL */}
+                      <div className="firstVerifyScreen group">
+                        <input
+                          type="url"
+                          value={videoUrl}
+                          onChange={(e) => {
+                            setVideoUrl(e.target.value);
+                            if (e.target.value) setVideoFile(null);
+                          }}
+                          className="w-full px-4 py-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-red/20 transition-all duration-300 firstVerifyScreenInput"
+                          style={{ color: '#949494' }}
+                          placeholder="https://youtube.com/watch?v=... or a direct video link"
+                        />
+                      </div>
+
+                      <div className="flex items-center my-3">
+                        <div className="flex-1 h-px bg-gray-200" />
+                        <span className="px-3 text-xs text-gray-400">OR</span>
+                        <div className="flex-1 h-px bg-gray-200" />
+                      </div>
+
+                      {/* Video File Upload */}
+                      <label className="flex flex-col items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#CF3232] transition-colors">
+                        <input
+                          type="file"
+                          accept="video/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null;
+                            setVideoFile(file);
+                            if (file) setVideoUrl('');
+                          }}
+                        />
+                        <span className="text-sm font-medium text-[#CF3232]">
+                          {videoFile ? 'Change video file' : 'Upload a video file'}
+                        </span>
+                        <span className="text-xs text-gray-400 mt-1">MP4, MOV, WebM up to your plan limit</span>
+                      </label>
+
+                      {videoFile && (
+                        <div className="mt-3 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                          <span className="text-sm text-gray-700 truncate">{videoFile.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => setVideoFile(null)}
+                            className="text-red-500 hover:text-red-700 text-sm ml-3 flex-shrink-0"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Mailing Address Section */}
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">Mailing Address</h3>
@@ -1684,39 +1771,28 @@ const handleArrayInputChange = (field: string, value: string[]) => {
 
 <div className="firstVerifyScreen group" style={{ height: "auto", flexDirection: "column" }}>
   {/* Content Preference Industry - Multi-select with improved UI */}
-  <div className="space-y-4">
+  <div className="space-y-4 w-full">
     <div className='flex flex-col items-center text-center mt-4 sm:mt-5 md:mt-6'>
       <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-800 mb-2 sm:mb-3 md:mb-4">
-        Content Preference Industry
+        Share What You Need
       </label>
       <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-3 sm:mb-4 px-2">
-        Select all industries that interest you (select multiple)
+        We&apos;ll help you find it
       </p>
     </div>
     {/* Grid of industry options - responsive and compact */}
-    <div className="grid grid-cols-1 sm:grid-cols-2  gap-2 sm:gap-3 md:gap-4 mb-6" style={{margin:25}}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-6" style={{margin:25}}>
       {[
-        "Construction",
-        "Energy & Facilities",
-        "Consumer Packed Goods (CPG)",
-        "Education/Training",
-        "Fashion/Apparel",
-        "Financial services",
-        "Food & Beverage (Non-CPG)",
-        "Healthcare",
-        "Home & Lifestyle",
-        "Insurance",
-        "Manufacturing/Industrial",
-        "Marketing & Media",
-        "Membership/Community",
-        "Personal Care & Wellness",
-        "Professional/Advisory and Consulting Services",
-        "Real Estate",
-        "Social Enterprise & Education",
-        "Staffing/Recruiting",
-        "Travel and Hospitality",
-        "Technology",
-        "Other",
+        "Capital",
+        "CEO Peer Advisory Group",
+        "Content/Marketing",
+        "Leadership Development",
+        "Credentials",
+        "Speaker Coaching",
+        "Connections",
+        "Hiring/Talent Solutions",
+        "Executive Development",
+        "Lead Generation",
       ].map((industry) => (
         <label
           key={industry}
