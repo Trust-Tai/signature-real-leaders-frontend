@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { useUser } from '../UserContext';
 import { useRouter } from 'next/navigation';
 // Scheduling link for the "Schedule Success Call" button.
-const SCHEDULE_SUCCESS_CALL_URL = 'https://calendly.com/';
+const SCHEDULE_SUCCESS_CALL_URL = 'https://calendly.com/kevin-rlp/verified-onboarding';
 
 interface UserProfileDropdownProps {
   userName?: string;
