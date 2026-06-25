@@ -6,16 +6,15 @@ import { LoadingScreen } from '@/components';
 import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
 import { toast } from '@/components/ui/toast';
 import { api } from '@/lib/api';
-import { countries } from '@/default/countries';
 import { ChevronDown } from 'lucide-react';
 
 interface ClaimProfileFormData {
-  ceo: string;
+  company_name: string;
+  first_name: string;
+  last_name: string;
   website: string;
-  linkedin: string;
-  share: string;
+  linkedin_url: string;
   email: string;
-  location: string;
   industry: string;
 }
 
@@ -25,12 +24,12 @@ const InnerClaimProfilePage = () => {
   
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ClaimProfileFormData>({
-    ceo: '',
+    company_name: '',
+    first_name: '',
+    last_name: '',
     website: '',
-    linkedin: '',
-    share: '',
+    linkedin_url: '',
     email: '',
-    location: '',
     industry: ''
   });
 
@@ -90,7 +89,7 @@ const InnerClaimProfilePage = () => {
     }
 
     // Validate required fields
-    const requiredFields: (keyof ClaimProfileFormData)[] = ['ceo', 'website', 'linkedin', 'share', 'email', 'location', 'industry'];
+    const requiredFields: (keyof ClaimProfileFormData)[] = ['company_name', 'first_name', 'last_name', 'website', 'linkedin_url', 'email', 'industry'];
     const missingFields = requiredFields.filter(field => !formData[field].trim());
     
     if (missingFields.length > 0) {
@@ -101,21 +100,27 @@ const InnerClaimProfilePage = () => {
     try {
       setLoading(true);
       
+      // Combine first_name and last_name into ceo for API
       const result = await api.claimProfile({
         id: parseInt(profileId, 10),
-        ...formData
+        company_name: formData.company_name,
+        ceo: `${formData.first_name} ${formData.last_name}`.trim(),
+        website: formData.website,
+        linkedin_url: formData.linkedin_url,
+        email: formData.email,
+        industry: formData.industry
       });
 
       if (result.success) {
         toast.success(result.message || 'Your account is pending review. Please wait for admin approval.');
         // Reset form
         setFormData({
-          ceo: '',
+          company_name: '',
+          first_name: '',
+          last_name: '',
           website: '',
-          linkedin: '',
-          share: '',
+          linkedin_url: '',
           email: '',
-          location: '',
           industry: ''
         });
         setCustomIndustry('');
@@ -156,18 +161,50 @@ const InnerClaimProfilePage = () => {
           {/* Claim Profile Form */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* CEO Name */}
+              {/* First Name */}
               <div>
-                <label htmlFor="ceo" className="block text-sm font-medium text-gray-200 mb-2">
-                  CEO Name *
+                <label htmlFor="first_name" className="block text-sm font-medium text-gray-200 mb-2">
+                  First Name *
                 </label>
                 <input
                   type="text"
-                  id="ceo"
-                  value={formData.ceo}
-                  onChange={(e) => handleInputChange('ceo', e.target.value)}
+                  id="first_name"
+                  value={formData.first_name}
+                  onChange={(e) => handleInputChange('first_name', e.target.value)}
                   className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  placeholder="Enter CEO name"
+                  placeholder="Enter first name"
+                  required
+                />
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <label htmlFor="last_name" className="block text-sm font-medium text-gray-200 mb-2">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  id="last_name"
+                  value={formData.last_name}
+                  onChange={(e) => handleInputChange('last_name', e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="Enter last name"
+                  required
+                />
+              </div>
+
+              {/* Company Name */}
+              <div>
+                <label htmlFor="company_name" className="block text-sm font-medium text-gray-200 mb-2">
+                  Company Name *
+                </label>
+                <input
+                  type="text"
+                  id="company_name"
+                  value={formData.company_name}
+                  onChange={(e) => handleInputChange('company_name', e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="Enter company name"
                   required
                 />
               </div>
@@ -188,34 +225,18 @@ const InnerClaimProfilePage = () => {
                 />
               </div>
 
-              {/* LinkedIn */}
+              {/* LinkedIn URL */}
               <div>
-                <label htmlFor="linkedin" className="block text-sm font-medium text-gray-200 mb-2">
-                  LinkedIn Profile *
+                <label htmlFor="linkedin_url" className="block text-sm font-medium text-gray-200 mb-2">
+                  LinkedIn URL *
                 </label>
                 <input
                   type="url"
-                  id="linkedin"
-                  value={formData.linkedin}
-                  onChange={(e) => handleInputChange('linkedin', e.target.value)}
+                  id="linkedin_url"
+                  value={formData.linkedin_url}
+                  onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
                   className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   placeholder="https://linkedin.com/in/username"
-                  required
-                />
-              </div>
-
-              {/* Share URL */}
-              <div>
-                <label htmlFor="share" className="block text-sm font-medium text-gray-200 mb-2">
-                  Share URL *
-                </label>
-                <input
-                  type="url"
-                  id="share"
-                  value={formData.share}
-                  onChange={(e) => handleInputChange('share', e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  placeholder="https://example.com/share"
                   required
                 />
               </div>
@@ -234,30 +255,6 @@ const InnerClaimProfilePage = () => {
                   placeholder="your@email.com"
                   required
                 />
-              </div>
-
-              {/* Location */}
-              <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-200 mb-2">
-                  Location *
-                </label>
-                <div className="relative">
-                  <select
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange('location', e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 appearance-none pr-10"
-                    required
-                  >
-                    <option value="">Select Location</option>
-                    {countries.map((country) => (
-                      <option key={country.code} value={country.name}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
-                </div>
               </div>
 
               {/* Industry */}

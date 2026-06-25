@@ -10,9 +10,9 @@ import DashBoardFooter from '@/components/ui/dashboardFooter';
 import DashboardTab from './tabs/DashboardTab';
 import PageViewsTab from './tabs/PageViewsTab';
 import PageClicksTab from './tabs/PageClicksTab';
-import MembersTab from './tabs/MembersTab';
+import SubscribersTab from './tabs/SubscribersTab';
 
-type TabType = 'dashboard' | 'page-views' | 'page-clicks' | 'members';
+type TabType = 'dashboard' | 'page-views' | 'page-clicks' | 'subscribers';
 
 const AnalyticsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,7 +22,7 @@ const AnalyticsPage = () => {
     { id: 'dashboard' as TabType, label: 'Dashboard' },
     { id: 'page-views' as TabType, label: 'Page Views' },
     { id: 'page-clicks' as TabType, label: 'Page Clicks' },
-    { id: 'members' as TabType, label: 'Members' }
+    { id: 'subscribers' as TabType, label: 'Subscribers' }
   ];
 
   const renderTabContent = () => {
@@ -33,8 +33,8 @@ const AnalyticsPage = () => {
         return <PageViewsTab />;
       case 'page-clicks':
         return <PageClicksTab />;
-      case 'members':
-        return <MembersTab />;
+      case 'subscribers':
+        return <SubscribersTab />;
       default:
         return <DashboardTab />;
     }

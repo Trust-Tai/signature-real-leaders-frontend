@@ -9,6 +9,8 @@ import mg2Image from "@/assets/images/new2.png";
 import mg3Image from "@/assets/images/new3.png";
 import mg4Image from "@/assets/images/new4.png";
 import mg5Image from "@/assets/images/mg-5.jpeg";
+import mg6Image from "@/assets/images/content-articles-bg.jpg";
+import mg7Image from "@/assets/images/content-calendar-bg.jpg";
 
 // Define the Card interface for type safety
 interface Card {
@@ -26,7 +28,7 @@ const cards: Card[] = [
   {
     id: 1,
     image: mg1Image,
-    badge: "MAGAZINE",
+    badge: "CONTENT",
     title: "Purpose-Driven Business Stories",
     subtitle: "Read the latest from Real Leaders.",
     link: `${WP_URL}/`,
@@ -35,7 +37,7 @@ const cards: Card[] = [
   {
     id: 2,
     image: mg2Image,
-    badge: "AWARDS",
+    badge: "CREDENTIALS",
     title: "Real Leaders Impact Awards",
     subtitle: "Celebrating companies using business for good.",
     link: `${WP_URL}/awards/`,
@@ -44,7 +46,7 @@ const cards: Card[] = [
   {
     id: 3,
     image: mg3Image,
-    badge: "SIGNIFY",
+    badge: "CONNECTIONS",
     title: "Follow Signify Leaders",
     subtitle: "Insights and reels from leaders you trust.",
     link: `${WP_URL}/signify/`,
@@ -53,7 +55,7 @@ const cards: Card[] = [
   {
     id: 4,
     image: mg4Image,
-    badge: "EVENTS",
+    badge: "CUSTOM PROFILE",
     title: "Book Speakers & Advisors",
     subtitle: "Bring impact leaders to your next event.",
     link: `${WP_URL}/events/`,
@@ -62,11 +64,29 @@ const cards: Card[] = [
   {
     id: 5,
     image: mg5Image,
-    badge: "SUBSCRIBE",
+    badge: "CEO PEER GROUPS",
     title: "Get the Magazine",
     subtitle: "Insights delivered to your inbox & door.",
     link: `${WP_URL}/subscribe/`,
     position: "pos5",
+  },
+  {
+    id: 6,
+    image: mg6Image,
+    badge: "CONTRIBUTE ARTICLES",
+    title: "Share Your Expertise",
+    subtitle: "Contribute thought leadership articles.",
+    link: `${WP_URL}/contribute/`,
+    position: "pos6",
+  },
+  {
+    id: 7,
+    image: mg7Image,
+    badge: "CAPITAL",
+    title: "Access Funding Opportunities",
+    subtitle: "Connect with investors and capital sources.",
+    link: `${WP_URL}/capital/`,
+    position: "pos7",
   },
 ];
 
@@ -155,6 +175,12 @@ export const InteractiveMagazineCards: React.FC = () => {
 
   return (
     <div className="magazine-cards-container">
+      {/* Header Section */}
+      <div className="cards-header">
+        <h2 className="cards-title">The Community for Impact</h2>
+        <p className="cards-subtitle">Create Your Free Profile to Benefit from Real Leaders</p>
+      </div>
+
       <style>{`
         .magazine-cards-container {
           --rl-red: #c61f27;
@@ -172,6 +198,36 @@ export const InteractiveMagazineCards: React.FC = () => {
           justify-content: center;
           color: #eaeaea;
           font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+
+        .cards-header {
+          position: absolute;
+          top: 40px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          z-index: 50;
+          max-width: 100%;
+          padding: 0 20px;
+          width: 100%;
+        }
+
+        .cards-title {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #ffffff;
+          margin: 0 0 12px 0;
+          line-height: 1.2;
+          letter-spacing: -0.02em;
+          margin-bottom: 5px;
+        }
+
+        .cards-subtitle {
+          font-size: 1.125rem;
+          font-weight: 400;
+          color: rgba(255, 255, 255, 0.75);
+          margin: 0;
+          line-height: 1.5;
         }
 
         .nav {
@@ -296,11 +352,13 @@ export const InteractiveMagazineCards: React.FC = () => {
 
       
 
-        .pos1 { left: 8%; top: 5%; transform: rotate(-9deg) translateZ(0); }
-        .pos2 { left: 35%; top: 15%; transform: rotate(6deg) translateZ(0); }
-        .pos3 { left: 62%; top: 8%; transform: rotate(-3deg) translateZ(0); }
+        .pos1 { left: 8%; top: 15%; transform: rotate(-9deg) translateZ(0); }
+        .pos2 { left: 35%; top: 20%; transform: rotate(6deg) translateZ(0); }
+        .pos3 { left: 62%; top: 15%; transform: rotate(-3deg) translateZ(0); }
         .pos4 { left: 15%; top: 45%; transform: rotate(10deg) translateZ(0); }
-        .pos5 { left: 50%; top: 48%; transform: rotate(-7deg) translateZ(0); }
+        .pos5 { left: 50%; top: 50%; transform: rotate(-7deg) translateZ(0); }
+        .pos6 { left: 65%; top: 58%; transform: rotate(5deg) translateZ(0); }
+        .pos7 { left: 28%; top: 72%; transform: rotate(-8deg) translateZ(0); }
 
         .hint {
           position: absolute;
@@ -320,12 +378,33 @@ export const InteractiveMagazineCards: React.FC = () => {
             --card-w: 180px;
             --card-h: 240px;
           }
+
+          .cards-title {
+            font-size: 2rem;
+          }
+
+          .cards-subtitle {
+            font-size: 1rem;
+          }
         }
 
         @media (max-width: 720px) {
           .magazine-cards-container {
             --card-w: 160px;
             --card-h: 220px;
+          }
+
+          .cards-header {
+            top: 40px;
+            max-width: 90%;
+          }
+
+          .cards-title {
+            font-size: 1.75rem;
+          }
+
+          .cards-subtitle {
+            font-size: 0.95rem;
           }
         }
       `}</style>

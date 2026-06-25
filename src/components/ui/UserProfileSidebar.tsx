@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, Mail, SquarePlus,Rss, UserPlus, UserCheck, Wand2, HelpCircle, Share2 } from 'lucide-react';
+import { X, BookUser, SquarePlus, UserCheck, HelpCircle, Share2, Calendar, Users } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { WP_URL } from '@/lib/config';
@@ -28,10 +28,10 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   };
 
   const sidebarItems = [
-    { icon: Rss, label: 'RSS Feed', path: '/dashboard/rss-feed', page: 'rss-feed', tourId: 'rss-feed' },
     { icon: UserCheck, label: 'Following', path: '/dashboard/following', page: 'following' },
-    { icon: UserPlus, label: 'Followers', path: '/dashboard/followers', page: 'followers' },
-    { icon: Mail, label: 'Leads', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' }
+    { icon: BookUser, label: 'Directory', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
+    { icon: Calendar, label: 'Event', path: 'https://real-leaders.com/event/', page: 'events', external: true },
+    { icon: Users, label: 'Join Community', path: '/dashboard/community', page: 'community', badge: 'Add On' }
   ];
 
   return (
@@ -106,36 +106,25 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
                   }`}
                   onClick={() => {
                     setSidebarOpen(false);
-                    router.push(`${item.path}`);
+                    if (item.external) {
+                      window.open(item.path, '_blank', 'noopener,noreferrer');
+                    } else {
+                      router.push(`${item.path}`);
+                    }
                   }}
                 >
                   <div className="flex items-center space-x-3">
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm">{item.label}</span>
                   </div>
+                  {item.badge && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
+                      {item.badge}
+                    </span>
+                  )}
                 </div>
               );
             })}
-
-            {/* Magic Studio - After other items */}
-            <div
-              data-tour="magic-publishing"
-              onClick={() => {
-                setSidebarOpen(false);
-                router.push('/dashboard/magic-publishing');
-              }}
-              className={`flex items-center justify-between w-full p-3 rounded-lg cursor-pointer transition-colors ${
-                currentPage.startsWith('magic-publishing') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <Wand2 className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm">Magic Studio</span>
-              </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
-                Pro
-              </span>
-            </div>
 
             {/* Help - Last Menu Item */}
             <div

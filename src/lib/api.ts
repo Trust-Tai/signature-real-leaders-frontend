@@ -943,12 +943,12 @@ export const api = {
 
   async claimProfile(payload: {
     id: number;
+    company_name: string;
     ceo: string;
     website: string;
-    linkedin: string;
-    share: string;
+    linkedin_url: string;
     email: string;
-    location: string;
+    industry: string;
   }) {
     // Use the external API endpoint for claim profile
     const url = API_ENDPOINTS.CLAIM_PROFILE;

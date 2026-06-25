@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { User, ChevronDown, LogOut, User as UserIcon, UserRoundCheck } from 'lucide-react';
+import { User, ChevronDown, LogOut, User as UserIcon, UserRoundCheck, PhoneCall } from 'lucide-react';
 import LogoutConfirmationPopup from './LogoutConfirmationPopup';
 import Image from 'next/image';
 import { useUser } from '../UserContext';
 import { useRouter } from 'next/navigation';
+// Scheduling link for the "Schedule Success Call" button.
+const SCHEDULE_SUCCESS_CALL_URL = 'https://calendly.com/';
+
 interface UserProfileDropdownProps {
   userName?: string;
   userImage?: string;
@@ -82,6 +85,16 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
 
   return (
     <>
+      <div className="flex items-center space-x-2 sm:space-x-3">
+      <a
+        href={SCHEDULE_SUCCESS_CALL_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center space-x-2 bg-[#CF3232] text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors whitespace-nowrap"
+      >
+        <PhoneCall className="w-4 h-4 flex-shrink-0" />
+        <span className="hidden sm:inline">Schedule Success Call</span>
+      </a>
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={toggleDropdown}
@@ -151,6 +164,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
             </button>
           </div>
         )}
+      </div>
       </div>
 
       <LogoutConfirmationPopup
