@@ -132,8 +132,6 @@ export default function DefaultTemplate({
               }}
             />
           </div>
-
-          {/* Video Section */}
           {profileData.profile_video && (
             <div className="w-full mb-8">
               <ProfileVideoPlayer src={profileData.profile_video} />

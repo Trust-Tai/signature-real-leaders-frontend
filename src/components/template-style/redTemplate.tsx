@@ -92,8 +92,6 @@ export default function RedTemplate({
               }}
             />
           </div>
-
-          {/* Video Section */}
           {profileData.profile_video && (
             <div className="w-full mb-6">
               <ProfileVideoPlayer src={profileData.profile_video} />

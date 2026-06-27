@@ -27,12 +27,6 @@ interface LocalSubscriber {
   list_name?: string;
 }
 
-/**
- * NewsletterSubscribersPanel
- * Self-contained subscribers experience (stats, table, filters, modals) WITHOUT the
- * page chrome (sidebar/header/footer). Rendered both by the standalone
- * /dashboard/email-subscribers page and by the Subscribers tab in /dashboard/analytics.
- */
 const NewsletterSubscribersPanel = () => {
   const { user, fetchUserDetails } = useUser();
   const router = useRouter();
@@ -60,7 +54,6 @@ const NewsletterSubscribersPanel = () => {
   const [newWebhookUrl, setNewWebhookUrl] = useState('');
   const [webhookLoading, setWebhookLoading] = useState(false);
 
-  // Pixel tracking state
   const [pixelTrackingEnabled, setPixelTrackingEnabled] = useState(false);
   const [facebookPixelIds, setFacebookPixelIds] = useState<string[]>([]);
   const [googleAdsIds, setGoogleAdsIds] = useState<string[]>([]);
@@ -68,7 +61,6 @@ const NewsletterSubscribersPanel = () => {
   const [newGoogleAdsId, setNewGoogleAdsId] = useState('');
   const [pixelLoading, setPixelLoading] = useState(false);
 
-  // API State
   const [stats, setStats] = useState<NewsletterStats | null>(null);
   const [subscribersData, setSubscribersData] = useState<LocalSubscriber[]>([]);
   const [pagination, setPagination] = useState({
@@ -82,14 +74,12 @@ const NewsletterSubscribersPanel = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [exportLoading, setExportLoading] = useState(false);
 
-  // Fetch newsletter stats
   const fetchStats = useCallback(async () => {
     try {
       const statsData = await getNewsletterStats();
       setStats(statsData);
     } catch (err) {
       console.error('Error fetching stats:', err);
-      // Set default stats instead of showing error
       setStats({
         success: true,
         data: {
@@ -105,7 +95,6 @@ const NewsletterSubscribersPanel = () => {
     }
   }, []);
 
-  // Fetch subscribers with filters
   const fetchSubscribers = useCallback(async (page = 1) => {
     try {
       setLoading(true);
@@ -114,7 +103,6 @@ const NewsletterSubscribersPanel = () => {
         per_page: 20
       };
 
-      // Apply filters
       if (filters.status !== 'all') {
         apiFilters.status = filters.status as 'active' | 'unsubscribed';
       }
@@ -122,22 +110,18 @@ const NewsletterSubscribersPanel = () => {
         apiFilters.search = filters.searchTerm;
       }
 
-      // Handle date range
       if (filters.dateRange !== 'all') {
         const dateRange = getDateRange(filters.dateRange);
         if (dateRange.date_from) apiFilters.date_from = dateRange.date_from;
         if (dateRange.date_to) apiFilters.date_to = dateRange.date_to;
       }
 
-      // Handle custom date range
       if (filters.dateFrom) apiFilters.date_from = filters.dateFrom;
       if (filters.dateTo) apiFilters.date_to = filters.dateTo;
 
       const subscribersResponse = await getNewsletterSubscribers(apiFilters);
 
       if (subscribersResponse.success) {
-        // Convert API subscribers to local format
-        // API returns subscribers as a direct array
         const allSubscribers = subscribersResponse.data.subscribers || [];
 
         const localSubscribers: LocalSubscriber[] = allSubscribers.map((sub, index) => ({
@@ -155,7 +139,6 @@ const NewsletterSubscribersPanel = () => {
       }
     } catch (err) {
       console.error('Error fetching subscribers:', err);
-      // Set empty data instead of showing error
       setSubscribersData([]);
       setPagination({
         page: 1,
@@ -169,18 +152,15 @@ const NewsletterSubscribersPanel = () => {
     }
   }, [filters]);
 
-  // Initial data fetch
   useEffect(() => {
     fetchStats();
     fetchSubscribers();
   }, [fetchStats, fetchSubscribers]);
 
-  // Refetch when filters change
   useEffect(() => {
     fetchSubscribers(1);
   }, [filters, fetchSubscribers]);
 
-  // Generate stats cards from API data
   const statsCards = stats ? [
     {
       number: stats.data.total_subscribers.toLocaleString(),
@@ -220,7 +200,6 @@ const NewsletterSubscribersPanel = () => {
       try {
         setAddingSubscriber(true);
 
-        // Get current user's ID from user context or localStorage
         const userDataStr = localStorage.getItem('user_data');
         let userId = user?.id;
 
@@ -238,7 +217,6 @@ const NewsletterSubscribersPanel = () => {
           return;
         }
 
-        // Use the new API endpoint with user's own ID
         const response = await addSubscriberToUser(userId, {
           email: newSubscriber.email,
           first_name: newSubscriber.first_name,
@@ -248,7 +226,6 @@ const NewsletterSubscribersPanel = () => {
         if (response.success) {
           toast.success(response.message || 'Subscriber added successfully!');
 
-          // Refresh both stats and subscribers list
           await Promise.all([
             fetchStats(),
             fetchSubscribers(currentPage)
@@ -281,25 +258,20 @@ const NewsletterSubscribersPanel = () => {
       try {
         setStatusUpdating(editingSubscriber.email);
 
-        // Check what status user has selected in the modal
         const selectedStatus = editingSubscriber.status.toLowerCase();
 
         if (selectedStatus === 'active') {
-          // User wants to activate subscriber
           const response = await activateSubscriber({ email: editingSubscriber.email });
           if (response.success) {
             toast.success(response.message || 'Subscriber activated successfully!');
-            // Refresh subscribers list
             await fetchSubscribers(currentPage);
             setEditSubscriberModalOpen(false);
             setEditingSubscriber(null);
           }
         } else {
-          // User wants to deactivate subscriber (inactive/unsubscribed)
           const response = await deactivateSubscriber({ email: editingSubscriber.email });
           if (response.success) {
             toast.success(response.message || 'Subscriber deactivated successfully!');
-            // Refresh subscribers list
             await fetchSubscribers(currentPage);
             setEditSubscriberModalOpen(false);
             setEditingSubscriber(null);
@@ -340,13 +312,11 @@ const NewsletterSubscribersPanel = () => {
     try {
       setExportLoading(true);
 
-      // Import the export function
       const { exportSubscribersCSV } = await import('@/lib/newsletterApi');
 
       const response = await exportSubscribersCSV();
 
       if (response.success && response.data.download_url) {
-        // Open download URL in new tab
         window.open(response.data.download_url, '_blank');
       } else {
         alert('Export failed: ' + (response.message || 'Unknown error'));
@@ -354,7 +324,6 @@ const NewsletterSubscribersPanel = () => {
     } catch (error) {
       console.error('Error exporting CSV:', error);
 
-      // Fallback to static export if API fails
       if (subscribersData.length === 0) {
         alert('No subscribers to export');
         return;
@@ -387,11 +356,9 @@ const NewsletterSubscribersPanel = () => {
     }
   };
 
-  // Fetch current webhook URLs
   const fetchWebhookUrls = useCallback(async () => {
     try {
       setWebhookLoading(true);
-      // Get user data from localStorage or context
       const userDataStr = localStorage.getItem('user_data');
       let userData = user;
 
@@ -416,7 +383,6 @@ const NewsletterSubscribersPanel = () => {
     }
   }, [user]);
 
-  // Add new webhook URL
   const handleAddWebhookUrl = async () => {
     if (!newWebhookUrl.trim()) {
       toast.error('Please enter a valid webhook URL');
@@ -432,10 +398,8 @@ const NewsletterSubscribersPanel = () => {
         return;
       }
 
-      // Update webhook URLs
       const updatedUrls = [...webhookUrls, newWebhookUrl.trim()];
 
-      // Call update profile API using the same method as profile page
       const response = await api.updateProfile(token, {
         webhookUrl: updatedUrls
       });
@@ -445,10 +409,8 @@ const NewsletterSubscribersPanel = () => {
         setNewWebhookUrl('');
         toast.success(response.message || 'Webhook URL added successfully!');
 
-        // Fetch fresh user details to get updated data
         await fetchUserDetails();
 
-        // Update localStorage
         const userDataStr = localStorage.getItem('user_data');
         if (userDataStr) {
           try {
@@ -471,7 +433,6 @@ const NewsletterSubscribersPanel = () => {
     }
   };
 
-  // Remove webhook URL
   const handleRemoveWebhookUrl = async (indexToRemove: number) => {
     try {
       setWebhookLoading(true);
@@ -482,10 +443,8 @@ const NewsletterSubscribersPanel = () => {
         return;
       }
 
-      // Update webhook URLs
       const updatedUrls = webhookUrls.filter((_, index) => index !== indexToRemove);
 
-      // Call update profile API using the same method as profile page
       const response = await api.updateProfile(token, {
         webhookUrl: updatedUrls
       });
@@ -494,10 +453,8 @@ const NewsletterSubscribersPanel = () => {
         setWebhookUrls(updatedUrls);
         toast.success(response.message || 'Webhook URL removed successfully!');
 
-        // Fetch fresh user details to get updated data
         await fetchUserDetails();
 
-        // Update localStorage
         const userDataStr = localStorage.getItem('user_data');
         if (userDataStr) {
           try {
@@ -520,26 +477,20 @@ const NewsletterSubscribersPanel = () => {
     }
   };
 
-  // Fetch webhook URLs when modal opens
   useEffect(() => {
     if (webhookModalOpen) {
       fetchWebhookUrls();
     }
   }, [webhookModalOpen, fetchWebhookUrls]);
 
-  // Pixel tracking validation functions
   const validateFacebookPixelId = (pixelId: string): boolean => {
-    // Facebook pixel IDs are usually 15-16 digits
     return /^\d{15,16}$/.test(pixelId.trim());
   };
 
   const validateGoogleAdsId = (adsId: string): boolean => {
-    // Google Ads IDs start with 'AW-' followed by numbers
-    // Google Analytics IDs start with 'G-' followed by alphanumeric characters
     return /^(AW-\d+|G-[A-Z0-9]+)$/.test(adsId.trim());
   };
 
-  // Pixel tracking functions
   const addFacebookPixelId = () => {
     const trimmedId = newFacebookPixelId.trim();
     if (trimmedId && validateFacebookPixelId(trimmedId) && !facebookPixelIds.includes(trimmedId)) {
@@ -572,11 +523,9 @@ const NewsletterSubscribersPanel = () => {
     setGoogleAdsIds(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Fetch current pixel tracking data
   const fetchPixelTrackingData = useCallback(async () => {
     try {
       setPixelLoading(true);
-      // Get user data from localStorage or context
       const userDataStr = localStorage.getItem('user_data');
       let userData = user;
 
@@ -606,7 +555,6 @@ const NewsletterSubscribersPanel = () => {
     }
   }, [user]);
 
-  // Save pixel tracking data
   const savePixelTrackingData = async () => {
     try {
       setPixelLoading(true);
@@ -617,7 +565,6 @@ const NewsletterSubscribersPanel = () => {
         return;
       }
 
-      // Call update profile API using the same method as profile page
       const response = await api.updateProfile(token, {
         pixel_tracking_enabled: pixelTrackingEnabled,
         facebook_pixel_ids: facebookPixelIds,
@@ -627,10 +574,8 @@ const NewsletterSubscribersPanel = () => {
       if (response.success) {
         toast.success(response.message || 'Pixel tracking settings updated successfully!');
 
-        // Fetch fresh user details to get updated data
         await fetchUserDetails();
 
-        // Update localStorage
         const userDataStr = localStorage.getItem('user_data');
         if (userDataStr) {
           try {
@@ -657,7 +602,6 @@ const NewsletterSubscribersPanel = () => {
     }
   };
 
-  // Fetch pixel tracking data when modal opens
   useEffect(() => {
     if (pixelTrackingModalOpen) {
       fetchPixelTrackingData();
@@ -667,7 +611,6 @@ const NewsletterSubscribersPanel = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
-      {/* Toolbar: title + search */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 className="text-lg sm:text-xl font-semibold text-[#101117]">Newsletter Subscribers</h2>
         <div className="relative w-full sm:w-auto">
@@ -683,12 +626,10 @@ const NewsletterSubscribersPanel = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
       {error !== 'NO_NEWSLETTER_SERVICE' && (
         <StatsCards stats={statsCards} columns={4} />
       )}
 
-      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
         <button
           onClick={() => setAddSubscriberModalOpen(true)}
@@ -732,7 +673,6 @@ const NewsletterSubscribersPanel = () => {
         </button>
       </div>
 
-      {/* Active Filters Display */}
       {(filters.status !== 'all' || filters.dateRange !== 'all' || filters.searchTerm || filters.dateFrom || filters.dateTo) && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
@@ -796,7 +736,6 @@ const NewsletterSubscribersPanel = () => {
         </div>
       )}
 
-      {/* Subscribers Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 sm:p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
@@ -823,7 +762,6 @@ const NewsletterSubscribersPanel = () => {
           </div>
         ) : (
           <>
-            {/* Mobile View - Cards */}
             <div className="block sm:hidden p-4 space-y-4">
               {subscribersData.map((subscriber) => (
                 <div key={subscriber.id} className="bg-gray-50 rounded-lg p-4">
@@ -852,7 +790,6 @@ const NewsletterSubscribersPanel = () => {
               ))}
             </div>
 
-            {/* Desktop Table */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -895,7 +832,6 @@ const NewsletterSubscribersPanel = () => {
           </>
         )}
 
-        {/* Pagination */}
         {!loading && subscribersData.length > 0 && (
           <div className="p-4 sm:p-6 border-t border-gray-100">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -911,7 +847,6 @@ const NewsletterSubscribersPanel = () => {
                   <ChevronLeft className="w-4 h-4 text-gray-400" />
                 </button>
 
-                {/* Page Numbers */}
                 {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
                   const pageNum = Math.max(1, Math.min(pagination.total_pages - 4, pagination.page - 2)) + i;
                   if (pageNum > pagination.total_pages) return null;
@@ -944,7 +879,6 @@ const NewsletterSubscribersPanel = () => {
         )}
       </div>
 
-      {/* Filter Modal */}
       {filterModalOpen && (
         <div
           className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
@@ -954,7 +888,6 @@ const NewsletterSubscribersPanel = () => {
             className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
@@ -969,9 +902,7 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 space-y-6">
-              {/* Status Filter */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Subscription Status
@@ -988,7 +919,6 @@ const NewsletterSubscribersPanel = () => {
                 </select>
               </div>
 
-              {/* Date Range Filter */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Date Range
@@ -1010,7 +940,6 @@ const NewsletterSubscribersPanel = () => {
                 </select>
               </div>
 
-              {/* Custom Date Range */}
               {filters.dateRange === 'custom' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -1038,7 +967,6 @@ const NewsletterSubscribersPanel = () => {
                 </div>
               )}
 
-              {/* Search Term */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Search Term
@@ -1054,7 +982,6 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 border-t border-gray-200 flex gap-3">
               <button
                 onClick={handleResetFilters}
@@ -1073,7 +1000,6 @@ const NewsletterSubscribersPanel = () => {
         </div>
       )}
 
-      {/* Add New Subscriber Modal */}
       {addSubscriberModalOpen && (
         <div
           className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
@@ -1083,7 +1009,6 @@ const NewsletterSubscribersPanel = () => {
             className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
@@ -1098,9 +1023,7 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 space-y-6">
-              {/* First Name */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   First Name
@@ -1114,7 +1037,6 @@ const NewsletterSubscribersPanel = () => {
                 />
               </div>
 
-              {/* Last Name */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Last Name
@@ -1128,7 +1050,6 @@ const NewsletterSubscribersPanel = () => {
                 />
               </div>
 
-              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Email Address
@@ -1142,7 +1063,6 @@ const NewsletterSubscribersPanel = () => {
                 />
               </div>
 
-              {/* Status */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Status
@@ -1159,7 +1079,6 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 border-t border-gray-200 flex gap-3">
               <button
                 onClick={() => setAddSubscriberModalOpen(false)}
@@ -1187,7 +1106,6 @@ const NewsletterSubscribersPanel = () => {
         </div>
       )}
 
-      {/* Edit Subscriber Modal */}
       {editSubscriberModalOpen && editingSubscriber && (
         <div
           className="fixed inset-0  bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
@@ -1197,7 +1115,6 @@ const NewsletterSubscribersPanel = () => {
             className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
@@ -1212,9 +1129,7 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 space-y-6">
-              {/* Name - Read Only */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Full Name
@@ -1228,7 +1143,6 @@ const NewsletterSubscribersPanel = () => {
                 <p className="text-xs text-gray-500 mt-1">Name cannot be changed</p>
               </div>
 
-              {/* Email - Read Only */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Email Address
@@ -1242,7 +1156,6 @@ const NewsletterSubscribersPanel = () => {
                 <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
               </div>
 
-              {/* Status - Editable */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Status
@@ -1259,7 +1172,6 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 border-t border-gray-200 flex gap-3">
               <button
                 onClick={() => setEditSubscriberModalOpen(false)}
@@ -1287,7 +1199,6 @@ const NewsletterSubscribersPanel = () => {
         </div>
       )}
 
-      {/* Webhook URLs Modal */}
       {webhookModalOpen && (
         <div
           className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
@@ -1297,7 +1208,6 @@ const NewsletterSubscribersPanel = () => {
             className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
@@ -1312,9 +1222,7 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 space-y-6">
-              {/* Add New Webhook URL */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Add New Webhook URL
@@ -1341,7 +1249,6 @@ const NewsletterSubscribersPanel = () => {
                 </div>
               </div>
 
-              {/* Current Webhook URLs */}
               <div>
                 <label className="block text-sm font-medium text-[#101117] mb-3">
                   Current Webhook URLs ({webhookUrls.length})
@@ -1384,7 +1291,6 @@ const NewsletterSubscribersPanel = () => {
                 )}
               </div>
 
-              {/* Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
@@ -1400,7 +1306,6 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 border-t border-gray-200">
               <button
                 onClick={() => setWebhookModalOpen(false)}
@@ -1413,7 +1318,6 @@ const NewsletterSubscribersPanel = () => {
         </div>
       )}
 
-      {/* Pixel Tracking Modal */}
       {pixelTrackingModalOpen && (
         <div
           className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-40 flex items-center justify-center p-4 transition-opacity duration-300"
@@ -1423,7 +1327,6 @@ const NewsletterSubscribersPanel = () => {
             className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative z-50 transform transition-all duration-300 scale-100 border border-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-[#101117]" style={{ fontFamily: 'Outfit SemiBold, sans-serif' }}>
@@ -1438,7 +1341,6 @@ const NewsletterSubscribersPanel = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 space-y-6">
               {pixelLoading ? (
                 <div className="flex items-center justify-center py-8">
@@ -1447,7 +1349,6 @@ const NewsletterSubscribersPanel = () => {
                 </div>
               ) : (
                 <>
-                  {/* Enable/Disable Toggle */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -1483,7 +1384,6 @@ const NewsletterSubscribersPanel = () => {
                     </button>
                   </div>
 
-                  {/* Show configured IDs even when tracking is disabled */}
                   {!pixelTrackingEnabled && (facebookPixelIds.length > 0 || googleAdsIds.length > 0) && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mb-4">
                       <div className="flex items-start space-x-2 sm:space-x-3">
@@ -1513,7 +1413,6 @@ const NewsletterSubscribersPanel = () => {
 
                   {pixelTrackingEnabled && (
                     <div className="space-y-4 sm:space-y-6">
-                      {/* Facebook Pixel IDs */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Facebook Pixel IDs
@@ -1522,7 +1421,6 @@ const NewsletterSubscribersPanel = () => {
                           Facebook Pixel IDs are usually 15-16 digits (e.g., 1234567890123456)
                         </p>
 
-                        {/* Add new Facebook Pixel ID */}
                         <div className="mb-3">
                           <div className="firstVerifyScreen group">
                             <input
@@ -1553,7 +1451,6 @@ const NewsletterSubscribersPanel = () => {
                           </div>
                         </div>
 
-                        {/* Display Facebook Pixel IDs */}
                         {facebookPixelIds.length > 0 && (
                           <div className="space-y-2">
                             {facebookPixelIds.map((pixelId, index) => (
@@ -1572,7 +1469,6 @@ const NewsletterSubscribersPanel = () => {
                         )}
                       </div>
 
-                      {/* Google Ads IDs */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Google Ads / Analytics IDs
@@ -1581,7 +1477,6 @@ const NewsletterSubscribersPanel = () => {
                           Google Ads IDs start with &quot;AW-&quot; followed by numbers (e.g., AW-1234567890). Google Analytics IDs start with &quot;G-&quot; followed by alphanumeric characters (e.g., G-FE3XTDLD7N)
                         </p>
 
-                        {/* Add new Google Ads ID */}
                         <div className="mb-3">
                           <div className="firstVerifyScreen group">
                             <input
@@ -1612,7 +1507,6 @@ const NewsletterSubscribersPanel = () => {
                           </div>
                         </div>
 
-                        {/* Display Google Ads IDs */}
                         {googleAdsIds.length > 0 && (
                           <div className="space-y-2">
                             {googleAdsIds.map((adsId, index) => (
@@ -1631,7 +1525,6 @@ const NewsletterSubscribersPanel = () => {
                         )}
                       </div>
 
-                      {/* Info about tracking */}
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
                         <div className="flex items-start space-x-2 sm:space-x-3">
                           <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -1655,7 +1548,6 @@ const NewsletterSubscribersPanel = () => {
               )}
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 border-t border-gray-200 flex gap-3">
               <button
                 onClick={() => setPixelTrackingModalOpen(false)}

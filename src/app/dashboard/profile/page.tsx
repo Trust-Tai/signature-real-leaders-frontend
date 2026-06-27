@@ -39,7 +39,6 @@ const ProfilePage = () => {
   // Existing state
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [bio, setBio] = useState("");
-  // Video section state
   const [showVideoSection, setShowVideoSection] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -482,7 +481,6 @@ const ProfilePage = () => {
       setBio(user.audience_description || '');
       setProfileImage(user.profile_picture_url || null);
 
-      // Prefill video section from saved profile_video
       if (user.profile_video) {
         setVideoUrl(user.profile_video);
         setShowVideoSection(true);
@@ -775,12 +773,10 @@ const ProfilePage = () => {
       updateData.facebook_pixel_ids = facebookPixelIds;
       updateData.google_ads_ids = googleAdsIds;
 
-      // Video section - send as `profile_video` (a file upload or a URL string)
       if (showVideoSection && videoUrl && !videoFile) {
-        updateData.profile_video = videoUrl;
+        updateData.video = videoUrl;
       }
 
-      // If a video file was uploaded, send everything as multipart with the file under `profile_video`
       let response;
       if (showVideoSection && videoFile) {
         const formData = new FormData();
@@ -788,7 +784,7 @@ const ProfilePage = () => {
           if (value === undefined || value === null) return;
           formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
         });
-        formData.append('profile_video', videoFile);
+        formData.append('video', videoFile);
         response = await api.updateProfileWithFiles(token, formData);
       } else {
         response = await api.updateProfile(token, updateData);
@@ -1469,7 +1465,6 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                     </div>
                   </div>
 
-                  {/* Add Video Section Toggle */}
                   <div className="mt-4">
                     <button
                       type="button"
@@ -1483,13 +1478,11 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                     </button>
                   </div>
 
-                  {/* Video Field - file upload or URL */}
                   {showVideoSection && (
                     <div className="mt-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">Video</label>
                       <p className="text-xs text-gray-500 mb-3">Upload a video file or paste a video URL.</p>
 
-                      {/* Video URL */}
                       <div className="firstVerifyScreen group">
                         <input
                           type="url"
@@ -1510,7 +1503,6 @@ const handleArrayInputChange = (field: string, value: string[]) => {
                         <div className="flex-1 h-px bg-gray-200" />
                       </div>
 
-                      {/* Video File Upload */}
                       <label className="flex flex-col items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#CF3232] transition-colors">
                         <input
                           type="file"

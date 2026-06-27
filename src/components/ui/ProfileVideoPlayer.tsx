@@ -7,10 +7,6 @@ interface ProfileVideoPlayerProps {
   className?: string;
 }
 
-/**
- * Renders a user's profile_video. Supports YouTube/Vimeo links (as embeds)
- * and direct video file URLs (mp4/mov/webm) via a native player.
- */
 const getYouTubeId = (url: string): string | null => {
   const match = url.match(
     /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/
@@ -49,7 +45,6 @@ const ProfileVideoPlayer: React.FC<ProfileVideoPlayerProps> = ({ src, className 
     );
   }
 
-  // Direct video file
   return (
     <div className={wrapperClass}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
