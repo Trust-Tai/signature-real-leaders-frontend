@@ -774,7 +774,7 @@ const ProfilePage = () => {
       updateData.google_ads_ids = googleAdsIds;
 
       if (showVideoSection && videoUrl && !videoFile) {
-        updateData.video = videoUrl;
+        updateData.profile_video = videoUrl;
       }
 
       let response;
@@ -784,7 +784,7 @@ const ProfilePage = () => {
           if (value === undefined || value === null) return;
           formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
         });
-        formData.append('video', videoFile);
+        formData.append('profile_video', videoFile);
         response = await api.updateProfileWithFiles(token, formData);
       } else {
         response = await api.updateProfile(token, updateData);
