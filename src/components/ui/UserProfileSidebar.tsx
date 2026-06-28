@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, BookUser, SquarePlus, UserCheck, HelpCircle, Share2, Users } from 'lucide-react';
+import { X, BookUser, SquarePlus, UserCheck, HelpCircle, Share2, Users, UserCog } from 'lucide-react';
 import UserProfileDropdown from './UserProfileDropdown';
 import { performAutoLogin } from '@/lib/autoLogin';
 import { WP_URL } from '@/lib/config';
@@ -29,8 +29,9 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
   const sidebarItems = [
     { icon: UserCheck, label: 'Following', path: '/dashboard/following', page: 'following' },
-    { icon: BookUser, label: 'Directory', path: '/dashboard/email-subscribers', page: 'email-subscribers', tourId: 'subscribers' },
-    { icon: Users, label: 'Join Community', path: 'https://real-leaders.com/membership/', page: 'community', badge: 'Add On', external: true }
+    { icon: BookUser, label: 'Profile Subscribers', path: '/dashboard/profile-subscribers', page: 'profile-subscribers', tourId: 'subscribers' },
+    { icon: Users, label: 'Join Community', path: 'https://real-leaders.com/membership/', page: 'community', badge: 'Add On', external: true },
+    { icon: UserCog, label: 'Profile', path: '/dashboard/profile', page: 'profile' }
   ];
 
   return (

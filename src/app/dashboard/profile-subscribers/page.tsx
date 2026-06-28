@@ -16,7 +16,7 @@ const EmailSubscribers = () => {
       <UserProfileSidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        currentPage="email-subscribers"
+        currentPage="profile-subscribers"
       />
 
       {/* Right Side (Header + Main Content + Footer) */}

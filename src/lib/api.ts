@@ -950,6 +950,7 @@ export const api = {
     linkedin: string;
     email: string;
     industry: string;
+    profile_use: string;
   }) {
     // Use the external API endpoint for claim profile
     const url = API_ENDPOINTS.CLAIM_PROFILE;

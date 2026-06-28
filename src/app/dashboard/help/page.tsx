@@ -196,7 +196,7 @@ const HelpPage = () => {
               'Export subscriber data',
               'Integration with email tools',
             ]}
-            link="/dashboard/email-subscribers"
+            link="/dashboard/profile-subscribers"
           />
         </div>
       ),

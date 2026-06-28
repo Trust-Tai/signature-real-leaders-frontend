@@ -16,6 +16,7 @@ interface ClaimProfileFormData {
   linkedin_url: string;
   email: string;
   industry: string;
+  profile_use: string;
 }
 
 const InnerClaimProfilePage = () => {
@@ -30,10 +31,18 @@ const InnerClaimProfilePage = () => {
     website: '',
     linkedin_url: '',
     email: '',
-    industry: ''
+    industry: '',
+    profile_use: ''
   });
 
   const [customIndustry, setCustomIndustry] = useState('');
+
+  const profileUseOptions = [
+    "CEO / Business Leader",
+    "Investor — Fund Manager, VC, Angel Investor or Family Office",
+    "Speaker / Thought Leader",
+    "Chair / Advisor — Board Member, Coach or Consultant"
+  ];
 
   // Industry options list (same as profile-verification and dashboard profile)
   const industryOptions = [
@@ -89,7 +98,7 @@ const InnerClaimProfilePage = () => {
     }
 
     // Validate required fields
-    const requiredFields: (keyof ClaimProfileFormData)[] = ['company_name', 'first_name', 'last_name', 'website', 'linkedin_url', 'email', 'industry'];
+    const requiredFields: (keyof ClaimProfileFormData)[] = ['company_name', 'first_name', 'last_name', 'website', 'linkedin_url', 'email', 'industry', 'profile_use'];
     const missingFields = requiredFields.filter(field => !formData[field].trim());
     
     if (missingFields.length > 0) {
@@ -108,7 +117,8 @@ const InnerClaimProfilePage = () => {
         website: formData.website,
         linkedin: formData.linkedin_url,
         email: formData.email,
-        industry: formData.industry
+        industry: formData.industry,
+        profile_use: formData.profile_use
       });
 
       if (result.success) {
@@ -121,7 +131,8 @@ const InnerClaimProfilePage = () => {
           website: '',
           linkedin_url: '',
           email: '',
-          industry: ''
+          industry: '',
+          profile_use: ''
         });
         setCustomIndustry('');
       } else {
@@ -255,6 +266,28 @@ const InnerClaimProfilePage = () => {
                   placeholder="your@email.com"
                   required
                 />
+              </div>
+
+              {/* Profile Use */}
+              <div>
+                <label htmlFor="profile_use" className="block text-sm font-medium text-gray-200 mb-2">
+                  What best describes how you plan to use your profile? *
+                </label>
+                <div className="relative">
+                  <select
+                    id="profile_use"
+                    value={formData.profile_use}
+                    onChange={(e) => handleInputChange('profile_use', e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 appearance-none pr-10"
+                    required
+                  >
+                    <option value="">Select an option</option>
+                    {profileUseOptions.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                </div>
               </div>
 
               {/* Industry */}

@@ -93,7 +93,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
         className="flex items-center space-x-2 bg-[#CF3232] text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors whitespace-nowrap"
       >
         <PhoneCall className="w-4 h-4 flex-shrink-0" />
-        <span className="hidden sm:inline">Schedule Success Call</span>
+        <span className="hidden sm:inline">Speak to An Advisor</span>
       </a>
       <div className="relative" ref={dropdownRef}>
         <button
