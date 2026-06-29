@@ -164,7 +164,6 @@ const MembersTab = () => {
                   onClick={() => handleViewDetails(member)}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
                 >
-                  <Eye className="w-4 h-4" />
                   <span>View Details</span>
                 </button>
 
