@@ -88,14 +88,6 @@ const MembersTab = () => {
                 placeholder="Search members..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    fetchMembers(1);
-                  }
-                }}
-                onBlur={() => {
-                  fetchMembers(1);
-                }}
                 className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500/30"
               />
             </div>
@@ -135,7 +127,7 @@ const MembersTab = () => {
                     <img 
                       src={member.user_image_url} 
                       alt={member.profile_name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                     />
                   </div>
                 ) : (
