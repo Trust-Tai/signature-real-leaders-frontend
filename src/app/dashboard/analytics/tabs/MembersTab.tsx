@@ -81,18 +81,24 @@ const MembersTab = () => {
 
           {/* Search */}
           <div className="w-full lg:w-auto lg:min-w-[400px]">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search members..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500/30"
-                />
-              </div>
-            </form>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search members..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    fetchMembers(1);
+                  }
+                }}
+                onBlur={() => {
+                  fetchMembers(1);
+                }}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500/30"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -111,15 +117,34 @@ const MembersTab = () => {
           {members.map((member) => (
             <div
               key={member.post_id}
-              className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md hover:border-red-200 transition-all duration-200"
+              className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md hover:border-red-200 transition-all duration-200 relative"
             >
-              {/* Profile Avatar */}
-              <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
-                  <span className="text-2xl font-bold text-red-700">
-                    {member.first_name?.[0]}{member.last_name?.[0]}
+              {/* Industry Badge - Top Left */}
+              {member.industry && (
+                <div className="absolute top-3 left-3 z-10">
+                  <span className="inline-block bg-red-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
+                    {member.industry}
                   </span>
                 </div>
+              )}
+
+              {/* Profile Avatar/Image */}
+              <div className="mb-4 -mx-5 -mt-5">
+                {member.user_image_url ? (
+                  <div className="w-full h-48 overflow-hidden rounded-t-xl">
+                    <img 
+                      src={member.user_image_url} 
+                      alt={member.profile_name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-48 bg-gradient-to-br from-red-100 to-red-200 rounded-t-xl flex items-center justify-center">
+                    <span className="text-6xl font-bold text-red-700">
+                      {member.first_name?.[0]}{member.last_name?.[0]}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Member Info */}
@@ -133,9 +158,9 @@ const MembersTab = () => {
                 <p className="text-sm text-gray-600 mb-1">
                   {member.company_name}
                 </p>
-                {member.industry && (
+                {member.job_title && (
                   <span className="inline-block bg-red-50 text-red-700 text-xs px-2 py-1 rounded-full">
-                    {member.industry}
+                    {member.job_title}
                   </span>
                 )}
               </div>
@@ -172,30 +197,6 @@ const MembersTab = () => {
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 )}
-
-                {/* Social Links */}
-                <div className="flex gap-2">
-                  {member.linkedin && (
-                    <a
-                      href={member.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-medium rounded-lg border border-gray-200 transition-colors text-center"
-                    >
-                      LinkedIn
-                    </a>
-                  )}
-                  {member.website && (
-                    <a
-                      href={member.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-medium rounded-lg border border-gray-200 transition-colors text-center"
-                    >
-                      Website
-                    </a>
-                  )}
-                </div>
               </div>
             </div>
           ))}
@@ -244,16 +245,12 @@ const MembersTab = () => {
             <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
               {/* Left Side - Profile Image - Only show if image exists */}
               {selectedMember.user_image_url && (
-                <div className="md:w-2/5 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center p-8">
-                  <div className="w-full max-w-xs">
-                    <div className="aspect-square rounded-2xl overflow-hidden">
-                      <img 
-                        src={selectedMember.user_image_url} 
-                        alt={selectedMember.profile_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
+                <div className="md:w-2/5 bg-black flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={selectedMember.user_image_url} 
+                    alt={selectedMember.profile_name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
 
