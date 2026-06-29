@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, ChevronLeft, ChevronRight, Loader2, ExternalLink, X, Eye } from 'lucide-react';
+import Image from 'next/image';
 import { getMembers, type Member, type MembersFilters } from '@/lib/membersApi';
 import { toast } from '@/components/ui/toast';
 import { WP_URL, APP_URL } from '@/lib/config';
@@ -242,20 +243,22 @@ const MembersTab = () => {
 
             <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
               {/* Left Side - Profile Image - Only show if image exists */}
-              {false && ( // Since there's no image parameter in the API, we hide this section
+              {selectedMember.user_image_url && (
                 <div className="md:w-2/5 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center p-8">
                   <div className="w-full max-w-xs">
-                    <div className="aspect-square bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center">
-                      <span className="text-6xl font-bold text-red-700">
-                        {selectedMember.first_name?.[0]}{selectedMember.last_name?.[0]}
-                      </span>
+                    <div className="aspect-square rounded-2xl overflow-hidden">
+                      <img 
+                        src={selectedMember.user_image_url} 
+                        alt={selectedMember.profile_name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Right Side - Details (Full Width when no image) */}
-              <div className="w-full bg-[#1a1a1a] p-6 md:p-8 overflow-y-auto">
+              <div className={`${selectedMember.user_image_url ? 'md:w-3/5' : 'w-full'} bg-[#1a1a1a] p-6 md:p-8 overflow-y-auto`}>
                 {/* Header */}
                 <div className="mb-8">
                   <div className="flex items-start gap-3 mb-2">
@@ -273,10 +276,26 @@ const MembersTab = () => {
 
                 {/* Details Grid */}
                 <div className="space-y-4 mb-6">
-                  {/* Email */}
-                  <div className="bg-[#252525] rounded-xl p-4">
-                    <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Email</p>
-                    <p className="text-white text-base">{selectedMember.email}</p>
+                  {/* Job Title */}
+                  {selectedMember.job_title && (
+                    <div className="bg-[#252525] rounded-xl p-4">
+                      <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Job Title</p>
+                      <p className="text-white text-base">{selectedMember.job_title}</p>
+                    </div>
+                  )}
+
+                  {/* Email & Phone */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-[#252525] rounded-xl p-4">
+                      <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Email</p>
+                      <p className="text-white text-base break-all">{selectedMember.email}</p>
+                    </div>
+                    {selectedMember.phone && (
+                      <div className="bg-[#252525] rounded-xl p-4">
+                        <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Phone</p>
+                        <p className="text-white text-base">{selectedMember.phone}</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Industry */}
@@ -284,6 +303,40 @@ const MembersTab = () => {
                     <div className="bg-[#252525] rounded-xl p-4">
                       <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Industry</p>
                       <p className="text-white text-base">{selectedMember.industry}</p>
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  {selectedMember.location && (
+                    <div className="bg-[#252525] rounded-xl p-4">
+                      <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Location</p>
+                      <p className="text-white text-base">{selectedMember.location}</p>
+                    </div>
+                  )}
+
+                  {/* Asset Type & Asset Class */}
+                  {(selectedMember.asset_type || selectedMember.asset_class) && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {selectedMember.asset_type && (
+                        <div className="bg-[#252525] rounded-xl p-4">
+                          <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Asset Type</p>
+                          <p className="text-white text-base">{selectedMember.asset_type}</p>
+                        </div>
+                      )}
+                      {selectedMember.asset_class && (
+                        <div className="bg-[#252525] rounded-xl p-4">
+                          <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Asset Class</p>
+                          <p className="text-white text-base">{selectedMember.asset_class}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Deal Size */}
+                  {selectedMember.deal_size && (
+                    <div className="bg-[#252525] rounded-xl p-4">
+                      <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Deal Size</p>
+                      <p className="text-white text-base">{selectedMember.deal_size}</p>
                     </div>
                   )}
                 </div>

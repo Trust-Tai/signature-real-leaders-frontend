@@ -5,14 +5,21 @@ import { API_BASE_URL } from './config';
 export interface Member {
   post_id: number;
   user_id: number;
+  job_title: string;
   profile_name: string;
-  email: string;
-  website: string;
-  linkedin: string;
   first_name: string;
   last_name: string;
+  email: string;
+  phone: string;
+  website: string;
+  linkedin: string;
   company_name: string;
   industry: string;
+  asset_class: string;
+  asset_type: string;
+  location: string;
+  deal_size: string;
+  user_image_url: string;
 }
 
 export interface MembersResponse {
