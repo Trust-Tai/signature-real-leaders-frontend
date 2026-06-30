@@ -6,7 +6,7 @@ import { LoadingScreen } from '@/components';
 import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
 import { toast } from '@/components/ui/toast';
 import { api } from '@/lib/api';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Upload, X } from 'lucide-react';
 
 interface ClaimProfileFormData {
   company_name: string;
@@ -36,6 +36,8 @@ const InnerClaimProfilePage = () => {
   });
 
   const [customIndustry, setCustomIndustry] = useState('');
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const profileUseOptions = [
     "CEO / Business Leader",
@@ -89,6 +91,37 @@ const InnerClaimProfilePage = () => {
     }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+
+      setProfileImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setProfileImage(null);
+    setImagePreview(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -119,7 +152,7 @@ const InnerClaimProfilePage = () => {
         email: formData.email,
         industry: formData.industry,
         profile_use: formData.profile_use
-      });
+      }, profileImage);
 
       if (result.success) {
         toast.success(result.message || 'Your account is pending review. Please wait for admin approval.');
@@ -135,6 +168,8 @@ const InnerClaimProfilePage = () => {
           profile_use: ''
         });
         setCustomIndustry('');
+        setProfileImage(null);
+        setImagePreview(null);
       } else {
         toast.error(result.message || 'Failed to submit profile claim');
       }
@@ -266,6 +301,52 @@ const InnerClaimProfilePage = () => {
                   placeholder="your@email.com"
                   required
                 />
+              </div>
+
+              {/* Profile Image */}
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Profile Image (Optional)
+                </label>
+                <div className="space-y-3">
+                  {!imagePreview ? (
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-400">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  ) : (
+                    <div className="relative w-full">
+                      <div className="relative w-32 h-32 mx-auto">
+                        <img
+                          src={imagePreview}
+                          alt="Profile preview"
+                          className="w-full h-full object-cover rounded-lg border-2 border-gray-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-center text-sm text-gray-400 mt-2">
+                        {profileImage?.name}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Profile Use */}

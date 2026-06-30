@@ -951,18 +951,41 @@ export const api = {
     email: string;
     industry: string;
     profile_use: string;
-  }) {
+  }, image?: File | null) {
     // Use the external API endpoint for claim profile
     const url = API_ENDPOINTS.CLAIM_PROFILE;
     
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      let response;
+      
+      // If image is provided, use FormData
+      if (image) {
+        const formData = new FormData();
+        formData.append('id', payload.id.toString());
+        formData.append('company_name', payload.company_name);
+        formData.append('first_name', payload.first_name);
+        formData.append('last_name', payload.last_name);
+        formData.append('website', payload.website);
+        formData.append('linkedin', payload.linkedin);
+        formData.append('email', payload.email);
+        formData.append('industry', payload.industry);
+        formData.append('profile_use', payload.profile_use);
+        formData.append('image', image);
+
+        response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        // No image, use JSON
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      }
 
       const data = await response.json();
 
