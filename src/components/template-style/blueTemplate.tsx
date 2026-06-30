@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { images } from '@/assets';
 import ProfileVideoPlayer from '@/components/ui/ProfileVideoPlayer';
+import { generateInitialsAvatar } from '@/lib/avatarUtils';
 
 interface BlueTemplateProps {
   profileData: {
@@ -81,14 +82,14 @@ export default function BlueTemplate({
           {/* Profile Image */}
           <div className="w-36 h-36 mx-auto mb-6 rounded-full bg-gray-300 overflow-hidden border-4 border-purple-400/50 shadow-xl shadow-purple-500/30">
             <Image
-              src={(profileData.profile_picture_url || profileData.profile_image) || images.userProfileImage}
+              src={(profileData.profile_picture_url || profileData.profile_image) || generateInitialsAvatar(profileData.full_name)}
               alt={`${profileData.full_name} Profile`}
               width={144}
               height={144}
               unoptimized
               className="w-full h-full object-cover"
               onError={(e) => {
-                e.currentTarget.src = images.userProfileImage.src;
+                e.currentTarget.src = generateInitialsAvatar(profileData.full_name);
               }}
             />
           </div>

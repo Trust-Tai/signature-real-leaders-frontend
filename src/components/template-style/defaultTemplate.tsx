@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { images } from '@/assets';
 import ProfileVideoPlayer from '@/components/ui/ProfileVideoPlayer';
+import { generateInitialsAvatar } from '@/lib/avatarUtils';
 
 interface DefaultTemplateProps {
   profileData: {
@@ -121,14 +122,14 @@ export default function DefaultTemplate({
             }}
           >
             <Image
-              src={(profileData.profile_picture_url || profileData.profile_image) || images.userProfileImage}
+              src={(profileData.profile_picture_url || profileData.profile_image) || generateInitialsAvatar(profileData.full_name)}
               alt={`${profileData.full_name} Profile`}
               width={180}
               height={180}
               unoptimized
               className="w-full h-full object-cover"
               onError={(e) => {
-                e.currentTarget.src = images.userProfileImage.src;
+                e.currentTarget.src = generateInitialsAvatar(profileData.full_name);
               }}
             />
           </div>
