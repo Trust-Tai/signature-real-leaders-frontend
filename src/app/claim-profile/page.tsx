@@ -306,7 +306,7 @@ const InnerClaimProfilePage = () => {
               {/* Profile Image */}
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
-                  Profile Image (Optional)
+                  Profile Headshot (Optional)
                 </label>
                 <div className="space-y-3">
                   {!imagePreview ? (
