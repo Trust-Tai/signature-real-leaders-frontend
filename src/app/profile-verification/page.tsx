@@ -1,181 +1,105 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
-import {
-  Sidebar,
-  RightImageSection,
-  MainContent,
-  PageHeader,
-  PendingReviewSection,
-  Step,
-  MobileSidebarToggle,
-  LoadingScreen
-} from '@/components';
-import CombinedEmailOtpSection from '@/components/ui/CombinedEmailOtpSection';
-import InformationFormSection from '@/components/ui/InformationFormSection';
-import SignSection from '@/components/ui/SignSection';
-import { OnboardingProvider, useOnboarding } from '@/components/OnboardingContext';
-import { api } from '@/lib/api';
-import { images } from "../../assets/index";
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { LoadingScreen } from '@/components';
+import { InteractiveMagazineCards } from '@/components/ui/InteractiveMagazineCards';
+import SocialLoginButtons from '@/components/ui/SocialLoginButtons';
 import { toast } from '@/components/ui/toast';
-import { InteractiveFollowCard } from '@/components/ui/InteractiveFollowCard';
+import { api } from '@/lib/api';
+import { ChevronDown, Upload, X } from 'lucide-react';
+import Link from 'next/link';
 import { trackProfileVerificationSuccess, trackProfileVerificationStart } from '@/lib/conversionTracking';
 
+interface VerificationFormData {
+  firstName: string;
+  lastName: string;
+  companyName: string;
+  companyWebsite: string;
+  occupation: string;
+  phone: string;
+  industry: string;
+  numberOfEmployees: string;
+  about: string;
+}
+
+const INPUT_CLASS =
+  'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500';
+
+const industryOptions = [
+  'Construction',
+  'Energy & Facilities',
+  'Consumer Packed Goods (CPG)',
+  'Education/Training',
+  'Fashion/Apparel',
+  'Financial services',
+  'Food & Beverage (Non-CPG)',
+  'Healthcare',
+  'Home & Lifestyle',
+  'Insurance',
+  'Manufacturing/Industrial',
+  'Marketing & Media',
+  'Membership/Community',
+  'Personal Care & Wellness',
+  'Professional/Advisory and Consulting Services',
+  'Real Estate',
+  'Social Enterprise & Education',
+  'Staffing/Recruiting',
+  'Travel and Hospitality',
+  'Technology',
+];
+
+const isCustomIndustry = (industry: string) =>
+  !!industry && !industryOptions.includes(industry) && industry !== 'Other' && industry !== '';
+
+const employeeOptions = ['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'];
+
 const InnerProfileVerificationPage = () => {
-  // Track if we've already processed redirect_to_step
-  const hasProcessedRedirect = React.useRef(false);
-  
-  // Scroll state for MobileSidebarToggle
-  const [isScrolled, setIsScrolled] = useState(false);
-  
-  // Initialize currentStep from localStorage if available
-  const [currentStep, setCurrentStep] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const redirectStep = localStorage.getItem('redirect_to_step');
-      
-      if (redirectStep && !hasProcessedRedirect.current) {
-        hasProcessedRedirect.current = true;
-        // Don't remove yet - will remove in useEffect after component mounts
-        // Clear saved step when using redirect_to_step (fresh social login)
-        localStorage.removeItem('profile_verification_current_step');
-        return parseInt(redirectStep, 10);
-      }
-      
-      // Don't restore saved step - always start fresh at step 1
-      // This ensures user starts from beginning when manually accessing profile-verification
-      if (!redirectStep) {
-        localStorage.removeItem('profile_verification_current_step');
-      }
-    }
-    return 1; // Default to step 1
+  // Email / verification state
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [showOtp, setShowOtp] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [isSocialUser, setIsSocialUser] = useState(false);
+
+  // Loading state
+  const [sendingCode, setSendingCode] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  // Profile / info form
+  const [formData, setFormData] = useState<VerificationFormData>({
+    firstName: '',
+    lastName: '',
+    companyName: '',
+    companyWebsite: '',
+    occupation: '',
+    phone: '',
+    industry: '',
+    numberOfEmployees: '',
+    about: '',
   });
-  
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showCodeVerification, setShowCodeVerification] = useState(false);
-  
-  // Clean up redirect_to_step after component mounts
-  React.useEffect(() => {
-    if (hasProcessedRedirect.current) {
-      // Small delay to ensure state is set before clearing
-      setTimeout(() => {
-        localStorage.removeItem('redirect_to_step');
-      }, 100);
-    }
-    
-    // Track profile verification start when component mounts
+  const [customIndustry, setCustomIndustry] = useState('');
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [socialPicUrl, setSocialPicUrl] = useState<string | null>(null);
+
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handleInputChange = (field: keyof VerificationFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  /* =========================
+     MOUNT: tracking + social callback
+  ========================= */
+  useEffect(() => {
     trackProfileVerificationStart();
   }, []);
-  
-  // Don't save current step to localStorage
-  // User should always start fresh when accessing profile-verification
-  // Only social login with redirect_to_step should set the step
-  
-  // Check for redirect step when page becomes visible
-  React.useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && typeof window !== 'undefined') {
-        const redirectStep = localStorage.getItem('redirect_to_step');
-        if (redirectStep) {
-          console.log('[Profile Verification] Found redirect_to_step on visibility change:', redirectStep);
-          const step = parseInt(redirectStep, 10);
-          setCurrentStep(step);
-          localStorage.removeItem('redirect_to_step');
-        }
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-  
-  // Form data state for simplified flow
-  const { state, setState } = useOnboarding();
-  const [loading, setLoading] = useState(false); // For social login callback
-  const [sendingCode, setSendingCode] = useState(false); // For email verification
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined);
-  const [resendResponseMessage, setResendResponseMessage] = useState<string | undefined>(undefined);
 
-  // Load first_name, last_name, and profile_picture from localStorage (set by login page for pending_review users)
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const firstName = localStorage.getItem('profile_first_name');
-      const lastName = localStorage.getItem('profile_last_name');
-      const profilePictureUrl = localStorage.getItem('profile_picture_url');
-      
-      if (firstName || lastName || profilePictureUrl) {
-        console.log('[Profile Verification] Loading user data from localStorage:', {
-          first_name: firstName,
-          last_name: lastName,
-          profile_picture_url: profilePictureUrl
-        });
-        
-        setState(prev => ({
-          ...prev,
-          first_name: firstName || prev.first_name,
-          last_name: lastName || prev.last_name,
-          profilePicture: profilePictureUrl || prev.profilePicture
-        }));
-        
-        // Clear from localStorage after loading
-        localStorage.removeItem('profile_first_name');
-        localStorage.removeItem('profile_last_name');
-        localStorage.removeItem('profile_picture_url');
-      }
-    }
-  }, [setState]);
-
-  const steps: Step[] = [
-    { id: 1, title: 'Email & Code Verification', status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
-    { id: 2, title: 'Experience', status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
-    { id: 3, title: 'Signature', status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending' },
-    { id: 4, title: 'Complete', status: currentStep === 4 ? 'current' : 'pending' }
-  ];
-
-  const handleStepClick = (stepId: number) => {
-    // Allow navigation to completed and current steps
-    if (stepId <= currentStep) {
-      setCurrentStep(stepId);
-      
-      // Special handling for step 1 (Email & OTP) - reset email and verification state
-      if (stepId === 1) {
-        setState(prev => ({ ...prev, email: undefined }));
-        setShowCodeVerification(false);
-        setInfoMessage(undefined);
-        setResendResponseMessage(undefined);
-        setError(undefined);
-        console.log(`Navigated to step ${stepId} - reset email and verification state`);
-      } else {
-        console.log(`Navigated to step ${stepId}`);
-      }
-    }
-  };
-
-  const nextStep = () => {
-    console.log('nextStep called, current step:', currentStep);
-    if (currentStep < 4) {
-      const newStep = currentStep + 1;
-      console.log('Setting new step to:', newStep);
-      setCurrentStep(newStep);
-      
-      // Fire conversion tracking when reaching the final step (step 4)
-      if (newStep === 4) {
-        console.log('[Conversion Tracking] Profile verification completed - firing success event');
-        trackProfileVerificationSuccess();
-      }
-    }
-  };
-
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  // Handle Google/LinkedIn OAuth callback
-  React.useEffect(() => {
+  useEffect(() => {
     const handleSocialCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const status = urlParams.get('status');
@@ -183,636 +107,559 @@ const InnerProfileVerificationPage = () => {
       const message = urlParams.get('message');
       const accountStatus = urlParams.get('account_status');
       const isLoggedIn = urlParams.get('is_logged_in');
-      const userId = urlParams.get('user_id');
-
-      console.log('[Social Callback - Profile Verification] URL Params:', {
-        status,
-        tempToken: tempToken ? 'present' : 'missing',
-        message,
-        accountStatus,
-        isLoggedIn,
-        userId
-      });
 
       if (status === 'success' && tempToken) {
         try {
           setLoading(true);
-          
-          console.log('[Social Callback] Processing successful auth...');
-          console.log('[Social Callback] is_logged_in:', isLoggedIn);
-          console.log('[Social Callback] account_status:', accountStatus);
-          
-          // Get permanent token
           const response = await api.getUserDetailsWithToken(tempToken);
-          
-          console.log('[Social Callback] API Response:', {
-            success: response.success,
-            hasToken: !!response.token,
-            hasUser: !!response.user,
-            accountStatus: response.user?.account_status
-          });
-          
+
           if (response.success && response.token) {
-            setState(prev => ({ 
-              ...prev, 
-              email: response.user.email,
-              auth_token: response.token,
-              first_name: response.user.first_name,
-              last_name: response.user.last_name,
-              profilePicture: response.user.profile_picture_url
-            }));
-            
-            // Store in localStorage
             localStorage.setItem('auth_token', response.token);
             localStorage.setItem('user_data', JSON.stringify(response.user));
             localStorage.setItem('user_id', response.user.id.toString());
-            
+
             toast.success(message || 'Authentication successful!');
-            
-            // Check account status and redirect accordingly
+
             if (response.user.account_status === 'approved' || isLoggedIn === '1') {
-              console.log('[Social Callback] Account approved, redirecting to dashboard...');
-              // Use window.location for hard redirect to ensure dashboard loads properly
               window.location.href = '/dashboard';
-            } else if (response.user.account_status === 'pending_review' || accountStatus === 'pending_review') {
-              console.log('[Social Callback] Account pending review, navigating to step 2 (Experience)...');
-              // Navigate to step 2 (Experience) for pending review users
-              setCurrentStep(2);
-              toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
-              // Clean up URL
-              window.history.replaceState({}, document.title, '/profile-verification');
-            } else {
-              console.log('[Social Callback] Unknown status, navigating to step 2 (Experience)...');
-              // Navigate to step 2 for unknown status
-              setCurrentStep(2);
-              toast.success('Please complete the next steps to finish your profile', { autoClose: 5000 });
-              window.history.replaceState({}, document.title, '/profile-verification');
+              return;
             }
+
+            // Pending review / new social user - move straight into the info form
+            setAuthToken(response.token);
+            setEmail(response.user.email || '');
+            setVerified(true);
+            setIsSocialUser(
+              response.user.account_status === 'pending_review' || accountStatus === 'pending_review'
+            );
+            setFormData((prev) => ({
+              ...prev,
+              firstName: response.user.first_name || '',
+              lastName: response.user.last_name || '',
+            }));
+            if (response.user.profile_picture_url) {
+              setSocialPicUrl(response.user.profile_picture_url);
+              setImagePreview(response.user.profile_picture_url);
+            }
+            window.history.replaceState({}, document.title, '/profile-verification');
           }
         } catch (error) {
-          console.error('[Social Callback] Error:', error);
           const errorMsg = error instanceof Error ? error.message : 'Failed to complete authentication';
-          setError(errorMsg);
           toast.error(errorMsg);
           window.history.replaceState({}, document.title, '/profile-verification');
         } finally {
           setLoading(false);
         }
       } else if (status === 'failed') {
-        console.log('[Social Callback] Auth failed:', message);
         toast.error(message || 'Authentication failed');
         window.history.replaceState({}, document.title, '/profile-verification');
       }
     };
 
     void handleSocialCallback();
-  }, [setState]);
+  }, []);
 
-  // Social login handlers
-  const handleSocialLogin = async (provider: 'google' | 'apple' | 'linkedin') => {
+  /* =========================
+     EMAIL + OTP
+  ========================= */
+  const handleSendCode = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!isValidEmail) return;
+
     try {
-      setError(undefined);
-      console.log(`[Social Login] Attempting ${provider} login`);
-      
-      if (provider === 'google') {
-        const redirectUrl = `${window.location.origin}/profile-verification`;
-        api.initiateGoogleAuth(redirectUrl);
-        // Don't set loading here - it will redirect to Google
-      } else if (provider === 'linkedin') {
-        const redirectUrl = `${window.location.origin}/profile-verification`;
-        api.initiateLinkedInAuth(redirectUrl);
-        // Don't set loading here - it will redirect to LinkedIn
+      setSendingCode(true);
+      const res = await api.sendVerificationCode(email);
+
+      if (res.code === 'sent_email') {
+        setShowOtp(true);
+        toast.info(res.message || 'Verification code sent to your email');
+      } else if (res.code === 'email_exists') {
+        toast.warning(res.message || 'Email already exists', { id: 'email-exists' });
       } else {
-        // Apple coming soon
-        toast.info(`${provider} login will be implemented soon`, { id: 'social-login-info' });
+        toast.error(res.message || 'Failed to send code');
       }
-      
-    } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : `${provider} login failed`;
-      setError(errorMessage);
-      toast.error(errorMessage, { id: 'social-login-error' });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send code');
+    } finally {
+      setSendingCode(false);
     }
   };
 
-  const renderCurrentStep = () => {
-    console.log('renderCurrentStep called with currentStep:', currentStep);
-    switch (currentStep) {
-      case 1:
-        return (
-          <CombinedEmailOtpSection
-            onSendCode={async (email) => {
-              try {
-                setSendingCode(true);
-                setError(undefined);
-                console.log('[Step 1] Sending verification code', { email });
-                const res = await api.sendVerificationCode(email);
-               
-                // Expect res.code to be 'sent_email' or 'email_exists'
-                if (res.code === 'sent_email') {
-                  setState(prev => ({ ...prev, email }));
-                  setInfoMessage(res.message);
-                  console.log('[Step 1] Email verified: code sent. Showing OTP input');
-                  setShowCodeVerification(true);
-                } else if (res.code === 'email_exists') {
-                  // Stay on same screen and show message
-                  setError(undefined);
-                  setInfoMessage(undefined);
-                  setState(prev => ({ ...prev, email }));
-                  console.log('[Step 1] Email exists. Staying on email screen with message');
-                  const msg = res.message || 'Email already exists';
-                  setError(msg);
-                  toast.warning(msg, { id: 'email-exists' });
-                } else {
-                  // Fallback: treat as error
-                  const msg = res.message || 'Failed to send code';
-                  setError(msg);
-                  toast.error(msg, { id: 'send-code-error' });
-                }
-              } catch (e: unknown) {
-                const errorMessage = e instanceof Error ? e.message : 'Failed to send code';
-                setError(errorMessage);
-                toast.error(errorMessage, { id: 'send-code-exception'});
-              } finally {
-                setSendingCode(false);
-              }
-            }}
-            onVerify={async (code) => {
-              try {
-                if (!state.email) return;
-                setSendingCode(true);
-                setError(undefined);
-              
-                console.log('[Step 1] Verifying code with email', { email: state.email, code });
-                const res = await api.verifyCode(state.email, code);
-              
-                if (res.success && res.auth_token) {
-                  setState(prev => ({ ...prev, auth_token: res.auth_token }));
-                  console.log('[Step 1] Verified. Moving to next step');
-                  nextStep();
-                } else {
-                  setError(res.message || 'Invalid code');
-                }
-              } catch (e: unknown) {
-                const errorMessage = e instanceof Error ? e.message : 'Verification failed';
-                setError(errorMessage);
-              } finally {
-                setSendingCode(false);
-              }
-            }}
-            onResendCode={async () => {
-              try {
-                if (!state.email) return;
-                setSendingCode(true);
-                setError(undefined);
-                setResendResponseMessage(undefined);
-                console.log('[Step 1] Resending verification code', { email: state.email });
-                const res = await api.sendVerificationCode(state.email);
-                if (res.message) {
-                  setResendResponseMessage(res.message);
-                }
-              } catch (e: unknown) {
-                const errorMessage = e instanceof Error ? e.message : 'Failed to resend';
-                setError(errorMessage);
-                setResendResponseMessage(errorMessage);
-              } finally {
-                setSendingCode(false);
-              }
-            }}
-            onGoogleLogin={() => handleSocialLogin('google')}
-            onAppleLogin={() => handleSocialLogin('apple')}
-            onLinkedInLogin={() => handleSocialLogin('linkedin')}
-            error={error}
-            isLoading={sendingCode}
-            infoMessage={infoMessage}
-            resendResponseMessage={resendResponseMessage}
-            showOtpInput={showCodeVerification}
-          />
-        );
-      
-      case 2:
-        return (
-          <InformationFormSection
-            onBack={() => {
-              console.log('[Step 2] Going back to step 1');
-              setCurrentStep(1);
-              setShowCodeVerification(false);
-            }}
-            onSubmit={(data) => {
-              console.log('[Step 2] Information form data received, moving to signature step');
-              
-              // Store all form data in context including email
-              setState(prev => ({
-                ...prev,
-                first_name: data.firstName,
-                last_name: data.lastName,
-                email: data.email || prev.email, // Use form email or keep existing
-                company_name: data.companyName,
-                company_website: data.companyWebsite,
-                industry: data.industry,
-                num_employees: data.numberOfEmployees,
-                about: data.about,
-                occupation: data.occupation,
-                profilePicture: data.profilePicture,
-                phone: data.phone
-              }));
-              
-              // Move to signature step
-              nextStep();
-            }}
-            initialData={{
-              firstName: state.first_name,
-              lastName: state.last_name,
-              email: state.email,
-              profilePicture: state.profilePicture
-            }}
-          />
-        );
-      
-      case 3:
-        return (
-          <SignSection
-            onBack={() => setCurrentStep(2)}
-            onSubmit={async (signData) => {
-                try {
-                  console.log('[Step 4] Submitting all data to API...');
-                  setLoading(true);
-                  
-                  const authToken = state.auth_token || localStorage.getItem('auth_token');
-                  if (!authToken) {
-                    toast.error('Authentication token missing. Please login again.');
-                    return;
-                  }
+  const verifyCode = async (fullCode: string) => {
+    try {
+      setSendingCode(true);
+      const res = await api.verifyCode(email, fullCode);
 
-                  // Prepare FormData for file upload
-                  const formData = new FormData();
-                  
-                  // Add user_id from localStorage if available
-                  const userId = localStorage.getItem('user_id');
-                  if (userId) {
-                    formData.append('user_id', userId);
-                  }
-                  
-                  // Add all text fields
-                  if (state.first_name) formData.append('firstName', state.first_name);
-                  if (state.last_name) formData.append('lastName', state.last_name);
-                  if (state.email) formData.append('email', state.email);
-                  if (state.company_name) formData.append('companyName', state.company_name);
-                  if (state.company_website) formData.append('companyWebsite', state.company_website);
-                  if (state.industry) formData.append('industry', state.industry);
-                  if (state.num_employees) formData.append('numEmployees', state.num_employees);
-                  if (state.about) formData.append('about', state.about);
-                  if (state.occupation) formData.append('occupation', state.occupation);
-                  if (state.phone) formData.append('billing_phone', state.phone);
-                  
-                  // Add signature - prioritize file objects over data URLs
-                  console.log('[Step 4] Signature data:', {
-                    hasSignatureFile: !!signData.signatureFile,
-                    hasUploadedImageFile: !!signData.uploadedImageFile,
-                    hasSignature: !!signData.signature,
-                    hasUploadedImage: !!signData.uploadedImage
-                  });
-                  
-                  let signatureAdded = false;
-                  
-                  if (signData.signatureFile) {
-                    console.log('[Step 4] Adding signatureFile to FormData:', {
-                      name: signData.signatureFile.name,
-                      size: signData.signatureFile.size,
-                      type: signData.signatureFile.type
-                    });
-                    formData.append('signature', signData.signatureFile, 'signature.png');
-                    signatureAdded = true;
-                  } else if (signData.uploadedImageFile) {
-                    console.log('[Step 4] Adding uploadedImageFile to FormData:', {
-                      name: signData.uploadedImageFile.name,
-                      size: signData.uploadedImageFile.size,
-                      type: signData.uploadedImageFile.type
-                    });
-                    formData.append('signature', signData.uploadedImageFile, signData.uploadedImageFile.name);
-                    signatureAdded = true;
-                  } else if (signData.signature) {
-                    console.log('[Step 4] Converting signature data URL to File');
-                    const signatureResponse = await fetch(signData.signature);
-                    const signatureBlob = await signatureResponse.blob();
-                    const signatureFile = new File([signatureBlob], 'signature.png', { type: 'image/png' });
-                    console.log('[Step 4] Converted signature file:', {
-                      name: signatureFile.name,
-                      size: signatureFile.size,
-                      type: signatureFile.type
-                    });
-                    formData.append('signature', signatureFile, 'signature.png');
-                    signatureAdded = true;
-                  } else if (signData.uploadedImage) {
-                    console.log('[Step 4] Converting uploaded image data URL to File');
-                    const response = await fetch(signData.uploadedImage);
-                    const blob = await response.blob();
-                    const file = new File([blob], 'uploaded-signature.png', { type: 'image/png' });
-                    console.log('[Step 4] Converted uploaded image file:', {
-                      name: file.name,
-                      size: file.size,
-                      type: file.type
-                    });
-                    formData.append('signature', file, 'uploaded-signature.png');
-                    signatureAdded = true;
-                  }
-                  
-                  if (!signatureAdded) {
-                    console.error('[Step 4] No signature data found!');
-                    toast.error('Please add your signature before submitting.');
-                    setLoading(false);
-                    return;
-                  }
-                  
-                  console.log('[Step 4] Signature successfully added to FormData');
-                  
-                  // Consent fields (required by API)
-                  formData.append('consentFeatureName', signData.giveConsent ? 'true' : 'false');
-                  formData.append('agreeTerms', signData.agreeTerms ? 'true' : 'false');
-                  formData.append('confimInFoAccurate', signData.confirmInfo ? 'true' : 'false');
-                  
-                  // Add profile picture if exists
-                  if (state.profilePicture) {
-                    // Check if it's a URL (starts with http/https) or a data URL (base64)
-                    const isExternalUrl = state.profilePicture.startsWith('http://') || state.profilePicture.startsWith('https://');
-                    const isDataUrl = state.profilePicture.startsWith('data:');
-                    
-                    if (isExternalUrl) {
-                      // External URL (like Gravatar) - send as-is, don't convert to File
-                      formData.append('profilePictureUrl', state.profilePicture);
-                    } else if (isDataUrl) {
-                      // Data URL (user uploaded new image) - convert to File
-                      const response = await fetch(state.profilePicture);
-                      const blob = await response.blob();
-                      const file = new File([blob], 'profile-picture.png', { type: 'image/png' });
-                      formData.append('profilePicture', file);
-                    } else {
-                      // Fallback - treat as URL
-                      formData.append('profilePictureUrl', state.profilePicture);
-                    }
-                  } else {
-                    formData.append('profilePicture', '');
-                  }
-
-                  console.log('[Step 4] Submitting to API...');
-                  
-                  // Log FormData contents for debugging
-                  console.log('[Step 4] FormData contents:');
-                  let hasSignatureInFormData = false;
-                  for (const [key, value] of formData.entries()) {
-                    if (key === 'signature') {
-                      hasSignatureInFormData = true;
-                      console.log(`  ✅ ${key}: File(${value instanceof File ? value.name : 'unknown'}, ${value instanceof File ? value.size : 0} bytes, ${value instanceof File ? value.type : 'unknown'})`);
-                    } else if (value instanceof File) {
-                      console.log(`  ${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
-                    } else {
-                      console.log(`  ${key}: ${value}`);
-                    }
-                  }
-                  
-                  if (!hasSignatureInFormData) {
-                    console.error('[Step 4] ❌ CRITICAL: Signature NOT found in FormData!');
-                    toast.error('Signature missing from form data. Please try again.');
-                    setLoading(false);
-                    return;
-                  }
-                  
-                  console.log('[Step 3] ✅ Signature confirmed in FormData');
-                  
-                  // Check if user came from social login (pending_review status)
-                  const userDataStr = localStorage.getItem('user_data');
-                  const isSocialLoginUser = userDataStr && JSON.parse(userDataStr).account_status === 'pending_review';
-                  
-                  let result;
-                  if (isSocialLoginUser) {
-                    // Use update-profile API for social login users with pending_review
-                    console.log('[Step 3] Social login user detected, using update-profile API');
-                    result = await api.updateProfileWithFiles(authToken, formData);
-                    localStorage.removeItem("auth_token")
-                    localStorage.removeItem("temp_auth_token")
-                    localStorage.removeItem("user_data")
-                    localStorage.removeItem("user_id")
-                  } else {
-                    // Use submit-user-info API for regular users
-                    console.log('[Step 3] Regular user, using submit-user-info API');
-                    result = await api.submitUserInfoWithFiles(authToken, formData);
-                    localStorage.removeItem("auth_token")
-                    localStorage.removeItem("temp_auth_token")
-                    localStorage.removeItem("user_data")
-                    localStorage.removeItem("user_id")
-                  }
-                  
-                  if (result.success) {
-                    console.log('[Step 3] Submission successful!');
-                    toast.success('Profile submitted successfully! Awaiting admin review.');
-                    nextStep(); // Move to pending review (step 4)
-                  } else {
-                    toast.error(result.message || 'Submission failed. Please try again.');
-                  }
-                } catch (error) {
-                  console.error('[Step 4] Submission error:', error);
-                  toast.error('Failed to submit profile. Please try again.');
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              isSubmitting={loading}
-            />
-        );
-      
-      case 4:
-        return <PendingReviewSection />;
-      
-      default:
-        return (
-          <CombinedEmailOtpSection
-            onSendCode={async (email) => {
-              try {
-                setSendingCode(true);
-                setError(undefined);
-                console.log('[Step 1] Sending verification code', { email });
-                const res = await api.sendVerificationCode(email);
-               
-                if (res.code === 'sent_email') {
-                  setState(prev => ({ ...prev, email }));
-                  setInfoMessage(res.message);
-                  console.log('[Step 1] Email verified: code sent. Showing OTP input');
-                  setShowCodeVerification(true);
-                } else if (res.code === 'email_exists') {
-                  setError(undefined);
-                  setInfoMessage(undefined);
-                  setState(prev => ({ ...prev, email }));
-                  const msg = res.message || 'Email already exists';
-                  setError(msg);
-                  toast.warning(msg, { id: 'email-exists' });
-                } else {
-                  const msg = res.message || 'Failed to send code';
-                  setError(msg);
-                  toast.error(msg, { id: 'send-code-error' });
-                }
-              } catch (e: unknown) {
-                const errorMessage = e instanceof Error ? e.message : 'Failed to send code';
-                setError(errorMessage);
-                toast.error(errorMessage, { id: 'send-code-exception'});
-              } finally {
-                setSendingCode(false);
-              }
-            }}
-            onVerify={async (code) => {
-              try {
-                if (!state.email) return;
-                setSendingCode(true);
-                setError(undefined);
-              
-                console.log('[Step 1] Verifying code with email', { email: state.email, code });
-                const res = await api.verifyCode(state.email, code);
-              
-                if (res.success && res.auth_token) {
-                  setState(prev => ({ ...prev, auth_token: res.auth_token }));
-                  console.log('[Step 1] Verified. Moving to next step');
-                  nextStep();
-                } else {
-                  setError(res.message || 'Invalid code');
-                }
-              } catch (e: unknown) {
-                const errorMessage = e instanceof Error ? e.message : 'Verification failed';
-                setError(errorMessage);
-              } finally {
-                setSendingCode(false);
-              }
-            }}
-            onResendCode={async () => {
-              try {
-                if (!state.email) return;
-                setSendingCode(true);
-                setError(undefined);
-                setResendResponseMessage(undefined);
-                console.log('[Step 1] Resending verification code', { email: state.email });
-                const res = await api.sendVerificationCode(state.email);
-                if (res.message) {
-                  setResendResponseMessage(res.message);
-                }
-              } catch (e: unknown) {
-                const errorMessage = e instanceof Error ? e.message : 'Failed to resend';
-                setError(errorMessage);
-                setResendResponseMessage(errorMessage);
-              } finally {
-                setSendingCode(false);
-              }
-            }}
-            onGoogleLogin={() => handleSocialLogin('google')}
-            onAppleLogin={() => handleSocialLogin('apple')}
-            onLinkedInLogin={() => handleSocialLogin('linkedin')}
-            error={error}
-            isLoading={sendingCode}
-            infoMessage={infoMessage}
-            resendResponseMessage={resendResponseMessage}
-            showOtpInput={showCodeVerification}
-          />
-        );
+      if (res.success && res.auth_token) {
+        setAuthToken(res.auth_token);
+        localStorage.setItem('auth_token', res.auth_token);
+        setVerified(true);
+        toast.success('Email verified. Please complete your profile.');
+      } else {
+        toast.error(res.message || 'Invalid code');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Verification failed');
+    } finally {
+      setSendingCode(false);
     }
   };
 
-  const getRightComponent = () => {
-    // Combine first and last name for display
-    const fullName = [state.first_name, state.last_name]
-      .filter(Boolean)
-      .join(' ')
-      .trim() || 'John Doe';
-    
-    switch (currentStep) {
-      case 1:
-      case 2:
-        return <InteractiveFollowCard name={fullName} />;
-      case 3:
-      case 4:
-        return <InteractiveFollowCard name={fullName} />;
-      default:
-        return <InteractiveFollowCard name={fullName} />;
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) return;
+    const next = [...code];
+    next[index] = value;
+    setCode(next);
+    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+    if (next.every((d) => d !== '') && next.join('').length === 6) {
+      void verifyCode(next.join(''));
     }
   };
 
-  const getRightImageStyle = () => {
-    // Use default styling for all steps in simplified flow
-    return {};
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !code[index] && index > 0) otpRefs.current[index - 1]?.focus();
   };
 
-  // Show loading overlay when processing social login callback
-  if (loading) {
-    return (
-      <LoadingScreen text1='Processing authentication...'/>
-    );
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text/plain').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+    const next = [...code];
+    pasted.split('').forEach((d, i) => {
+      if (index + i < 6) next[index + i] = d;
+    });
+    setCode(next);
+    otpRefs.current[Math.min(index + pasted.length, 5)]?.focus();
+    if (next.every((d) => d !== '')) void verifyCode(next.join(''));
+  };
+
+  /* =========================
+     SOCIAL LOGIN
+  ========================= */
+  const handleSocialLogin = (provider: 'google' | 'apple' | 'linkedin') => {
+    const redirectUrl = `${window.location.origin}/profile-verification`;
+    if (provider === 'google') {
+      api.initiateGoogleAuth(redirectUrl);
+    } else if (provider === 'linkedin') {
+      api.initiateLinkedInAuth(redirectUrl);
+    } else {
+      toast.info('Apple login will be implemented soon', { id: 'social-login-info' });
+    }
+  };
+
+  /* =========================
+     PROFILE IMAGE
+  ========================= */
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+    setProfileImage(file);
+    setSocialPicUrl(null);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setProfileImage(null);
+    setImagePreview(null);
+    setSocialPicUrl(null);
+  };
+
+  /* =========================
+     SUBMIT
+  ========================= */
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const required: (keyof VerificationFormData)[] = [
+      'firstName',
+      'lastName',
+      'companyName',
+      'companyWebsite',
+      'occupation',
+      'phone',
+      'industry',
+      'numberOfEmployees',
+      'about',
+    ];
+    if (required.some((f) => !formData[f].trim())) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const token = authToken || localStorage.getItem('auth_token');
+    if (!token) {
+      toast.error('Authentication token missing. Please verify your email again.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const fd = new FormData();
+
+      const userId = localStorage.getItem('user_id');
+      if (userId) fd.append('user_id', userId);
+
+      fd.append('firstName', formData.firstName);
+      fd.append('lastName', formData.lastName);
+      fd.append('email', email);
+      fd.append('companyName', formData.companyName);
+      fd.append('companyWebsite', formData.companyWebsite);
+      fd.append('industry', formData.industry);
+      fd.append('numEmployees', formData.numberOfEmployees);
+      fd.append('about', formData.about);
+      fd.append('occupation', formData.occupation);
+      fd.append('billing_phone', formData.phone);
+
+      if (profileImage) {
+        fd.append('profilePicture', profileImage);
+      } else if (socialPicUrl) {
+        fd.append('profilePictureUrl', socialPicUrl);
+      }
+
+      const result = isSocialUser
+        ? await api.updateProfileWithFiles(token, fd)
+        : await api.submitUserInfoWithFiles(token, fd);
+
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('temp_auth_token');
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('user_id');
+
+      if (result.success) {
+        trackProfileVerificationSuccess();
+        toast.success('Profile submitted successfully! Awaiting admin review.');
+        setSubmitted(true);
+      } else {
+        toast.error(result.message || 'Submission failed. Please try again.');
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to submit profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading && !verified) {
+    return <LoadingScreen text1="Processing authentication..." />;
   }
 
   return (
-    <div className="h-screen bg-black flex overflow-hidden">
-      {/* Mobile Sidebar Toggle - Only show when sidebar is closed */}
-      {!isMobileMenuOpen && (
-        <MobileSidebarToggle onToggle={toggleMobileMenu} isScrolled={isScrolled} />
-      )}
+    <div className="min-h-screen bg-black flex">
+      {/* Left Section - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Become a Verified <span className="text-red-500">Real Leader</span>
+            </h1>
+            <p className="text-gray-400 text-sm">
+              {submitted
+                ? 'Your application has been submitted.'
+                : 'Verify your email and complete the form below.'}
+            </p>
+          </div>
 
-      {/* Section 1: Left Sidebar - Fixed position */}
-      <div className="hidden xl:block flex-shrink-0">
-        <Sidebar steps={steps} imageUrl={images.verifyPageLefBgImage} onStepClick={handleStepClick}/>
-      </div>
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            {submitted ? (
+              /* ===== SUCCESS ===== */
+              <div className="text-center py-6">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
+                  <svg className="h-8 w-8 text-green-500" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-white mb-2">Application submitted</h2>
+                <p className="text-gray-400 text-sm">
+                  Your account is pending review. You&apos;ll be notified by email once it&apos;s approved.
+                </p>
+              </div>
+            ) : (
+              /* ===== SINGLE FORM ===== */
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Email + inline Verify */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">Email Address *</label>
+                  <div className="flex gap-2 items-stretch">
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !verified) {
+                          e.preventDefault();
+                          handleSendCode();
+                        }
+                      }}
+                      className={`${INPUT_CLASS} flex-1`}
+                      placeholder="your@email.com"
+                      required
+                      disabled={verified || sendingCode}
+                    />
+                    {verified ? (
+                      <span className="inline-flex items-center gap-1 px-4 rounded-lg bg-green-500/20 text-green-400 text-sm font-medium whitespace-nowrap">
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                          <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Verified
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleSendCode()}
+                        disabled={!isValidEmail || sendingCode}
+                        className="px-5 py-3 rounded-lg bg-red-600 hover:bg-red-700 disabled:bg-red-600/50 text-white font-semibold text-sm whitespace-nowrap transition-colors duration-200"
+                      >
+                        {sendingCode ? '...' : showOtp ? 'Resend' : 'Verify'}
+                      </button>
+                    )}
+                  </div>
+                </div>
 
-      {/* Mobile/Tablet Sidebar - Overlay */}
-      <Sidebar 
-        steps={steps} 
-        imageUrl={images.verifyPageLefBgImage}
-        isMobileOpen={isMobileMenuOpen}
-        onMobileToggle={toggleMobileMenu}
-        onStepClick={handleStepClick}
-      />
+                {/* Code input (below email, after Verify is clicked) */}
+                {showOtp && !verified && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                      Enter the 6-digit code sent to your email
+                    </label>
+                    <div className="flex gap-2 sm:gap-3">
+                      {code.map((digit, index) => (
+                        <input
+                          key={index}
+                          ref={(el) => {
+                            otpRefs.current[index] = el;
+                          }}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleOtpChange(index, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          onPaste={(e) => handleOtpPaste(e, index)}
+                          disabled={sendingCode}
+                          className="w-full h-12 sm:h-14 text-center text-xl font-bold bg-white border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-gray-400 text-xs mt-2">
+                      {sendingCode ? 'Verifying...' : 'The code verifies automatically once all 6 digits are entered.'}
+                    </p>
+                  </div>
+                )}
 
-      {/* Section 2: Middle Content - Scrollable */}
-      <MainContent>
-        {/* Scrollable Content with hidden scrollbar */}
-        <div 
-          className="h-full overflow-y-auto scrollbar-hide"
-          onScroll={(e) => {
-            const scrollTop = e.currentTarget.scrollTop;
-            setIsScrolled(scrollTop > 50);
-          }}
-        >
-          <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
+                {/* Profile Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Profile Headshot (Optional)</label>
+                  {!imagePreview ? (
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-400">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                      </div>
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                    </label>
+                  ) : (
+                    <div className="relative w-full">
+                      <div className="relative w-32 h-32 mx-auto">
+                        <img src={imagePreview} alt="Profile preview" className="w-full h-full object-cover rounded-lg border-2 border-gray-300" />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-            <div className={`w-full mt-16 sm:mt-20 lg:mt-[40px] max-w-2xl`}>
-              {/* Header */}
-             {currentStep !== 4 && (
-    <PageHeader
-      title="Become a verified Real Leader."
-      highlightWord="Real Leader"
-      className="lg:mb-[90px]"
-    />
-)}
+                {/* First Name */}
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-200 mb-2">First Name *</label>
+                  <input type="text" id="firstName" value={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)} className={INPUT_CLASS} placeholder="Enter first name" required />
+                </div>
 
-              {/* Current Step Component */}
-              {renderCurrentStep()}
-            </div>
+                {/* Last Name */}
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-200 mb-2">Last Name *</label>
+                  <input type="text" id="lastName" value={formData.lastName} onChange={(e) => handleInputChange('lastName', e.target.value)} className={INPUT_CLASS} placeholder="Enter last name" required />
+                </div>
 
+                {/* Company Name */}
+                <div>
+                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-200 mb-2">Company Name *</label>
+                  <input type="text" id="companyName" value={formData.companyName} onChange={(e) => handleInputChange('companyName', e.target.value)} className={INPUT_CLASS} placeholder="Enter company name" required />
+                </div>
+
+                {/* Company Website */}
+                <div>
+                  <label htmlFor="companyWebsite" className="block text-sm font-medium text-gray-200 mb-2">Company Website *</label>
+                  <input type="url" id="companyWebsite" value={formData.companyWebsite} onChange={(e) => handleInputChange('companyWebsite', e.target.value)} className={INPUT_CLASS} placeholder="https://example.com" required />
+                </div>
+
+                {/* Role */}
+                <div>
+                  <label htmlFor="occupation" className="block text-sm font-medium text-gray-200 mb-2">Role *</label>
+                  <input type="text" id="occupation" value={formData.occupation} onChange={(e) => handleInputChange('occupation', e.target.value)} className={INPUT_CLASS} placeholder="e.g. CEO, Founder" required />
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-200 mb-2">Phone *</label>
+                  <input type="tel" id="phone" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className={INPUT_CLASS} placeholder="Enter phone number" required />
+                </div>
+
+                {/* Number of Employees */}
+                <div>
+                  <label htmlFor="numberOfEmployees" className="block text-sm font-medium text-gray-200 mb-2">Number of Employees *</label>
+                  <div className="relative">
+                    <select
+                      id="numberOfEmployees"
+                      value={formData.numberOfEmployees}
+                      onChange={(e) => handleInputChange('numberOfEmployees', e.target.value)}
+                      className={`${INPUT_CLASS} appearance-none pr-10`}
+                      required
+                    >
+                      <option value="">Select an option</option>
+                      {employeeOptions.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                  </div>
+                </div>
+
+                {/* Industry */}
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="industry" className="block text-sm font-medium text-gray-200 mb-2">Industry *</label>
+                    <div className="relative">
+                      <select
+                        id="industry"
+                        value={isCustomIndustry(formData.industry) ? 'Other' : formData.industry}
+                        onChange={(e) => {
+                          if (e.target.value === 'Other') {
+                            handleInputChange('industry', 'Other');
+                            if (!customIndustry && isCustomIndustry(formData.industry)) setCustomIndustry(formData.industry);
+                          } else {
+                            handleInputChange('industry', e.target.value);
+                            setCustomIndustry('');
+                          }
+                        }}
+                        className={`${INPUT_CLASS} appearance-none pr-10`}
+                        required
+                      >
+                        <option value="">Select Industry</option>
+                        {industryOptions.map((industry) => (
+                          <option key={industry} value={industry}>{industry}</option>
+                        ))}
+                        <option value="Other">Other</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" />
+                    </div>
+                  </div>
+
+                  {(formData.industry === 'Other' || isCustomIndustry(formData.industry)) && (
+                    <input
+                      type="text"
+                      value={customIndustry || (isCustomIndustry(formData.industry) ? formData.industry : '')}
+                      onChange={(e) => setCustomIndustry(e.target.value)}
+                      onBlur={() => {
+                        if (customIndustry.trim()) handleInputChange('industry', customIndustry.trim());
+                      }}
+                      className={INPUT_CLASS}
+                      placeholder="Enter your industry"
+                    />
+                  )}
+                </div>
+
+                {/* About */}
+                <div>
+                  <label htmlFor="about" className="block text-sm font-medium text-gray-200 mb-2">About *</label>
+                  <textarea id="about" value={formData.about} onChange={(e) => handleInputChange('about', e.target.value)} className={`${INPUT_CLASS} resize-none min-h-[120px]`} placeholder="Tell us a little about yourself and what you do..." required />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || !verified}
+                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-600/50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 mt-6"
+                >
+                  {loading ? 'Submitting...' : 'Submit'}
+                </button>
+                {!verified && (
+                  <p className="text-center text-gray-500 text-xs">Verify your email above to enable submission.</p>
+                )}
+
+                {/* Divider + Social login */}
+                <div className="flex items-center justify-center space-x-4 pt-2">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-gray-500 text-xs">or continue with</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
+
+                <SocialLoginButtons
+                  onGoogleLogin={() => handleSocialLogin('google')}
+                  onAppleLogin={() => handleSocialLogin('apple')}
+                  onLinkedInLogin={() => handleSocialLogin('linkedin')}
+                  isLoading={sendingCode}
+                />
+
+                <p className="text-center text-gray-500 text-sm pt-1">
+                  Already a member?{' '}
+                  <Link href="/login" className="text-red-500 hover:text-red-400 font-medium underline">
+                    Login here
+                  </Link>
+                </p>
+              </form>
+            )}
           </div>
         </div>
-      </MainContent>
-
-      {/* Section 3: Right Image Section - Fixed position */}
-      <div className="hidden xl:block flex-shrink-0">
-        <RightImageSection
-          className='h-full'
-          style={getRightImageStyle()}
-        >
-          {getRightComponent()}
-          </RightImageSection>
       </div>
+
+      {/* Right Section - Interactive Magazine Cards */}
+      <div className="hidden lg:block w-1/2">
+        <InteractiveMagazineCards />
+      </div>
+
+      {/* Custom styles for the dropdowns */}
+      <style jsx global>{`
+        select option {
+          background-color: white !important;
+          color: black !important;
+          padding: 8px 12px !important;
+        }
+        select option:hover {
+          background-color: #fee2e2 !important;
+        }
+        select option:checked {
+          background-color: #ef4444 !important;
+          color: white !important;
+        }
+      `}</style>
     </div>
   );
 };
 
 const ProfileVerificationPage = () => (
-  <OnboardingProvider>
-    <Suspense fallback={<div>Loading...</div>}>
-      <InnerProfileVerificationPage />
-    </Suspense>
-  </OnboardingProvider>
+  <Suspense fallback={<LoadingScreen text1="Loading..." />}>
+    <InnerProfileVerificationPage />
+  </Suspense>
 );
 
 export default ProfileVerificationPage;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Profile Verification",
-  description: "Complete your Real Leaders profile verification. Add your professional information, signature, and get verified as a thought leader.",
+  description: "Complete your Real Leaders profile verification. Add your professional information and get verified as a thought leader.",
   robots: {
     index: false,
     follow: false

@@ -126,12 +126,12 @@ const CombinedEmailOtpSection: React.FC<CombinedEmailOtpSectionProps> = ({
         <>
           <div className="space-y-6">
             <form onSubmit={handleEmailSubmit} className="space-y-6">
-              <div className='firstVerifyScreen mx-auto group'>
+              <div className='mx-auto group'>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="px-4 py-3 w-full text-gray-700 rounded-lg focus:outline-none transition-all duration-300 firstVerifyScreenInput transform hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-xl"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   placeholder="Enter your email address..."
                   required
                   disabled={!!isLoading}
@@ -213,7 +213,7 @@ const CombinedEmailOtpSection: React.FC<CombinedEmailOtpSectionProps> = ({
         <div className="space-y-6 animate-fade-in-up">
           <div className="flex justify-center space-x-3 sm:space-x-4" style={{marginBottom:10}}>
             {code.map((digit, index) => (
-              <div key={index} className='firstVerifyScreen'>
+              <div key={index}>
                 <input
                   ref={(el) => {
                     inputRefs.current[index] = el;
@@ -227,15 +227,11 @@ const CombinedEmailOtpSection: React.FC<CombinedEmailOtpSectionProps> = ({
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={(e) => handlePaste(e, index)}
                   className={cn(
-                    "text-center font-bold font-mono transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-custom-red/20",
+                    "text-center font-bold font-mono transition-all duration-200 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500",
                     "w-[50px] h-[50px] sm:w-14 sm:h-14 text-xl sm:text-2xl",
                     "xl:w-16 xl:h-20 xl:text-2xl",
-                    "border-2 border-custom-red-border",
-                    "firstVerifyScreenInput",
-                    digit
-                      ? "text-custom-red bg-white"
-                      : "text-gray-400 bg-white",
-                    error && "text-custom-red"
+                    digit ? "text-red-500" : "text-black",
+                    error && "text-red-500"
                   )}
                   disabled={isLoading}
                 />
