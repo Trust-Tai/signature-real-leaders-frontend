@@ -437,8 +437,8 @@ const InnerClaimProfilePage = () => {
         </div>
       </div>
 
-      {/* Right Section - Interactive Magazine Cards */}
-      <div className="hidden lg:block w-1/2">
+      {/* Right Section - Interactive Magazine Cards (sticky while form scrolls) */}
+      <div className="hidden lg:block w-1/2 self-start sticky top-0 h-screen">
         <InteractiveMagazineCards />
       </div>
 
