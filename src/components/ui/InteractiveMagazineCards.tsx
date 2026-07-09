@@ -10,7 +10,7 @@ import mg3Image from "@/assets/images/new3.png";
 import mg4Image from "@/assets/images/new4.png";
 import mg5Image from "@/assets/images/mg-5.jpeg";
 import mg6Image from "@/assets/images/content-articles-bg.jpg";
-import mg7Image from "@/assets/images/content-calendar-bg.jpg";
+import mg7Image from "@/assets/images/capital.jpeg";
 
 // Define the Card interface for type safety
 interface Card {
