@@ -84,6 +84,33 @@ const InnerClaimProfilePage = () => {
     }
   }, [profileId]);
 
+  // Pre-fill the form from the listing's details (post-profile endpoint)
+  useEffect(() => {
+    if (!profileId) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const details = await api.getPostProfile(profileId);
+        if (cancelled) return;
+
+        setFormData(prev => ({
+          ...prev,
+          first_name: details.first_name || prev.first_name,
+          last_name: details.last_name || prev.last_name,
+          company_name: details.company || prev.company_name,
+        }));
+      } catch (error) {
+        console.error('Failed to pre-fill claim profile:', error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [profileId]);
+
   const handleInputChange = (field: keyof ClaimProfileFormData, value: string) => {
     setFormData(prev => ({
       ...prev,

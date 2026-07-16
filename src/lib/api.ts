@@ -5,6 +5,28 @@ export { API_BASE_URL };
 
 type JsonRecord = Record<string, unknown>;
 
+export interface PostProfileResponse {
+  first_name?: string;
+  last_name?: string;
+  company?: string;
+  property_address?: string;
+  property_state?: string;
+  market?: string;
+  submarket_name?: string;
+  property_type?: string;
+  secondary_type?: string;
+  number_of_units?: string;
+  sale_price?: string;
+  sale_type?: string;
+  sale_date?: string;
+  lender_company_name?: string;
+  lender_contact_first_name?: string;
+  lender_contact_last_name?: string;
+  lender_contact_email?: string;
+  lender_contact_phone_number?: string;
+  associated_user?: boolean | number;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   
@@ -939,6 +961,20 @@ export const api = {
         }),
       }
     );
+  },
+
+  // Fetch a directory listing's details (used to pre-fill the claim-profile form)
+  async getPostProfile(id: number | string) {
+    const url = `${API_BASE_URL}/post-profile?id=${encodeURIComponent(String(id))}`;
+
+    const response = await fetch(url, { method: 'GET' });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to load profile details');
+    }
+
+    return data as PostProfileResponse;
   },
 
   async claimProfile(payload: {
