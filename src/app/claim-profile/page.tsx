@@ -276,7 +276,7 @@ const InnerClaimProfilePage = () => {
                     </label>
                   ) : (
                     <div className="relative w-full">
-                      <div className="relative w-40 h-40 mx-auto">
+                      <div className="relative w-48 h-48 mx-auto">
                         <img
                           src={imagePreview}
                           alt="Profile preview"
