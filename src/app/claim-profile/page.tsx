@@ -279,11 +279,11 @@ const InnerClaimProfilePage = () => {
                     </label>
                   ) : (
                     <div className="relative w-full">
-                      <div className="relative w-32 h-32 mx-auto">
+                      <div className="relative w-40 h-40 mx-auto">
                         <img
                           src={imagePreview}
                           alt="Profile preview"
-                          className="w-full h-full object-cover rounded-lg border-2 border-gray-300"
+                          className="w-full h-full object-cover rounded-full border-2 border-gray-300"
                         />
                         <button
                           type="button"
