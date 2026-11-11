@@ -257,9 +257,6 @@ const InnerClaimProfilePage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Profile Image */}
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">
-                  Profile Headshot (Optional)
-                </label>
                 <div className="space-y-3">
                   {!imagePreview ? (
                     <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white/5 hover:bg-white/10 transition-colors">
