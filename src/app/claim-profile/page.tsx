@@ -108,19 +108,18 @@ const InnerClaimProfilePage = () => {
           setCustomIndustry(details.category);
         }
 
-        // Pull the headshot into the upload so it previews and submits (empty until the API returns it)
+        // Show the headshot immediately from its URL; fetch the File in the
+        // background so submission still uploads it (empty until the API returns it).
         if (details.headshot) {
-          try {
-            const res = await fetch(details.headshot);
-            const blob = await res.blob();
-            if (cancelled) return;
-            const ext = (blob.type.split('/')[1] || 'jpg').split('+')[0];
-            setProfileImage(new File([blob], `headshot.${ext}`, { type: blob.type }));
-            setImagePreview(details.headshot);
-          } catch {
-            // CORS or network: show it, even if it can't be re-uploaded
-            if (!cancelled) setImagePreview(details.headshot);
-          }
+          setImagePreview(details.headshot);
+          fetch(details.headshot)
+            .then(res => res.blob())
+            .then(blob => {
+              if (cancelled) return;
+              const ext = (blob.type.split('/')[1] || 'jpg').split('+')[0];
+              setProfileImage(new File([blob], `headshot.${ext}`, { type: blob.type }));
+            })
+            .catch(() => {}); // CORS/network: preview still shows, just won't re-upload
         }
       } catch (error) {
         console.error('Failed to pre-fill claim profile:', error);
