@@ -9,22 +9,11 @@ export interface PostProfileResponse {
   first_name?: string;
   last_name?: string;
   company?: string;
-  property_address?: string;
-  property_state?: string;
-  market?: string;
-  submarket_name?: string;
-  property_type?: string;
-  secondary_type?: string;
-  number_of_units?: string;
-  sale_price?: string;
-  sale_type?: string;
-  sale_date?: string;
-  lender_company_name?: string;
-  lender_contact_first_name?: string;
-  lender_contact_last_name?: string;
-  lender_contact_email?: string;
-  lender_contact_phone_number?: string;
+  website?: string;
+  headshot?: string;
+  category?: string;
   associated_user?: boolean | number;
+  [key: string]: unknown;
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {

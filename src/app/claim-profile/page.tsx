@@ -100,7 +100,28 @@ const InnerClaimProfilePage = () => {
           first_name: details.first_name || prev.first_name,
           last_name: details.last_name || prev.last_name,
           company_name: details.company || prev.company_name,
+          website: details.website || prev.website,
+          industry: details.category || prev.industry,
         }));
+        // category may be a free-text value not in the dropdown → mirror into the "Other" field
+        if (details.category && isCustomIndustry(details.category)) {
+          setCustomIndustry(details.category);
+        }
+
+        // Pull the headshot into the upload so it previews and submits (empty until the API returns it)
+        if (details.headshot) {
+          try {
+            const res = await fetch(details.headshot);
+            const blob = await res.blob();
+            if (cancelled) return;
+            const ext = (blob.type.split('/')[1] || 'jpg').split('+')[0];
+            setProfileImage(new File([blob], `headshot.${ext}`, { type: blob.type }));
+            setImagePreview(details.headshot);
+          } catch {
+            // CORS or network: show it, even if it can't be re-uploaded
+            if (!cancelled) setImagePreview(details.headshot);
+          }
+        }
       } catch (error) {
         console.error('Failed to pre-fill claim profile:', error);
       }
