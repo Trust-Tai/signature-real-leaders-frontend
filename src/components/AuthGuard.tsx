@@ -37,6 +37,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       
       // If no token and trying to access dashboard routes
       if (!token && pathname.startsWith('/dashboard')) {
+        // WordPress already said there's no session: go to login instead of looping back to check-session
+        if (searchParams.get('logged_in') === 'false') {
+          router.replace('/login');
+          setIsAuthenticated(false);
+          return;
+        }
         console.log('[AuthGuard] No token found, checking WordPress session...');
         // Redirect to WordPress SSO check
         const redirectUrl = buildRedirectUrl(pathname);
