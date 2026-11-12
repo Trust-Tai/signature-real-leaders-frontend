@@ -471,7 +471,37 @@ const ProfilePage = () => {
     return () => { mounted = false; };
   }, [user?.profile_template?.id]);
 
+  // Accounts created with an email as the username would expose that email in the public profile URL.
+  // Replace it once with "first-last" (adding -2, -3 if taken).
+  const usernameFixAttempted = useRef(false);
+  useEffect(() => {
+    if (!user?.username?.includes('@') || usernameFixAttempted.current) return;
+    const base = `${user.first_name || ''} ${user.last_name || ''}`
+      .normalize('NFKD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const token = localStorage.getItem('auth_token');
+    if (!base || !token) return;
+    usernameFixAttempted.current = true;
 
+    (async () => {
+      for (const candidate of [base, `${base}-2`, `${base}-3`]) {
+        try {
+          const res = await api.updateProfile(token, { username: candidate });
+          if (res.success) {
+            updateUser({ username: candidate });
+            return;
+          }
+        } catch {
+          // most likely taken; try the next one
+        }
+      }
+      // Couldn't save automatically: prefill so the user can adjust and click "Update Username"
+      setInformationData(prev => (prev ? { ...prev, username: base } : prev));
+    })();
+  }, [user?.username, user?.first_name, user?.last_name, updateUser]);
 
   // Initialize form data from user context
   useEffect(() => {
