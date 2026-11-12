@@ -1,6 +1,5 @@
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { images } from '@/assets';
 import ProfileVideoPlayer from '@/components/ui/ProfileVideoPlayer';
@@ -242,17 +241,6 @@ export default function BlueTemplate({
           </button>
         )}
 
-        {/* Claim Your Link CTA */}
-        {!user && (
-          <div className="w-full text-center mt-4">
-            <Link
-              href="/profile-verification"
-              className="text-white hover:text-white/90 font-semibold text-lg transition-colors decoration-blue-400 underline underline-offset-4"
-            >
-              Claim your link
-            </Link>
-          </div>
-        )}
 
         {/* Real Leaders Impact Awards Logo */}
         <div className="w-full flex items-center justify-center mt-6">
